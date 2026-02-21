@@ -722,24 +722,6 @@ function renderTable(viewName, view, rows, context) {
     .map((item) => `<span class="chip">${escapeHtml(item)}</span>`)
     .join("");
 
-  const filterParams = new URLSearchParams();
-  for (const filter of context.filters) {
-    if (filter.source === "search") {
-      filterParams.set(`s_${filter.column}`, filter.value);
-    } else {
-      filterParams.set(`f_${filter.column}`, filter.value);
-    }
-  }
-  const filterSuffix = filterParams.toString() ? `&${filterParams.toString()}` : "";
-
-  const sortLinks = view.columns
-    .map((column) => {
-      const ascUrl = `/table/${encodeURIComponent(viewName)}?sortBy=${encodeURIComponent(column.name)}&sortDir=ASC${filterSuffix}`;
-      const descUrl = `/table/${encodeURIComponent(viewName)}?sortBy=${encodeURIComponent(column.name)}&sortDir=DESC${filterSuffix}`;
-      return `<span>${escapeHtml(column.label || column.name)}: <a href="${ascUrl}">asc</a> <a href="${descUrl}">desc</a></span>`;
-    })
-    .join(" | ");
-
   const detailColumns = view.columns.map((column) => ({
     name: column.name,
     label: column.label || column.name
@@ -756,7 +738,6 @@ function renderTable(viewName, view, rows, context) {
      <div class="table-page">
        <div class="table-main">
          <div class="chips">${chips}</div>
-         <p class="muted">Quick sort: ${sortLinks}</p>
          <table>
           <thead><tr>${headers}${relatedHeader}</tr></thead>
           <tbody>${body}</tbody>
