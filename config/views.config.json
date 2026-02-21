@@ -1,0 +1,64 @@
+{
+  "views": {
+    "customers": {
+      "title": "Customers",
+      "schema": "dbo",
+      "table": "Customers",
+      "keyColumn": "CustomerID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CustomerID",
+        "direction": "ASC"
+      },
+      "columns": [
+        { "name": "CustomerID", "label": "ID" },
+        { "name": "CompanyName", "label": "Company" },
+        { "name": "ContactName", "label": "Contact" },
+        { "name": "City", "label": "City" }
+      ],
+      "searchFields": [
+        { "column": "CustomerID", "label": "Customer ID", "operator": "exact", "placeholder": "e.g. ALFKI" },
+        { "column": "CompanyName", "label": "Company", "operator": "contains", "placeholder": "Name contains..." },
+        { "column": "City", "label": "City", "operator": "contains", "placeholder": "City contains..." }
+      ],
+      "links": [
+        {
+          "label": "Orders",
+          "targetView": "orders",
+          "localColumn": "CustomerID",
+          "targetColumn": "CustomerID"
+        }
+      ]
+    },
+    "orders": {
+      "title": "Orders",
+      "schema": "dbo",
+      "table": "Orders",
+      "keyColumn": "OrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "OrderID",
+        "direction": "DESC"
+      },
+      "columns": [
+        { "name": "OrderID", "label": "Order #" },
+        { "name": "CustomerID", "label": "Customer ID" },
+        { "name": "OrderDate", "label": "Order Date", "format": "date", "dateFormat": "DD/MM/YYYY" },
+        { "name": "ShipCity", "label": "Ship City" }
+      ],
+      "searchFields": [
+        { "column": "OrderID", "label": "Order #", "operator": "exact", "placeholder": "e.g. 10248" },
+        { "column": "CustomerID", "label": "Customer ID", "operator": "exact", "placeholder": "e.g. ALFKI" },
+        { "column": "ShipCity", "label": "Ship City", "operator": "contains", "placeholder": "City contains..." }
+      ],
+      "links": [
+        {
+          "label": "Customer",
+          "targetView": "customers",
+          "localColumn": "CustomerID",
+          "targetColumn": "CustomerID"
+        }
+      ]
+    }
+  }
+}

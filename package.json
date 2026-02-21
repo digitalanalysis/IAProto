@@ -1,0 +1,16 @@
+{
+  "name": "sql-configurable-table-viewer",
+  "version": "1.0.0",
+  "description": "Config-driven Node.js web app for viewing SQL Server tables and related links",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "generate:views-config": "node src/generate-views-config-from-ddl.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mssql": "^11.0.1"
+  }
+}

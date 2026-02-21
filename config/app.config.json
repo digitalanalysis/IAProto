@@ -1,0 +1,25 @@
+{
+  "ui": {
+    "banner": {
+      "title": "CIDS Data Explorer",
+      "subtitle": "Prototype Data Explorer for InfoArchive Data"
+    }
+  },
+  "database": {
+    "type": "sqlserver",
+    "sqlserver": {
+      "server": "silentbob.local",
+      "port": 1433,
+      "database": "IA",
+      "user": "test",
+      "password": "test",
+      "options": {
+        "encrypt": false,
+        "trustServerCertificate": true
+      }
+    },
+    "duckdb": {
+      "path": "./data/app.duckdb"
+    }
+  }
+}
