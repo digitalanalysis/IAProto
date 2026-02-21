@@ -441,6 +441,10 @@ function formatCellValue(value, column) {
   return new Intl.DateTimeFormat(locale, { ...dateOptions, timeZone }).format(date);
 }
 
+function getGridColumns(view) {
+  return (view.columns || []).filter((column) => !column.hideOnGrid);
+}
+
 function renderLayout(title, content) {
   const banner = appConfig.ui?.banner || {};
   const bannerTitle = banner.title || "Configurable Data Viewer";
@@ -673,7 +677,8 @@ function renderHome() {
 }
 
 function renderTable(viewName, view, rows, context) {
-  const headers = view.columns.map((column) => `<th>${escapeHtml(column.label || column.name)}</th>`).join("");
+  const gridColumns = getGridColumns(view);
+  const headers = gridColumns.map((column) => `<th>${escapeHtml(column.label || column.name)}</th>`).join("");
 
   const relatedHeader = Array.isArray(view.links) && view.links.length ? "<th>Related</th>" : "";
 
@@ -682,13 +687,15 @@ function renderTable(viewName, view, rows, context) {
   const body = rows
     .map((row, index) => {
       const detail = {};
-      const cells = view.columns
+      const cells = gridColumns
         .map((column) => {
           const value = formatCellValue(row[column.name], column);
-          detail[column.name] = value;
           return `<td>${escapeHtml(value)}</td>`;
         })
         .join("");
+      for (const column of view.columns) {
+        detail[column.name] = formatCellValue(row[column.name], column);
+      }
       rowDetails.push(detail);
 
       const related =

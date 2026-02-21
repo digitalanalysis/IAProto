@@ -89,6 +89,7 @@ Environment overrides:
 - `views.<name>.schema`: SQL schema (used for SQL Server; optional for DuckDB)
 - `views.<name>.table`: SQL table name
 - `views.<name>.columns`: Columns shown in the table
+- `views.<name>.columns[].hideOnGrid`: Optional boolean to hide a column from the main table grid (still available in row details and links)
 - `views.<name>.columns[].format`: Optional cell formatter (`date`, `datetime`, `time`)
 - `views.<name>.columns[].dateFormat`: Optional date format, either:
   - string pattern (for example `DD/MM/YYYY`)
