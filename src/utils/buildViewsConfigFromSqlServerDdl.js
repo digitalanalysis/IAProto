@@ -66,7 +66,10 @@ function splitQualifiedIdentifier(value) {
 }
 
 function parseSchemaAndTable(rawName) {
-  const parts = splitQualifiedIdentifier(rawName);
+  const normalizedRawName = String(rawName || "")
+    .replace(/^if\s+not\s+exists\s+/i, "")
+    .trim();
+  const parts = splitQualifiedIdentifier(normalizedRawName);
   if (!parts.length) {
     return { schema: "dbo", table: "" };
   }
