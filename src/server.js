@@ -517,11 +517,32 @@ function toDate(value) {
   if (value instanceof Date) {
     return Number.isNaN(value.getTime()) ? null : value;
   }
+  if (typeof value === "number" || typeof value === "bigint" || typeof value === "boolean") {
+    return null;
+  }
   if (value === null || value === undefined || value === "") {
     return null;
   }
-  const parsed = new Date(value);
+  const text = String(value).trim();
+  if (!text) {
+    return null;
+  }
+  // Avoid turning numeric-looking values (e.g. "1", "12345") into arbitrary dates.
+  if (!isLikelyDateString(text)) {
+    return null;
+  }
+  const parsed = new Date(text);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function isLikelyDateString(text) {
+  if (!text) {
+    return false;
+  }
+  if (/^\d+$/.test(text)) {
+    return false;
+  }
+  return /[-/:T ]/.test(text);
 }
 
 function getDateParts(date, timeZone) {
