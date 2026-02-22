@@ -1,64 +1,366 @@
 {
   "views": {
-    "customers": {
-      "title": "Customers",
-      "schema": "dbo",
-      "table": "Customers",
-      "keyColumn": "CustomerID",
+    "salesorderheader": {
+      "title": "Sales Order Header",
+      "schema": "Sales",
+      "table": "SalesOrderHeader",
+      "keyColumn": "SalesOrderID",
       "limit": 200,
       "defaultSort": {
-        "column": "CustomerID",
+        "column": "SalesOrderID",
         "direction": "ASC"
       },
       "columns": [
-        { "name": "CustomerID", "label": "ID" },
-        { "name": "CompanyName", "label": "Company" },
-        { "name": "ContactName", "label": "Contact" },
-        { "name": "City", "label": "City" }
+        {
+          "name": "SalesOrderID",
+          "label": "Sales Order ID"
+        },
+        {
+          "name": "RevisionNumber",
+          "label": "Revision Number"
+        },
+        {
+          "name": "OrderDate",
+          "label": "Order Date"
+        },
+        {
+          "name": "DueDate",
+          "label": "Due Date"
+        },
+        {
+          "name": "ShipDate",
+          "label": "Ship Date"
+        },
+        {
+          "name": "Status",
+          "label": "Status"
+        },
+        {
+          "name": "OnlineOrderFlag",
+          "label": "Online Order Flag"
+        },
+        {
+          "name": "PurchaseOrderNumber",
+          "label": "Purchase Order Number"
+        },
+        {
+          "name": "AccountNumber",
+          "label": "Account Number"
+        },
+        {
+          "name": "CustomerID",
+          "label": "Customer ID"
+        },
+        {
+          "name": "SalesPersonID",
+          "label": "Sales Person ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "BillToAddressID",
+          "label": "Bill To Address ID"
+        },
+        {
+          "name": "ShipToAddressID",
+          "label": "Ship To Address ID"
+        },
+        {
+          "name": "ShipMethodID",
+          "label": "Ship Method ID"
+        },
+        {
+          "name": "CreditCardID",
+          "label": "Credit Card ID"
+        },
+        {
+          "name": "CreditCardApprovalCode",
+          "label": "Credit Card Approval Code"
+        },
+        {
+          "name": "CurrencyRateID",
+          "label": "Currency Rate ID"
+        },
+        {
+          "name": "SubTotal",
+          "label": "Sub Total"
+        },
+        {
+          "name": "TaxAmt",
+          "label": "Tax Amt"
+        },
+        {
+          "name": "Freight",
+          "label": "Freight"
+        },
+        {
+          "name": "Comment",
+          "label": "Comment"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
       ],
       "searchFields": [
-        { "column": "CustomerID", "label": "Customer ID", "operator": "exact", "placeholder": "e.g. ALFKI" },
-        { "column": "CompanyName", "label": "Company", "operator": "contains", "placeholder": "Name contains..." },
-        { "column": "City", "label": "City", "operator": "contains", "placeholder": "City contains..." }
+        {
+          "column": "SalesOrderID",
+          "label": "Sales Order ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order ID..."
+        },
+        {
+          "column": "RevisionNumber",
+          "label": "Revision Number",
+          "operator": "contains",
+          "placeholder": "Search Revision Number..."
+        },
+        {
+          "column": "OrderDate",
+          "label": "Order Date",
+          "operator": "dateRange",
+          "placeholder": "Search Order Date..."
+        },
+        {
+          "column": "OnlineOrderFlag",
+          "label": "Online Order Flag",
+          "type": "multiSelect",
+          "options":[
+          { "value": true, "label": "Online Order" },
+          { "value": false, "label": "Manual Order" }
+          ],
+          "placeholder": "Search Order Type..."
+        }        
       ],
       "links": [
         {
-          "label": "Orders",
-          "targetView": "orders",
-          "localColumn": "CustomerID",
-          "targetColumn": "CustomerID"
+          "label": "Order Detail",
+          "targetView": "salesorderdetail",
+          "localColumn": "SalesOrderID",
+          "targetColumn": "SalesOrderID"
         }
       ]
     },
-    "orders": {
-      "title": "Orders",
-      "schema": "dbo",
-      "table": "Orders",
-      "keyColumn": "OrderID",
+    "salesorderdetail": {
+      "title": "Sales Order Detail",
+      "schema": "Sales",
+      "table": "SalesOrderDetail",
+      "keyColumn": "SalesOrderID",
       "limit": 200,
       "defaultSort": {
-        "column": "OrderID",
-        "direction": "DESC"
+        "column": "SalesOrderID",
+        "direction": "ASC"
       },
       "columns": [
-        { "name": "OrderID", "label": "Order #" },
-        { "name": "CustomerID", "label": "Customer ID" },
-        { "name": "OrderDate", "label": "Order Date", "format": "date", "dateFormat": "DD/MM/YYYY" },
-        { "name": "ShipCity", "label": "Ship City" }
+        {
+          "name": "SalesOrderID",
+          "label": "Sales Order ID"
+        },
+        {
+          "name": "SalesOrderDetailID",
+          "label": "Sales Order Detail ID"
+        },
+        {
+          "name": "CarrierTrackingNumber",
+          "label": "Carrier Tracking Number"
+        },
+        {
+          "name": "OrderQty",
+          "label": "Order Qty"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "SpecialOfferID",
+          "label": "Special Offer ID"
+        },
+        {
+          "name": "UnitPrice",
+          "label": "Unit Price"
+        },
+        {
+          "name": "UnitPriceDiscount",
+          "label": "Unit Price Discount"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
       ],
       "searchFields": [
-        { "column": "OrderID", "label": "Order #", "operator": "exact", "placeholder": "e.g. 10248" },
-        { "column": "CustomerID", "label": "Customer ID", "operator": "exact", "placeholder": "e.g. ALFKI" },
-        { "column": "ShipCity", "label": "Ship City", "operator": "contains", "placeholder": "City contains..." }
+        {
+          "column": "SalesOrderID",
+          "label": "Sales Order ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order ID..."
+        },
+        {
+          "column": "SalesOrderDetailID",
+          "label": "Sales Order Detail ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order Detail ID..."
+        },
+        {
+          "column": "CarrierTrackingNumber",
+          "label": "Carrier Tracking Number",
+          "operator": "contains",
+          "placeholder": "Search Carrier Tracking Number..."
+        }
       ],
       "links": [
         {
-          "label": "Customer",
-          "targetView": "customers",
-          "localColumn": "CustomerID",
-          "targetColumn": "CustomerID"
+          "label": "Product Detail",
+          "targetView": "product",
+          "localColumn": "ProductID",
+          "targetColumn": "ProductID"
         }
       ]
-    }
-  }
+    },
+    "product": {
+      "title": "Product",
+      "schema": "Production",
+      "table": "Product",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ProductNumber",
+          "label": "Product Number"
+        },
+        {
+          "name": "MakeFlag",
+          "label": "Make Flag"
+        },
+        {
+          "name": "FinishedGoodsFlag",
+          "label": "Finished Goods Flag"
+        },
+        {
+          "name": "Color",
+          "label": "Color"
+        },
+        {
+          "name": "SafetyStockLevel",
+          "label": "Safety Stock Level"
+        },
+        {
+          "name": "ReorderPoint",
+          "label": "Reorder Point"
+        },
+        {
+          "name": "StandardCost",
+          "label": "Standard Cost"
+        },
+        {
+          "name": "ListPrice",
+          "label": "List Price"
+        },
+        {
+          "name": "Size",
+          "label": "Size"
+        },
+        {
+          "name": "SizeUnitMeasureCode",
+          "label": "Size Unit Measure Code"
+        },
+        {
+          "name": "WeightUnitMeasureCode",
+          "label": "Weight Unit Measure Code"
+        },
+        {
+          "name": "Weight",
+          "label": "Weight"
+        },
+        {
+          "name": "DaysToManufacture",
+          "label": "Days To Manufacture"
+        },
+        {
+          "name": "ProductLine",
+          "label": "Product Line"
+        },
+        {
+          "name": "Class",
+          "label": "Class"
+        },
+        {
+          "name": "Style",
+          "label": "Style"
+        },
+        {
+          "name": "ProductSubcategoryID",
+          "label": "Product Subcategory ID"
+        },
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "SellStartDate",
+          "label": "Sell Start Date"
+        },
+        {
+          "name": "SellEndDate",
+          "label": "Sell End Date"
+        },
+        {
+          "name": "DiscontinuedDate",
+          "label": "Discontinued Date"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ProductNumber",
+          "label": "Product Number",
+          "operator": "contains",
+          "placeholder": "Search Product Number..."
+        }
+      ],
+      "links": []
+    }        
+}
 }

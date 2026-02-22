@@ -1,5 +1,6 @@
 {
   "ui": {
+    "dateFormat": "MM-DD-YYYY",
     "banner": {
       "title": "CIDS Data Explorer",
       "subtitle": "Prototype Data Explorer for InfoArchive Data"
@@ -10,7 +11,7 @@
     "sqlserver": {
       "server": "silentbob.local",
       "port": 1433,
-      "database": "IA",
+      "database": "AdventureWorks2017",
       "user": "test",
       "password": "test",
       "options": {

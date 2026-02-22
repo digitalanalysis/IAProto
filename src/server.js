@@ -35,6 +35,69 @@ function toInlineJson(value) {
     .replaceAll("\u2029", "\\u2029");
 }
 
+function encodeBreadcrumbs(crumbs) {
+  return Buffer.from(JSON.stringify(crumbs), "utf8").toString("base64url");
+}
+
+function decodeBreadcrumbs(value) {
+  if (!value || typeof value !== "string") {
+    return [];
+  }
+  try {
+    const decoded = Buffer.from(value, "base64url").toString("utf8");
+    const parsed = JSON.parse(decoded);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed
+      .map((item) => ({
+        label: String(item?.label || "").trim(),
+        url: String(item?.url || "").trim()
+      }))
+      .filter((item) => item.label && item.url.startsWith("/"));
+  } catch {
+    return [];
+  }
+}
+
+function stripQueryParam(urlPath, paramName) {
+  const input = String(urlPath || "");
+  const qIndex = input.indexOf("?");
+  if (qIndex === -1) {
+    return input;
+  }
+  const pathOnly = input.slice(0, qIndex);
+  const params = new URLSearchParams(input.slice(qIndex + 1));
+  params.delete(paramName);
+  const query = params.toString();
+  return query ? `${pathOnly}?${query}` : pathOnly;
+}
+
+function buildQueryString(query) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query || {})) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        params.append(key, String(item));
+      }
+      continue;
+    }
+    if (value === undefined || value === null) {
+      continue;
+    }
+    params.set(key, String(value));
+  }
+  return params.toString();
+}
+
+function escapeCsv(value) {
+  const text = String(value ?? "");
+  if (/[",\r\n]/.test(text)) {
+    return `"${text.replaceAll('"', '""')}"`;
+  }
+  return text;
+}
+
 function quoteIdentifier(identifier, dbType) {
   const safe = String(identifier);
   if (dbType === "duckdb") {
@@ -91,6 +154,40 @@ function buildQuery(view, options, dbType) {
 
   for (const filter of options.filters || []) {
     if (
+      filter.operator === "in" &&
+      filter.column &&
+      allowedColumns.has(filter.column) &&
+      Array.isArray(filter.values) &&
+      filter.values.length
+    ) {
+      const nonEmptyValues = filter.values
+        .map((value) => String(value))
+        .filter((value) => value.trim() !== "");
+
+      if (!nonEmptyValues.length) {
+        continue;
+      }
+
+      if (dbType === "duckdb") {
+        const placeholders = nonEmptyValues.map(() => "?").join(", ");
+        whereClauses.push(`${quoteIdentifier(filter.column, dbType)} IN (${placeholders})`);
+        queryParams.push(...nonEmptyValues);
+      } else {
+        const paramNames = nonEmptyValues.map(() => `filterValue${paramIndex++}`);
+        whereClauses.push(
+          `${quoteIdentifier(filter.column, dbType)} IN (${paramNames.map((name) => `@${name}`).join(", ")})`
+        );
+        for (let i = 0; i < nonEmptyValues.length; i += 1) {
+          queryParams.push({
+            name: paramNames[i],
+            value: nonEmptyValues[i]
+          });
+        }
+      }
+      continue;
+    }
+
+    if (
       !filter.column ||
       filter.value === undefined ||
       filter.value === null ||
@@ -101,7 +198,7 @@ function buildQuery(view, options, dbType) {
     }
 
     const normalizedOperator = normalizeSearchOperator(filter.operator);
-    const sqlOperator = normalizedOperator === "exact" ? "=" : "LIKE";
+    const sqlOperator = resolveSqlOperator(normalizedOperator);
 
     if (dbType === "duckdb") {
       whereClauses.push(`${quoteIdentifier(filter.column, dbType)} ${sqlOperator} ?`);
@@ -146,13 +243,38 @@ function normalizeSearchOperator(operator) {
       return "startswith";
     case "endswith":
       return "endswith";
+    case "gt":
+      return "gt";
+    case "gte":
+      return "gte";
+    case "lt":
+      return "lt";
+    case "lte":
+      return "lte";
     default:
       return "contains";
   }
 }
 
+function resolveSqlOperator(operator) {
+  switch (operator) {
+    case "exact":
+      return "=";
+    case "gt":
+      return ">";
+    case "gte":
+      return ">=";
+    case "lt":
+      return "<";
+    case "lte":
+      return "<=";
+    default:
+      return "LIKE";
+  }
+}
+
 function applySearchPattern(value, operator) {
-  if (operator === "exact") {
+  if (operator === "exact" || operator === "gt" || operator === "gte" || operator === "lt" || operator === "lte") {
     return value;
   }
   if (operator === "startswith") {
@@ -176,6 +298,34 @@ function firstQueryValue(value) {
     return value[0];
   }
   return value;
+}
+
+function normalizeSearchFieldType(type) {
+  switch (String(type || "text").toLowerCase()) {
+    case "select":
+      return "select";
+    case "multiselect":
+    case "multi_select":
+    case "multicheckbox":
+    case "multi_checkbox":
+    case "checkboxes":
+      return "multiSelect";
+    case "date":
+      return "date";
+    case "daterange":
+    case "date_range":
+    case "range":
+      return "dateRange";
+    default:
+      return "text";
+  }
+}
+
+function getSearchFieldType(field) {
+  if (field?.type !== undefined && field?.type !== null && String(field.type).trim() !== "") {
+    return normalizeSearchFieldType(field.type);
+  }
+  return normalizeSearchFieldType(field?.operator);
 }
 
 function extractLinkKeyMappings(link) {
@@ -238,6 +388,55 @@ function collectSearchFilters(view, query) {
     if (!column) {
       continue;
     }
+    const fieldType = getSearchFieldType(field);
+
+    if (fieldType === "dateRange") {
+      const fromParam = `s_${column}_from`;
+      const toParam = `s_${column}_to`;
+      const fromValue = firstQueryValue(query[fromParam]);
+      const toValue = firstQueryValue(query[toParam]);
+
+      if (fromValue !== undefined && fromValue !== null && String(fromValue).trim() !== "") {
+        addedColumns.add(column);
+        filters.push({
+          column,
+          value: String(fromValue),
+          operator: "gte",
+          label: `${field.label || column} from`,
+          source: "search"
+        });
+      }
+      if (toValue !== undefined && toValue !== null && String(toValue).trim() !== "") {
+        addedColumns.add(column);
+        filters.push({
+          column,
+          value: String(toValue),
+          operator: "lte",
+          label: `${field.label || column} to`,
+          source: "search"
+        });
+      }
+      continue;
+    }
+
+    if (fieldType === "multiSelect") {
+      const paramName = `s_${column}`;
+      const values = asArray(query[paramName])
+        .map((value) => String(value))
+        .filter((value) => value.trim() !== "");
+      if (!values.length) {
+        continue;
+      }
+      addedColumns.add(column);
+      filters.push({
+        column,
+        values,
+        operator: "in",
+        label: field.label || column,
+        source: "search"
+      });
+      continue;
+    }
 
     const paramName = `s_${column}`;
     const value = firstQueryValue(query[paramName]);
@@ -249,7 +448,10 @@ function collectSearchFilters(view, query) {
     filters.push({
       column,
       value: String(value),
-      operator: field.operator || "contains",
+      operator:
+        fieldType === "select" || fieldType === "date"
+          ? "exact"
+          : normalizeSearchOperator(field.operator),
       label: field.label || column,
       source: "search"
     });
@@ -406,12 +608,29 @@ function resolveDateTimeOptions(column) {
   return null;
 }
 
+function isDateLikeColumn(column) {
+  const format = String(column.format || "").toLowerCase();
+  if (format === "date" || format === "time" || format === "datetime") {
+    return true;
+  }
+
+  const columnName = String(column.name || "");
+  return /(date|time)/i.test(columnName);
+}
+
 function resolveDateFormatPattern(column) {
   if (typeof column.dateFormat === "string" && column.dateFormat.trim()) {
     return column.dateFormat.trim();
   }
   if (typeof column.formatString === "string" && column.formatString.trim()) {
     return column.formatString.trim();
+  }
+  if (
+    isDateLikeColumn(column) &&
+    typeof appConfig?.ui?.dateFormat === "string" &&
+    appConfig.ui.dateFormat.trim()
+  ) {
+    return appConfig.ui.dateFormat.trim();
   }
   return null;
 }
@@ -443,6 +662,73 @@ function formatCellValue(value, column) {
 
 function getGridColumns(view) {
   return (view.columns || []).filter((column) => !column.hideOnGrid);
+}
+
+function renderSearchFieldControl(field) {
+  const column = field.column;
+  const label = escapeHtml(field.label || column || "");
+  if (!column) {
+    return "";
+  }
+
+  const fieldType = getSearchFieldType(field);
+
+  if (fieldType === "select") {
+    const options = (field.options || [])
+      .map((option) => {
+        if (typeof option === "string") {
+          return { value: option, label: option };
+        }
+        return {
+          value: option?.value ?? "",
+          label: option?.label ?? option?.value ?? ""
+        };
+      })
+      .filter((option) => String(option.value).trim() !== "")
+      .map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`)
+      .join("");
+
+    return `<label>${label}<select name="s_${escapeHtml(column)}"><option value="">Any</option>${options}</select></label>`;
+  }
+
+  if (fieldType === "multiSelect") {
+    const options = (field.options || [])
+      .map((option) => {
+        if (typeof option === "string") {
+          return { value: option, label: option };
+        }
+        return {
+          value: option?.value ?? "",
+          label: option?.label ?? option?.value ?? ""
+        };
+      })
+      .filter((option) => String(option.value).trim() !== "")
+      .map(
+        (option) =>
+          `<label class="check-option"><input type="checkbox" name="s_${escapeHtml(
+            column
+          )}" value="${escapeHtml(option.value)}" /> ${escapeHtml(option.label)}</label>`
+      )
+      .join("");
+
+    return `<label>${label}
+      <details class="multi-select">
+        <summary>${escapeHtml(field.placeholder || "Select one or more")}</summary>
+        <div class="multi-options">${options}</div>
+      </details>
+    </label>`;
+  }
+
+  if (fieldType === "date") {
+    return `<label>${label}<input type="date" name="s_${escapeHtml(column)}" /></label>`;
+  }
+
+  if (fieldType === "dateRange") {
+    return `<label>${label} From<input type="date" name="s_${escapeHtml(column)}_from" /></label>
+    <label>${label} To<input type="date" name="s_${escapeHtml(column)}_to" /></label>`;
+  }
+
+  return `<label>${label}<input type="text" name="s_${escapeHtml(column)}" placeholder="${escapeHtml(field.placeholder || "")}" /></label>`;
 }
 
 function renderLayout(title, content) {
@@ -487,12 +773,14 @@ function renderLayout(title, content) {
         opacity: 0.92;
       }
       .container {
-        max-width: 1200px;
-        margin: 24px auto;
+        max-width: none;
+        width: calc(100% - 32px);
+        margin: 16px;
         background: var(--panel);
         border: 1px solid var(--border);
         border-radius: 10px;
         padding: 20px;
+        box-sizing: border-box;
       }
       h1 {
         margin-top: 0;
@@ -534,6 +822,17 @@ function renderLayout(title, content) {
         padding: 4px 10px;
         font-size: 12px;
       }
+      .breadcrumbs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin: 0 0 10px;
+        font-size: 13px;
+      }
+      .crumb-sep {
+        color: #60708f;
+      }
       .view-list {
         list-style: none;
         padding: 0;
@@ -555,18 +854,61 @@ function renderLayout(title, content) {
         gap: 10px;
         align-items: end;
       }
-      .search-form label {
+      .search-form > label {
         display: grid;
         gap: 4px;
         font-size: 13px;
+        position: relative;
+        overflow: visible;
       }
-      input[type="text"] {
+      .multi-select {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+        padding: 6px 8px;
+        position: relative;
+      }
+      .multi-select summary {
+        cursor: pointer;
+        font-size: 13px;
+        color: #3a4b6b;
+      }
+      .multi-options {
+        display: grid;
+        gap: 6px;
+        max-height: 220px;
+        overflow: auto;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        z-index: 30;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: 0 8px 20px rgba(31, 42, 68, 0.16);
+        padding: 8px;
+      }
+      .check-option {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+      }
+      .search-submit {
+        width: 120px;
+        min-width: 120px;
+        justify-self: start;
+      }
+      input[type="text"], input[type="date"], select {
         border: 1px solid var(--border);
         border-radius: 6px;
         padding: 8px;
         font: inherit;
         color: inherit;
         background: #fff;
+        box-sizing: border-box;
+        width: 100%;
       }
       button {
         border: 1px solid var(--accent);
@@ -579,15 +921,43 @@ function renderLayout(title, content) {
       }
       .table-page {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 280px;
+        grid-template-columns: minmax(0, 1fr) 340px;
         gap: 16px;
         align-items: start;
       }
-      .table-main {
+      .table-grid {
         min-width: 0;
       }
+      .table-main {
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        margin-top: 8px;
+      }
+      .table-main::-webkit-scrollbar {
+        height: 0;
+      }
       .table-main table {
+        width: max-content;
         min-width: 100%;
+        table-layout: auto;
+      }
+      .table-scrollbar {
+        margin: 8px 0 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 14px;
+        position: sticky;
+        bottom: 8px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        z-index: 5;
+      }
+      .table-scrollbar-inner {
+        height: 1px;
       }
       .sidebar {
         border: 1px solid var(--border);
@@ -596,10 +966,43 @@ function renderLayout(title, content) {
         padding: 12px;
         position: sticky;
         top: 12px;
+        max-height: calc(100vh - 24px);
+        overflow: auto;
       }
       .sidebar h2 {
         margin: 0 0 8px;
         font-size: 16px;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+        justify-content: flex-start;
+      }
+      .tab-button {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+      .tab-button.active {
+        border-color: var(--accent);
+        background: #eaf2ff;
+        color: #0a4fbc;
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+      .row-links {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 6px;
       }
       tr.data-row {
         cursor: pointer;
@@ -623,14 +1026,6 @@ function renderLayout(title, content) {
         margin: 2px 0 0;
         font-size: 14px;
       }
-      @media (max-width: 960px) {
-        .table-page {
-          grid-template-columns: 1fr;
-        }
-        .sidebar {
-          position: static;
-        }
-      }
     </style>
   </head>
   <body>
@@ -648,16 +1043,14 @@ function renderLayout(title, content) {
 function renderHome() {
   const dbType = getDatabaseType();
   const viewItems = Object.entries(viewsConfig.views)
+    .filter(([, view]) => !view.hideOnHome)
     .map(([viewName, view]) => {
       const tableLabel = view.schema && dbType !== "duckdb" ? `${view.schema}.${view.table}` : view.table;
       const searchFields = (view.searchFields || [])
-        .map((field) => {
-          const name = `s_${field.column}`;
-          return `<label>${escapeHtml(field.label || field.column)}<input type="text" name="${escapeHtml(name)}" placeholder="${escapeHtml(field.placeholder || "")}" /></label>`;
-        })
+        .map((field) => renderSearchFieldControl(field))
         .join("");
       const searchForm = searchFields
-        ? `<form method="get" action="/table/${encodeURIComponent(viewName)}" class="search-form">${searchFields}<button type="submit">Search</button></form>`
+        ? `<form method="get" action="/table/${encodeURIComponent(viewName)}" class="search-form">${searchFields}<button type="submit" class="search-submit">Search</button></form>`
         : `<p class="muted">No search fields configured.</p>`;
 
       return `<li>
@@ -670,8 +1063,6 @@ function renderHome() {
   return renderLayout(
     "Search",
     `<h1>Search</h1>
-     <p class="muted">Edit <code>config/views.config.json</code> to control columns, sorting, links, and search fields.</p>
-     <p class="muted">Database type: <code>${escapeHtml(dbType)}</code></p>
      <ul class="view-list">${viewItems}</ul>`
   );
 }
@@ -679,10 +1070,12 @@ function renderHome() {
 function renderTable(viewName, view, rows, context) {
   const gridColumns = getGridColumns(view);
   const headers = gridColumns.map((column) => `<th>${escapeHtml(column.label || column.name)}</th>`).join("");
+  const nextBreadcrumbsToken = context.nextBreadcrumbsToken || "";
 
   const relatedHeader = Array.isArray(view.links) && view.links.length ? "<th>Related</th>" : "";
 
   const rowDetails = [];
+  const rowRawDetails = [];
 
   const body = rows
     .map((row, index) => {
@@ -697,6 +1090,11 @@ function renderTable(viewName, view, rows, context) {
         detail[column.name] = formatCellValue(row[column.name], column);
       }
       rowDetails.push(detail);
+      const rawDetail = {};
+      for (const column of view.columns) {
+        rawDetail[column.name] = row[column.name];
+      }
+      rowRawDetails.push(rawDetail);
 
       const related =
         Array.isArray(view.links) && view.links.length
@@ -709,6 +1107,9 @@ function renderTable(viewName, view, rows, context) {
                 const linkParams = new URLSearchParams();
                 for (const filter of linkFilters) {
                   linkParams.set(`f_${filter.column}`, filter.value);
+                }
+                if (nextBreadcrumbsToken) {
+                  linkParams.set("crumbs", nextBreadcrumbsToken);
                 }
                 const url = `/table/${encodeURIComponent(link.targetView)}?${linkParams.toString()}`;
                 return `<a href="${url}">${escapeHtml(link.label || link.targetView)}</a>`;
@@ -724,7 +1125,28 @@ function renderTable(viewName, view, rows, context) {
   const chips = [
     `Rows: ${rows.length}`,
     `Sort: ${context.sortColumn} ${context.direction}`,
-    context.filters.length ? `Filters: ${context.filters.map((item) => `${item.label} ${item.operator === "exact" ? "=" : "~"} ${item.value}`).join(", ")}` : "Filters: none"
+    context.filters.length
+      ? `Filters: ${context.filters
+          .map((item) => {
+            const symbol =
+              item.operator === "in"
+                ? "in"
+                : item.operator === "exact"
+                ? "="
+                : item.operator === "gte"
+                  ? ">="
+                  : item.operator === "lte"
+                    ? "<="
+                    : item.operator === "gt"
+                      ? ">"
+                      : item.operator === "lt"
+                        ? "<"
+                        : "~";
+            const valueDisplay = item.operator === "in" ? (item.values || []).join(", ") : item.value;
+            return `${item.label} ${symbol} ${valueDisplay}`;
+          })
+          .join(", ")}`
+      : "Filters: none"
   ]
     .map((item) => `<span class="chip">${escapeHtml(item)}</span>`)
     .join("");
@@ -733,37 +1155,90 @@ function renderTable(viewName, view, rows, context) {
     name: column.name,
     label: column.label || column.name
   }));
+  const breadcrumbItems = [...(context.breadcrumbs || []), { label: view.title || viewName, url: null }];
+  const breadcrumbsHtml = breadcrumbItems
+    .map((crumb, index) => {
+      const isLast = index === breadcrumbItems.length - 1;
+      const crumbHtml = isLast
+        ? `<span>${escapeHtml(crumb.label)}</span>`
+        : `<a href="${escapeHtml(crumb.url)}">${escapeHtml(crumb.label)}</a>`;
+      const separator = isLast ? "" : `<span class="crumb-sep">/</span>`;
+      return `${crumbHtml}${separator}`;
+    })
+    .join("");
+  const linkDefinitions = (view.links || [])
+    .map((link) => ({
+      label: link.label || link.targetView,
+      targetView: link.targetView,
+      keys: extractLinkKeyMappings(link)
+    }))
+    .filter((link) => link.targetView && link.keys.length);
   const detailsJson = toInlineJson(rowDetails);
+  const rawDetailsJson = toInlineJson(rowRawDetails);
   const detailColumnsJson = toInlineJson(detailColumns);
+  const linkDefinitionsJson = toInlineJson(linkDefinitions);
+  const downloadQuery = context.currentQueryString ? `?${context.currentQueryString}` : "";
+  const downloadUrl = `/table/${encodeURIComponent(viewName)}/download.csv${downloadQuery}`;
 
   return renderLayout(
     view.title || viewName,
     `<h1>${escapeHtml(view.title || viewName)}</h1>
+     <nav class="breadcrumbs">${breadcrumbsHtml}</nav>
      <div class="toolbar">
        <a href="/">All views</a>
+       <a href="${downloadUrl}">Download CSV</a>
      </div>
      <div class="table-page">
-       <div class="table-main">
+       <div class="table-grid">
          <div class="chips">${chips}</div>
-         <table>
-          <thead><tr>${headers}${relatedHeader}</tr></thead>
-          <tbody>${body}</tbody>
-         </table>
-       </div>
-       <aside class="sidebar">
-         <h2>Row Details</h2>
-         <p class="muted" id="row-details-empty">Click a row to view values.</p>
-         <dl class="details-grid" id="row-details"></dl>
+         <div class="table-main">
+           <table>
+            <thead><tr>${headers}${relatedHeader}</tr></thead>
+            <tbody>${body}</tbody>
+           </table>
+         </div>
+         <div class="table-scrollbar" id="table-scrollbar">
+           <div class="table-scrollbar-inner" id="table-scrollbar-inner"></div>
+         </div>
+        </div>
+        <aside class="sidebar">
+         <h2>Row Panel</h2>
+         <div class="tabs">
+           <button type="button" class="tab-button active" data-tab="fields" data-order="1">Fields</button>
+           <button type="button" class="tab-button" data-tab="links" data-order="2">Links</button>
+         </div>
+         <div class="tab-panel" id="tab-links">
+           <p class="muted" id="row-links-empty">Click a row to view related links.</p>
+           <ul class="row-links" id="row-links"></ul>
+         </div>
+         <div class="tab-panel active" id="tab-fields">
+           <p class="muted" id="row-fields-empty">Click a row to view field values.</p>
+           <dl class="details-grid" id="row-fields"></dl>
+         </div>
        </aside>
      </div>
      <script>
        (() => {
          const rows = Array.from(document.querySelectorAll("tr.data-row"));
          const detailsByRow = ${detailsJson};
+         const rawDetailsByRow = ${rawDetailsJson};
          const columns = ${detailColumnsJson};
-         const detailsRoot = document.getElementById("row-details");
-         const emptyState = document.getElementById("row-details-empty");
+         const linkDefinitions = ${linkDefinitionsJson};
+         const nextBreadcrumbsToken = ${toInlineJson(nextBreadcrumbsToken)};
+         const linksRoot = document.getElementById("row-links");
+         const linksEmpty = document.getElementById("row-links-empty");
+         const fieldsRoot = document.getElementById("row-fields");
+         const fieldsEmpty = document.getElementById("row-fields-empty");
+         const tableMain = document.querySelector(".table-main");
+         const dataTable = tableMain ? tableMain.querySelector("table") : null;
+         const tableScrollbar = document.getElementById("table-scrollbar");
+         const tableScrollbarInner = document.getElementById("table-scrollbar-inner");
+         const tabButtons = Array.from(document.querySelectorAll(".tab-button"))
+           .sort((a, b) => Number(a.dataset.order || 0) - Number(b.dataset.order || 0));
+         const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
          let selectedRow = null;
+         let syncingMain = false;
+         let syncingBar = false;
          function escapeText(value) {
            return String(value ?? "")
              .replaceAll("&", "&amp;")
@@ -773,21 +1248,112 @@ function renderTable(viewName, view, rows, context) {
              .replaceAll("'", "&#39;");
          }
 
-         function renderDetails(index) {
-           const detail = detailsByRow[index];
-           if (!detail) {
-             detailsRoot.innerHTML = "";
-             emptyState.style.display = "";
+         function activateTab(tabName) {
+           tabButtons.forEach((button) => {
+             button.classList.toggle("active", button.dataset.tab === tabName);
+           });
+           tabPanels.forEach((panel) => {
+             panel.classList.toggle("active", panel.id === "tab-" + tabName);
+           });
+         }
+
+         function renderFields(index) {
+           const detail = detailsByRow[index] || {};
+
+           fieldsRoot.innerHTML = columns
+             .map((column) => {
+               const value = detail[column.name];
+               const renderedValue = value === undefined || value === null || value === "" ? "-" : value;
+               return '<div><dt>' + escapeText(column.label) + '</dt><dd>' + escapeText(renderedValue) + '</dd></div>';
+             })
+             .join("");
+           fieldsEmpty.style.display = index === null || index === undefined || !detailsByRow[index] ? "" : "none";
+         }
+
+         function buildLinkUrl(linkDef, rawDetail) {
+           const params = [];
+           for (const key of linkDef.keys) {
+             const value = rawDetail[key.localColumn];
+             if (value === undefined || value === null || value === "") {
+               return null;
+             }
+             params.push("f_" + encodeURIComponent(key.targetColumn) + "=" + encodeURIComponent(String(value)));
+           }
+           if (nextBreadcrumbsToken) {
+             params.push("crumbs=" + encodeURIComponent(nextBreadcrumbsToken));
+           }
+           if (!params.length) {
+             return null;
+           }
+           return "/table/" + encodeURIComponent(linkDef.targetView) + "?" + params.join("&");
+         }
+
+         function renderLinks(index) {
+           const rawDetail = rawDetailsByRow[index];
+           if (!rawDetail) {
+             linksRoot.innerHTML = "";
+             linksEmpty.style.display = "";
              return;
            }
 
-           detailsRoot.innerHTML = columns
-             .map((column) => {
-               const value = detail[column.name] ?? "";
-               return '<div><dt>' + escapeText(column.label) + '</dt><dd>' + escapeText(value) + '</dd></div>';
+           const items = linkDefinitions
+             .map((linkDef) => {
+               const url = buildLinkUrl(linkDef, rawDetail);
+               if (!url) {
+                 return "";
+               }
+               return '<li><a href="' + url + '">' + escapeText(linkDef.label) + "</a></li>";
              })
-             .join("");
-           emptyState.style.display = "none";
+             .filter(Boolean);
+
+           linksRoot.innerHTML = items.join("");
+           linksEmpty.style.display = items.length ? "none" : "";
+         }
+
+         tabButtons.forEach((button) => {
+           button.addEventListener("click", () => {
+             activateTab(button.dataset.tab);
+           });
+         });
+
+         const defaultTab = "fields";
+         activateTab(defaultTab);
+         renderFields(null);
+
+         function syncHorizontalScrollbar() {
+           if (!tableMain || !dataTable || !tableScrollbar || !tableScrollbarInner) {
+             return;
+           }
+            tableScrollbarInner.style.width = Math.max(dataTable.scrollWidth, tableMain.clientWidth) + "px";
+            tableScrollbar.scrollLeft = tableMain.scrollLeft;
+          }
+
+         if (tableMain && tableScrollbar) {
+           tableMain.addEventListener("scroll", () => {
+             if (syncingBar) {
+               syncingBar = false;
+               return;
+             }
+             syncingMain = true;
+             tableScrollbar.scrollLeft = tableMain.scrollLeft;
+           });
+
+           tableScrollbar.addEventListener("scroll", () => {
+             if (syncingMain) {
+               syncingMain = false;
+               return;
+             }
+             syncingBar = true;
+             tableMain.scrollLeft = tableScrollbar.scrollLeft;
+           });
+
+           syncHorizontalScrollbar();
+           window.addEventListener("resize", syncHorizontalScrollbar);
+         }
+
+         function renderSidePanel(index) {
+           renderLinks(index);
+           renderFields(index);
          }
 
          rows.forEach((row) => {
@@ -798,7 +1364,7 @@ function renderTable(viewName, view, rows, context) {
              row.classList.add("selected-row");
              selectedRow = row;
              const rowIndex = Number(row.dataset.rowIndex);
-             renderDetails(rowIndex);
+             renderSidePanel(rowIndex);
            });
          });
        })();
@@ -847,8 +1413,73 @@ function runDuckDbQuery(connection, query, params) {
 let sqlServerPoolPromise;
 let duckDbConnection;
 
+async function fetchViewRows(view, query) {
+  const dbType = getDatabaseType();
+  const filters = collectSearchFilters(view, query);
+  const options = {
+    sortBy: query.sortBy,
+    sortDir: query.sortDir,
+    filters,
+    limit: Number(query.limit || view.limit || 200)
+  };
+
+  const built = buildQuery(view, options, dbType);
+  let rows;
+
+  if (dbType === "duckdb") {
+    if (!duckDbConnection) {
+      duckDbConnection = createDuckDbConnection();
+    }
+    rows = await runDuckDbQuery(duckDbConnection, built.query, built.queryParams);
+  } else {
+    if (!sqlServerPoolPromise) {
+      sqlServerPoolPromise = createSqlServerPool();
+    }
+
+    const pool = await sqlServerPoolPromise;
+    const request = pool.request();
+
+    for (const queryParam of built.queryParams) {
+      request.input(queryParam.name, queryParam.value);
+    }
+
+    const result = await request.query(built.query);
+    rows = result.recordset || [];
+  }
+
+  return { rows, built, filters };
+}
+
 app.get("/", (_req, res) => {
   res.send(renderHome());
+});
+
+app.get("/table/:viewName/download.csv", async (req, res) => {
+  const view = getView(req.params.viewName);
+
+  if (!view) {
+    res.status(404).send("View not found");
+    return;
+  }
+
+  try {
+    const { rows } = await fetchViewRows(view, req.query);
+    const headers = view.columns.map((column) => escapeCsv(column.label || column.name)).join(",");
+    const lines = rows.map((row) =>
+      view.columns.map((column) => escapeCsv(formatCellValue(row[column.name], column))).join(",")
+    );
+    const csv = [headers, ...lines].join("\r\n");
+
+    const fileBase = String(view.title || req.params.viewName)
+      .replace(/[^a-z0-9_-]+/gi, "_")
+      .replace(/^_+|_+$/g, "") || "data";
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileBase}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    res.status(500).send(`Export error: ${error.message}`);
+  }
 });
 
 app.get("/table/:viewName", async (req, res) => {
@@ -867,44 +1498,21 @@ app.get("/table/:viewName", async (req, res) => {
   }
 
   try {
-    const dbType = getDatabaseType();
-    const filters = collectSearchFilters(view, req.query);
-    const options = {
-      sortBy: req.query.sortBy,
-      sortDir: req.query.sortDir,
-      filters,
-      limit: Number(req.query.limit || view.limit || 200)
-    };
-
-    const built = buildQuery(view, options, dbType);
-    let rows;
-
-    if (dbType === "duckdb") {
-      if (!duckDbConnection) {
-        duckDbConnection = createDuckDbConnection();
-      }
-      rows = await runDuckDbQuery(duckDbConnection, built.query, built.queryParams);
-    } else {
-      if (!sqlServerPoolPromise) {
-        sqlServerPoolPromise = createSqlServerPool();
-      }
-
-      const pool = await sqlServerPoolPromise;
-      const request = pool.request();
-
-      for (const queryParam of built.queryParams) {
-        request.input(queryParam.name, queryParam.value);
-      }
-
-      const result = await request.query(built.query);
-      rows = result.recordset || [];
-    }
+    const breadcrumbs = decodeBreadcrumbs(firstQueryValue(req.query.crumbs));
+    const currentUrl = stripQueryParam(req.originalUrl, "crumbs");
+    const currentCrumb = { label: view.title || req.params.viewName, url: currentUrl };
+    const nextBreadcrumbsToken = encodeBreadcrumbs([...breadcrumbs, currentCrumb]);
+    const { rows, built, filters } = await fetchViewRows(view, req.query);
+    const currentQueryString = buildQueryString(req.query);
 
     res.send(
       renderTable(req.params.viewName, view, rows, {
         sortColumn: built.sortColumn,
         direction: built.direction,
-        filters
+        filters,
+        breadcrumbs,
+        nextBreadcrumbsToken,
+        currentQueryString
       })
     );
   } catch (error) {

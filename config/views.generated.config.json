@@ -1,0 +1,4322 @@
+{
+  "views": {
+    "awbuildversion": {
+      "title": "AWBuild Version",
+      "schema": "dbo",
+      "table": "AWBuildVersion",
+      "keyColumn": "SystemInformationID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SystemInformationID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SystemInformationID",
+          "label": "System Information ID"
+        },
+        {
+          "name": "Database Version",
+          "label": "Database Version"
+        },
+        {
+          "name": "VersionDate",
+          "label": "Version Date"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SystemInformationID",
+          "label": "System Information ID",
+          "operator": "exact",
+          "placeholder": "Search System Information ID..."
+        },
+        {
+          "column": "Database Version",
+          "label": "Database Version",
+          "operator": "contains",
+          "placeholder": "Search Database Version..."
+        },
+        {
+          "column": "VersionDate",
+          "label": "Version Date",
+          "operator": "contains",
+          "placeholder": "Search Version Date..."
+        }
+      ],
+      "links": []
+    },
+    "databaselog": {
+      "title": "Database Log",
+      "schema": "dbo",
+      "table": "DatabaseLog",
+      "keyColumn": "DatabaseLogID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "DatabaseLogID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "DatabaseLogID",
+          "label": "Database Log ID"
+        },
+        {
+          "name": "PostTime",
+          "label": "Post Time"
+        },
+        {
+          "name": "DatabaseUser",
+          "label": "Database User"
+        },
+        {
+          "name": "Event",
+          "label": "Event"
+        },
+        {
+          "name": "Schema",
+          "label": "Schema"
+        },
+        {
+          "name": "Object",
+          "label": "Object"
+        },
+        {
+          "name": "TSQL",
+          "label": "TSQL"
+        },
+        {
+          "name": "XmlEvent",
+          "label": "Xml Event"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "DatabaseLogID",
+          "label": "Database Log ID",
+          "operator": "exact",
+          "placeholder": "Search Database Log ID..."
+        },
+        {
+          "column": "PostTime",
+          "label": "Post Time",
+          "operator": "contains",
+          "placeholder": "Search Post Time..."
+        },
+        {
+          "column": "DatabaseUser",
+          "label": "Database User",
+          "operator": "contains",
+          "placeholder": "Search Database User..."
+        }
+      ],
+      "links": []
+    },
+    "errorlog": {
+      "title": "Error Log",
+      "schema": "dbo",
+      "table": "ErrorLog",
+      "keyColumn": "ErrorLogID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ErrorLogID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ErrorLogID",
+          "label": "Error Log ID"
+        },
+        {
+          "name": "ErrorTime",
+          "label": "Error Time"
+        },
+        {
+          "name": "UserName",
+          "label": "User Name"
+        },
+        {
+          "name": "ErrorNumber",
+          "label": "Error Number"
+        },
+        {
+          "name": "ErrorSeverity",
+          "label": "Error Severity"
+        },
+        {
+          "name": "ErrorState",
+          "label": "Error State"
+        },
+        {
+          "name": "ErrorProcedure",
+          "label": "Error Procedure"
+        },
+        {
+          "name": "ErrorLine",
+          "label": "Error Line"
+        },
+        {
+          "name": "ErrorMessage",
+          "label": "Error Message"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ErrorLogID",
+          "label": "Error Log ID",
+          "operator": "exact",
+          "placeholder": "Search Error Log ID..."
+        },
+        {
+          "column": "ErrorTime",
+          "label": "Error Time",
+          "operator": "contains",
+          "placeholder": "Search Error Time..."
+        },
+        {
+          "column": "UserName",
+          "label": "User Name",
+          "operator": "contains",
+          "placeholder": "Search User Name..."
+        }
+      ],
+      "links": []
+    },
+    "department": {
+      "title": "Department",
+      "schema": "HumanResources",
+      "table": "Department",
+      "keyColumn": "DepartmentID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "DepartmentID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "DepartmentID",
+          "label": "Department ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "GroupName",
+          "label": "Group Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "DepartmentID",
+          "label": "Department ID",
+          "operator": "exact",
+          "placeholder": "Search Department ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "GroupName",
+          "label": "Group Name",
+          "operator": "contains",
+          "placeholder": "Search Group Name..."
+        }
+      ],
+      "links": []
+    },
+    "employee": {
+      "title": "Employee",
+      "schema": "HumanResources",
+      "table": "Employee",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "NationalIDNumber",
+          "label": "National IDNumber"
+        },
+        {
+          "name": "LoginID",
+          "label": "Login ID"
+        },
+        {
+          "name": "OrganizationNode",
+          "label": "Organization Node"
+        },
+        {
+          "name": "JobTitle",
+          "label": "Job Title"
+        },
+        {
+          "name": "BirthDate",
+          "label": "Birth Date"
+        },
+        {
+          "name": "MaritalStatus",
+          "label": "Marital Status"
+        },
+        {
+          "name": "Gender",
+          "label": "Gender"
+        },
+        {
+          "name": "HireDate",
+          "label": "Hire Date"
+        },
+        {
+          "name": "SalariedFlag",
+          "label": "Salaried Flag"
+        },
+        {
+          "name": "VacationHours",
+          "label": "Vacation Hours"
+        },
+        {
+          "name": "SickLeaveHours",
+          "label": "Sick Leave Hours"
+        },
+        {
+          "name": "CurrentFlag",
+          "label": "Current Flag"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "NationalIDNumber",
+          "label": "National IDNumber",
+          "operator": "contains",
+          "placeholder": "Search National IDNumber..."
+        },
+        {
+          "column": "LoginID",
+          "label": "Login ID",
+          "operator": "exact",
+          "placeholder": "Search Login ID..."
+        }
+      ],
+      "links": []
+    },
+    "employeedepartmenthistory": {
+      "title": "Employee Department History",
+      "schema": "HumanResources",
+      "table": "EmployeeDepartmentHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "DepartmentID",
+          "label": "Department ID"
+        },
+        {
+          "name": "ShiftID",
+          "label": "Shift ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "DepartmentID",
+          "label": "Department ID",
+          "operator": "exact",
+          "placeholder": "Search Department ID..."
+        },
+        {
+          "column": "ShiftID",
+          "label": "Shift ID",
+          "operator": "exact",
+          "placeholder": "Search Shift ID..."
+        }
+      ],
+      "links": []
+    },
+    "employeepayhistory": {
+      "title": "Employee Pay History",
+      "schema": "HumanResources",
+      "table": "EmployeePayHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "RateChangeDate",
+          "label": "Rate Change Date"
+        },
+        {
+          "name": "Rate",
+          "label": "Rate"
+        },
+        {
+          "name": "PayFrequency",
+          "label": "Pay Frequency"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "RateChangeDate",
+          "label": "Rate Change Date",
+          "operator": "contains",
+          "placeholder": "Search Rate Change Date..."
+        },
+        {
+          "column": "Rate",
+          "label": "Rate",
+          "operator": "contains",
+          "placeholder": "Search Rate..."
+        }
+      ],
+      "links": []
+    },
+    "jobcandidate": {
+      "title": "Job Candidate",
+      "schema": "HumanResources",
+      "table": "JobCandidate",
+      "keyColumn": "JobCandidateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "JobCandidateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "JobCandidateID",
+          "label": "Job Candidate ID"
+        },
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Resume",
+          "label": "Resume"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "JobCandidateID",
+          "label": "Job Candidate ID",
+          "operator": "exact",
+          "placeholder": "Search Job Candidate ID..."
+        },
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Resume",
+          "label": "Resume",
+          "operator": "contains",
+          "placeholder": "Search Resume..."
+        }
+      ],
+      "links": []
+    },
+    "shift": {
+      "title": "Shift",
+      "schema": "HumanResources",
+      "table": "Shift",
+      "keyColumn": "ShiftID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ShiftID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ShiftID",
+          "label": "Shift ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "StartTime",
+          "label": "Start Time"
+        },
+        {
+          "name": "EndTime",
+          "label": "End Time"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ShiftID",
+          "label": "Shift ID",
+          "operator": "exact",
+          "placeholder": "Search Shift ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "StartTime",
+          "label": "Start Time",
+          "operator": "contains",
+          "placeholder": "Search Start Time..."
+        }
+      ],
+      "links": []
+    },
+    "address": {
+      "title": "Address",
+      "schema": "Person",
+      "table": "Address",
+      "keyColumn": "AddressID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "AddressID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "AddressID",
+          "label": "Address ID"
+        },
+        {
+          "name": "AddressLine1",
+          "label": "Address Line1"
+        },
+        {
+          "name": "AddressLine2",
+          "label": "Address Line2"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "StateProvinceID",
+          "label": "State Province ID"
+        },
+        {
+          "name": "PostalCode",
+          "label": "Postal Code"
+        },
+        {
+          "name": "SpatialLocation",
+          "label": "Spatial Location"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "AddressID",
+          "label": "Address ID",
+          "operator": "exact",
+          "placeholder": "Search Address ID..."
+        },
+        {
+          "column": "AddressLine1",
+          "label": "Address Line1",
+          "operator": "contains",
+          "placeholder": "Search Address Line1..."
+        },
+        {
+          "column": "AddressLine2",
+          "label": "Address Line2",
+          "operator": "contains",
+          "placeholder": "Search Address Line2..."
+        }
+      ],
+      "links": []
+    },
+    "addresstype": {
+      "title": "Address Type",
+      "schema": "Person",
+      "table": "AddressType",
+      "keyColumn": "AddressTypeID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "AddressTypeID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "AddressTypeID",
+          "label": "Address Type ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "AddressTypeID",
+          "label": "Address Type ID",
+          "operator": "exact",
+          "placeholder": "Search Address Type ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        }
+      ],
+      "links": []
+    },
+    "businessentity": {
+      "title": "Business Entity",
+      "schema": "Person",
+      "table": "BusinessEntity",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "businessentityaddress": {
+      "title": "Business Entity Address",
+      "schema": "Person",
+      "table": "BusinessEntityAddress",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "AddressID",
+          "label": "Address ID"
+        },
+        {
+          "name": "AddressTypeID",
+          "label": "Address Type ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "AddressID",
+          "label": "Address ID",
+          "operator": "exact",
+          "placeholder": "Search Address ID..."
+        },
+        {
+          "column": "AddressTypeID",
+          "label": "Address Type ID",
+          "operator": "exact",
+          "placeholder": "Search Address Type ID..."
+        }
+      ],
+      "links": []
+    },
+    "businessentitycontact": {
+      "title": "Business Entity Contact",
+      "schema": "Person",
+      "table": "BusinessEntityContact",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "PersonID",
+          "label": "Person ID"
+        },
+        {
+          "name": "ContactTypeID",
+          "label": "Contact Type ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "PersonID",
+          "label": "Person ID",
+          "operator": "exact",
+          "placeholder": "Search Person ID..."
+        },
+        {
+          "column": "ContactTypeID",
+          "label": "Contact Type ID",
+          "operator": "exact",
+          "placeholder": "Search Contact Type ID..."
+        }
+      ],
+      "links": []
+    },
+    "contacttype": {
+      "title": "Contact Type",
+      "schema": "Person",
+      "table": "ContactType",
+      "keyColumn": "ContactTypeID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ContactTypeID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ContactTypeID",
+          "label": "Contact Type ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ContactTypeID",
+          "label": "Contact Type ID",
+          "operator": "exact",
+          "placeholder": "Search Contact Type ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "countryregion": {
+      "title": "Country Region",
+      "schema": "Person",
+      "table": "CountryRegion",
+      "keyColumn": "CountryRegionCode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CountryRegionCode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CountryRegionCode",
+          "label": "Country Region Code",
+          "operator": "contains",
+          "placeholder": "Search Country Region Code..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "emailaddress": {
+      "title": "Email Address",
+      "schema": "Person",
+      "table": "EmailAddress",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "EmailAddressID",
+          "label": "Email Address ID"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "EmailAddressID",
+          "label": "Email Address ID",
+          "operator": "exact",
+          "placeholder": "Search Email Address ID..."
+        },
+        {
+          "column": "EmailAddress",
+          "label": "Email Address",
+          "operator": "contains",
+          "placeholder": "Search Email Address..."
+        }
+      ],
+      "links": []
+    },
+    "password": {
+      "title": "Password",
+      "schema": "Person",
+      "table": "Password",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "PasswordHash",
+          "label": "Password Hash"
+        },
+        {
+          "name": "PasswordSalt",
+          "label": "Password Salt"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "PasswordHash",
+          "label": "Password Hash",
+          "operator": "contains",
+          "placeholder": "Search Password Hash..."
+        },
+        {
+          "column": "PasswordSalt",
+          "label": "Password Salt",
+          "operator": "contains",
+          "placeholder": "Search Password Salt..."
+        }
+      ],
+      "links": []
+    },
+    "person": {
+      "title": "Person",
+      "schema": "Person",
+      "table": "Person",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "PersonType",
+          "label": "Person Type"
+        },
+        {
+          "name": "NameStyle",
+          "label": "Name Style"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "EmailPromotion",
+          "label": "Email Promotion"
+        },
+        {
+          "name": "AdditionalContactInfo",
+          "label": "Additional Contact Info"
+        },
+        {
+          "name": "Demographics",
+          "label": "Demographics"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "PersonType",
+          "label": "Person Type",
+          "operator": "contains",
+          "placeholder": "Search Person Type..."
+        },
+        {
+          "column": "NameStyle",
+          "label": "Name Style",
+          "operator": "contains",
+          "placeholder": "Search Name Style..."
+        }
+      ],
+      "links": []
+    },
+    "personphone": {
+      "title": "Person Phone",
+      "schema": "Person",
+      "table": "PersonPhone",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "PhoneNumber",
+          "label": "Phone Number"
+        },
+        {
+          "name": "PhoneNumberTypeID",
+          "label": "Phone Number Type ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "PhoneNumber",
+          "label": "Phone Number",
+          "operator": "contains",
+          "placeholder": "Search Phone Number..."
+        },
+        {
+          "column": "PhoneNumberTypeID",
+          "label": "Phone Number Type ID",
+          "operator": "exact",
+          "placeholder": "Search Phone Number Type ID..."
+        }
+      ],
+      "links": []
+    },
+    "phonenumbertype": {
+      "title": "Phone Number Type",
+      "schema": "Person",
+      "table": "PhoneNumberType",
+      "keyColumn": "PhoneNumberTypeID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "PhoneNumberTypeID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "PhoneNumberTypeID",
+          "label": "Phone Number Type ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "PhoneNumberTypeID",
+          "label": "Phone Number Type ID",
+          "operator": "exact",
+          "placeholder": "Search Phone Number Type ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "stateprovince": {
+      "title": "State Province",
+      "schema": "Person",
+      "table": "StateProvince",
+      "keyColumn": "StateProvinceID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "StateProvinceID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "StateProvinceID",
+          "label": "State Province ID"
+        },
+        {
+          "name": "StateProvinceCode",
+          "label": "State Province Code"
+        },
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "IsOnlyStateProvinceFlag",
+          "label": "Is Only State Province Flag"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "StateProvinceID",
+          "label": "State Province ID",
+          "operator": "exact",
+          "placeholder": "Search State Province ID..."
+        },
+        {
+          "column": "StateProvinceCode",
+          "label": "State Province Code",
+          "operator": "contains",
+          "placeholder": "Search State Province Code..."
+        },
+        {
+          "column": "CountryRegionCode",
+          "label": "Country Region Code",
+          "operator": "contains",
+          "placeholder": "Search Country Region Code..."
+        }
+      ],
+      "links": []
+    },
+    "billofmaterials": {
+      "title": "Bill Of Materials",
+      "schema": "Production",
+      "table": "BillOfMaterials",
+      "keyColumn": "BillOfMaterialsID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BillOfMaterialsID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BillOfMaterialsID",
+          "label": "Bill Of Materials ID"
+        },
+        {
+          "name": "ProductAssemblyID",
+          "label": "Product Assembly ID"
+        },
+        {
+          "name": "ComponentID",
+          "label": "Component ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date"
+        },
+        {
+          "name": "UnitMeasureCode",
+          "label": "Unit Measure Code"
+        },
+        {
+          "name": "BOMLevel",
+          "label": "BOMLevel"
+        },
+        {
+          "name": "PerAssemblyQty",
+          "label": "Per Assembly Qty"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BillOfMaterialsID",
+          "label": "Bill Of Materials ID",
+          "operator": "exact",
+          "placeholder": "Search Bill Of Materials ID..."
+        },
+        {
+          "column": "ProductAssemblyID",
+          "label": "Product Assembly ID",
+          "operator": "exact",
+          "placeholder": "Search Product Assembly ID..."
+        },
+        {
+          "column": "ComponentID",
+          "label": "Component ID",
+          "operator": "exact",
+          "placeholder": "Search Component ID..."
+        }
+      ],
+      "links": []
+    },
+    "culture": {
+      "title": "Culture",
+      "schema": "Production",
+      "table": "Culture",
+      "keyColumn": "CultureID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CultureID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CultureID",
+          "label": "Culture ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CultureID",
+          "label": "Culture ID",
+          "operator": "exact",
+          "placeholder": "Search Culture ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "document": {
+      "title": "Document",
+      "schema": "Production",
+      "table": "Document",
+      "keyColumn": "DocumentNode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "DocumentNode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "DocumentNode",
+          "label": "Document Node"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "Owner",
+          "label": "Owner"
+        },
+        {
+          "name": "FolderFlag",
+          "label": "Folder Flag"
+        },
+        {
+          "name": "FileName",
+          "label": "File Name"
+        },
+        {
+          "name": "FileExtension",
+          "label": "File Extension"
+        },
+        {
+          "name": "Revision",
+          "label": "Revision"
+        },
+        {
+          "name": "ChangeNumber",
+          "label": "Change Number"
+        },
+        {
+          "name": "Status",
+          "label": "Status"
+        },
+        {
+          "name": "DocumentSummary",
+          "label": "Document Summary"
+        },
+        {
+          "name": "Document",
+          "label": "Document"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "DocumentNode",
+          "label": "Document Node",
+          "operator": "contains",
+          "placeholder": "Search Document Node..."
+        },
+        {
+          "column": "Title",
+          "label": "Title",
+          "operator": "contains",
+          "placeholder": "Search Title..."
+        },
+        {
+          "column": "Owner",
+          "label": "Owner",
+          "operator": "contains",
+          "placeholder": "Search Owner..."
+        }
+      ],
+      "links": []
+    },
+    "illustration": {
+      "title": "Illustration",
+      "schema": "Production",
+      "table": "Illustration",
+      "keyColumn": "IllustrationID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "IllustrationID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "IllustrationID",
+          "label": "Illustration ID"
+        },
+        {
+          "name": "Diagram",
+          "label": "Diagram"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "IllustrationID",
+          "label": "Illustration ID",
+          "operator": "exact",
+          "placeholder": "Search Illustration ID..."
+        },
+        {
+          "column": "Diagram",
+          "label": "Diagram",
+          "operator": "contains",
+          "placeholder": "Search Diagram..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "location": {
+      "title": "Location",
+      "schema": "Production",
+      "table": "Location",
+      "keyColumn": "LocationID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LocationID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LocationID",
+          "label": "Location ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "CostRate",
+          "label": "Cost Rate"
+        },
+        {
+          "name": "Availability",
+          "label": "Availability"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LocationID",
+          "label": "Location ID",
+          "operator": "exact",
+          "placeholder": "Search Location ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "CostRate",
+          "label": "Cost Rate",
+          "operator": "contains",
+          "placeholder": "Search Cost Rate..."
+        }
+      ],
+      "links": []
+    },
+    "product": {
+      "title": "Product",
+      "schema": "Production",
+      "table": "Product",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ProductNumber",
+          "label": "Product Number"
+        },
+        {
+          "name": "MakeFlag",
+          "label": "Make Flag"
+        },
+        {
+          "name": "FinishedGoodsFlag",
+          "label": "Finished Goods Flag"
+        },
+        {
+          "name": "Color",
+          "label": "Color"
+        },
+        {
+          "name": "SafetyStockLevel",
+          "label": "Safety Stock Level"
+        },
+        {
+          "name": "ReorderPoint",
+          "label": "Reorder Point"
+        },
+        {
+          "name": "StandardCost",
+          "label": "Standard Cost"
+        },
+        {
+          "name": "ListPrice",
+          "label": "List Price"
+        },
+        {
+          "name": "Size",
+          "label": "Size"
+        },
+        {
+          "name": "SizeUnitMeasureCode",
+          "label": "Size Unit Measure Code"
+        },
+        {
+          "name": "WeightUnitMeasureCode",
+          "label": "Weight Unit Measure Code"
+        },
+        {
+          "name": "Weight",
+          "label": "Weight"
+        },
+        {
+          "name": "DaysToManufacture",
+          "label": "Days To Manufacture"
+        },
+        {
+          "name": "ProductLine",
+          "label": "Product Line"
+        },
+        {
+          "name": "Class",
+          "label": "Class"
+        },
+        {
+          "name": "Style",
+          "label": "Style"
+        },
+        {
+          "name": "ProductSubcategoryID",
+          "label": "Product Subcategory ID"
+        },
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "SellStartDate",
+          "label": "Sell Start Date"
+        },
+        {
+          "name": "SellEndDate",
+          "label": "Sell End Date"
+        },
+        {
+          "name": "DiscontinuedDate",
+          "label": "Discontinued Date"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ProductNumber",
+          "label": "Product Number",
+          "operator": "contains",
+          "placeholder": "Search Product Number..."
+        }
+      ],
+      "links": []
+    },
+    "productcategory": {
+      "title": "Product Category",
+      "schema": "Production",
+      "table": "ProductCategory",
+      "keyColumn": "ProductCategoryID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductCategoryID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductCategoryID",
+          "label": "Product Category ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductCategoryID",
+          "label": "Product Category ID",
+          "operator": "exact",
+          "placeholder": "Search Product Category ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        }
+      ],
+      "links": []
+    },
+    "productcosthistory": {
+      "title": "Product Cost History",
+      "schema": "Production",
+      "table": "ProductCostHistory",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date"
+        },
+        {
+          "name": "StandardCost",
+          "label": "Standard Cost"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "StartDate",
+          "label": "Start Date",
+          "operator": "contains",
+          "placeholder": "Search Start Date..."
+        },
+        {
+          "column": "EndDate",
+          "label": "End Date",
+          "operator": "contains",
+          "placeholder": "Search End Date..."
+        }
+      ],
+      "links": []
+    },
+    "productdescription": {
+      "title": "Product Description",
+      "schema": "Production",
+      "table": "ProductDescription",
+      "keyColumn": "ProductDescriptionID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductDescriptionID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductDescriptionID",
+          "label": "Product Description ID"
+        },
+        {
+          "name": "Description",
+          "label": "Description"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductDescriptionID",
+          "label": "Product Description ID",
+          "operator": "exact",
+          "placeholder": "Search Product Description ID..."
+        },
+        {
+          "column": "Description",
+          "label": "Description",
+          "operator": "contains",
+          "placeholder": "Search Description..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        }
+      ],
+      "links": []
+    },
+    "productdocument": {
+      "title": "Product Document",
+      "schema": "Production",
+      "table": "ProductDocument",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "DocumentNode",
+          "label": "Document Node"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "DocumentNode",
+          "label": "Document Node",
+          "operator": "contains",
+          "placeholder": "Search Document Node..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "productinventory": {
+      "title": "Product Inventory",
+      "schema": "Production",
+      "table": "ProductInventory",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "LocationID",
+          "label": "Location ID"
+        },
+        {
+          "name": "Shelf",
+          "label": "Shelf"
+        },
+        {
+          "name": "Bin",
+          "label": "Bin"
+        },
+        {
+          "name": "Quantity",
+          "label": "Quantity"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "LocationID",
+          "label": "Location ID",
+          "operator": "exact",
+          "placeholder": "Search Location ID..."
+        },
+        {
+          "column": "Shelf",
+          "label": "Shelf",
+          "operator": "contains",
+          "placeholder": "Search Shelf..."
+        }
+      ],
+      "links": []
+    },
+    "productlistpricehistory": {
+      "title": "Product List Price History",
+      "schema": "Production",
+      "table": "ProductListPriceHistory",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date"
+        },
+        {
+          "name": "ListPrice",
+          "label": "List Price"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "StartDate",
+          "label": "Start Date",
+          "operator": "contains",
+          "placeholder": "Search Start Date..."
+        },
+        {
+          "column": "EndDate",
+          "label": "End Date",
+          "operator": "contains",
+          "placeholder": "Search End Date..."
+        }
+      ],
+      "links": []
+    },
+    "productmodel": {
+      "title": "Product Model",
+      "schema": "Production",
+      "table": "ProductModel",
+      "keyColumn": "ProductModelID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductModelID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "CatalogDescription",
+          "label": "Catalog Description"
+        },
+        {
+          "name": "Instructions",
+          "label": "Instructions"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductModelID",
+          "label": "Product Model ID",
+          "operator": "exact",
+          "placeholder": "Search Product Model ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "CatalogDescription",
+          "label": "Catalog Description",
+          "operator": "contains",
+          "placeholder": "Search Catalog Description..."
+        }
+      ],
+      "links": []
+    },
+    "productmodelillustration": {
+      "title": "Product Model Illustration",
+      "schema": "Production",
+      "table": "ProductModelIllustration",
+      "keyColumn": "ProductModelID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductModelID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "IllustrationID",
+          "label": "Illustration ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductModelID",
+          "label": "Product Model ID",
+          "operator": "exact",
+          "placeholder": "Search Product Model ID..."
+        },
+        {
+          "column": "IllustrationID",
+          "label": "Illustration ID",
+          "operator": "exact",
+          "placeholder": "Search Illustration ID..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "productmodelproductdescriptionculture": {
+      "title": "Product Model Product Description Culture",
+      "schema": "Production",
+      "table": "ProductModelProductDescriptionCulture",
+      "keyColumn": "ProductModelID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductModelID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "ProductDescriptionID",
+          "label": "Product Description ID"
+        },
+        {
+          "name": "CultureID",
+          "label": "Culture ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductModelID",
+          "label": "Product Model ID",
+          "operator": "exact",
+          "placeholder": "Search Product Model ID..."
+        },
+        {
+          "column": "ProductDescriptionID",
+          "label": "Product Description ID",
+          "operator": "exact",
+          "placeholder": "Search Product Description ID..."
+        },
+        {
+          "column": "CultureID",
+          "label": "Culture ID",
+          "operator": "exact",
+          "placeholder": "Search Culture ID..."
+        }
+      ],
+      "links": []
+    },
+    "productphoto": {
+      "title": "Product Photo",
+      "schema": "Production",
+      "table": "ProductPhoto",
+      "keyColumn": "ProductPhotoID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductPhotoID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductPhotoID",
+          "label": "Product Photo ID"
+        },
+        {
+          "name": "ThumbNailPhoto",
+          "label": "Thumb Nail Photo"
+        },
+        {
+          "name": "ThumbnailPhotoFileName",
+          "label": "Thumbnail Photo File Name"
+        },
+        {
+          "name": "LargePhoto",
+          "label": "Large Photo"
+        },
+        {
+          "name": "LargePhotoFileName",
+          "label": "Large Photo File Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductPhotoID",
+          "label": "Product Photo ID",
+          "operator": "exact",
+          "placeholder": "Search Product Photo ID..."
+        },
+        {
+          "column": "ThumbNailPhoto",
+          "label": "Thumb Nail Photo",
+          "operator": "contains",
+          "placeholder": "Search Thumb Nail Photo..."
+        },
+        {
+          "column": "ThumbnailPhotoFileName",
+          "label": "Thumbnail Photo File Name",
+          "operator": "contains",
+          "placeholder": "Search Thumbnail Photo File Name..."
+        }
+      ],
+      "links": []
+    },
+    "productproductphoto": {
+      "title": "Product Product Photo",
+      "schema": "Production",
+      "table": "ProductProductPhoto",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "ProductPhotoID",
+          "label": "Product Photo ID"
+        },
+        {
+          "name": "Primary",
+          "label": "Primary"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "ProductPhotoID",
+          "label": "Product Photo ID",
+          "operator": "exact",
+          "placeholder": "Search Product Photo ID..."
+        },
+        {
+          "column": "Primary",
+          "label": "Primary",
+          "operator": "contains",
+          "placeholder": "Search Primary..."
+        }
+      ],
+      "links": []
+    },
+    "productreview": {
+      "title": "Product Review",
+      "schema": "Production",
+      "table": "ProductReview",
+      "keyColumn": "ProductReviewID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductReviewID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductReviewID",
+          "label": "Product Review ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "ReviewerName",
+          "label": "Reviewer Name"
+        },
+        {
+          "name": "ReviewDate",
+          "label": "Review Date"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "Rating",
+          "label": "Rating"
+        },
+        {
+          "name": "Comments",
+          "label": "Comments"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductReviewID",
+          "label": "Product Review ID",
+          "operator": "exact",
+          "placeholder": "Search Product Review ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "ReviewerName",
+          "label": "Reviewer Name",
+          "operator": "contains",
+          "placeholder": "Search Reviewer Name..."
+        }
+      ],
+      "links": []
+    },
+    "productsubcategory": {
+      "title": "Product Subcategory",
+      "schema": "Production",
+      "table": "ProductSubcategory",
+      "keyColumn": "ProductSubcategoryID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductSubcategoryID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductSubcategoryID",
+          "label": "Product Subcategory ID"
+        },
+        {
+          "name": "ProductCategoryID",
+          "label": "Product Category ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductSubcategoryID",
+          "label": "Product Subcategory ID",
+          "operator": "exact",
+          "placeholder": "Search Product Subcategory ID..."
+        },
+        {
+          "column": "ProductCategoryID",
+          "label": "Product Category ID",
+          "operator": "exact",
+          "placeholder": "Search Product Category ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        }
+      ],
+      "links": []
+    },
+    "scrapreason": {
+      "title": "Scrap Reason",
+      "schema": "Production",
+      "table": "ScrapReason",
+      "keyColumn": "ScrapReasonID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ScrapReasonID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ScrapReasonID",
+          "label": "Scrap Reason ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ScrapReasonID",
+          "label": "Scrap Reason ID",
+          "operator": "exact",
+          "placeholder": "Search Scrap Reason ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "transactionhistory": {
+      "title": "Transaction History",
+      "schema": "Production",
+      "table": "TransactionHistory",
+      "keyColumn": "TransactionID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "TransactionID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "TransactionID",
+          "label": "Transaction ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "ReferenceOrderID",
+          "label": "Reference Order ID"
+        },
+        {
+          "name": "ReferenceOrderLineID",
+          "label": "Reference Order Line ID"
+        },
+        {
+          "name": "TransactionDate",
+          "label": "Transaction Date"
+        },
+        {
+          "name": "TransactionType",
+          "label": "Transaction Type"
+        },
+        {
+          "name": "Quantity",
+          "label": "Quantity"
+        },
+        {
+          "name": "ActualCost",
+          "label": "Actual Cost"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "TransactionID",
+          "label": "Transaction ID",
+          "operator": "exact",
+          "placeholder": "Search Transaction ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "ReferenceOrderID",
+          "label": "Reference Order ID",
+          "operator": "exact",
+          "placeholder": "Search Reference Order ID..."
+        }
+      ],
+      "links": []
+    },
+    "transactionhistoryarchive": {
+      "title": "Transaction History Archive",
+      "schema": "Production",
+      "table": "TransactionHistoryArchive",
+      "keyColumn": "TransactionID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "TransactionID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "TransactionID",
+          "label": "Transaction ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "ReferenceOrderID",
+          "label": "Reference Order ID"
+        },
+        {
+          "name": "ReferenceOrderLineID",
+          "label": "Reference Order Line ID"
+        },
+        {
+          "name": "TransactionDate",
+          "label": "Transaction Date"
+        },
+        {
+          "name": "TransactionType",
+          "label": "Transaction Type"
+        },
+        {
+          "name": "Quantity",
+          "label": "Quantity"
+        },
+        {
+          "name": "ActualCost",
+          "label": "Actual Cost"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "TransactionID",
+          "label": "Transaction ID",
+          "operator": "exact",
+          "placeholder": "Search Transaction ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "ReferenceOrderID",
+          "label": "Reference Order ID",
+          "operator": "exact",
+          "placeholder": "Search Reference Order ID..."
+        }
+      ],
+      "links": []
+    },
+    "unitmeasure": {
+      "title": "Unit Measure",
+      "schema": "Production",
+      "table": "UnitMeasure",
+      "keyColumn": "UnitMeasureCode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "UnitMeasureCode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "UnitMeasureCode",
+          "label": "Unit Measure Code"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "UnitMeasureCode",
+          "label": "Unit Measure Code",
+          "operator": "contains",
+          "placeholder": "Search Unit Measure Code..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "workorder": {
+      "title": "Work Order",
+      "schema": "Production",
+      "table": "WorkOrder",
+      "keyColumn": "WorkOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "WorkOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "WorkOrderID",
+          "label": "Work Order ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "OrderQty",
+          "label": "Order Qty"
+        },
+        {
+          "name": "ScrappedQty",
+          "label": "Scrapped Qty"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date"
+        },
+        {
+          "name": "DueDate",
+          "label": "Due Date"
+        },
+        {
+          "name": "ScrapReasonID",
+          "label": "Scrap Reason ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "WorkOrderID",
+          "label": "Work Order ID",
+          "operator": "exact",
+          "placeholder": "Search Work Order ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "OrderQty",
+          "label": "Order Qty",
+          "operator": "contains",
+          "placeholder": "Search Order Qty..."
+        }
+      ],
+      "links": []
+    },
+    "workorderrouting": {
+      "title": "Work Order Routing",
+      "schema": "Production",
+      "table": "WorkOrderRouting",
+      "keyColumn": "WorkOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "WorkOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "WorkOrderID",
+          "label": "Work Order ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "OperationSequence",
+          "label": "Operation Sequence"
+        },
+        {
+          "name": "LocationID",
+          "label": "Location ID"
+        },
+        {
+          "name": "ScheduledStartDate",
+          "label": "Scheduled Start Date"
+        },
+        {
+          "name": "ScheduledEndDate",
+          "label": "Scheduled End Date"
+        },
+        {
+          "name": "ActualStartDate",
+          "label": "Actual Start Date"
+        },
+        {
+          "name": "ActualEndDate",
+          "label": "Actual End Date"
+        },
+        {
+          "name": "ActualResourceHrs",
+          "label": "Actual Resource Hrs"
+        },
+        {
+          "name": "PlannedCost",
+          "label": "Planned Cost"
+        },
+        {
+          "name": "ActualCost",
+          "label": "Actual Cost"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "WorkOrderID",
+          "label": "Work Order ID",
+          "operator": "exact",
+          "placeholder": "Search Work Order ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "OperationSequence",
+          "label": "Operation Sequence",
+          "operator": "contains",
+          "placeholder": "Search Operation Sequence..."
+        }
+      ],
+      "links": []
+    },
+    "productvendor": {
+      "title": "Product Vendor",
+      "schema": "Purchasing",
+      "table": "ProductVendor",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "AverageLeadTime",
+          "label": "Average Lead Time"
+        },
+        {
+          "name": "StandardPrice",
+          "label": "Standard Price"
+        },
+        {
+          "name": "LastReceiptCost",
+          "label": "Last Receipt Cost"
+        },
+        {
+          "name": "LastReceiptDate",
+          "label": "Last Receipt Date"
+        },
+        {
+          "name": "MinOrderQty",
+          "label": "Min Order Qty"
+        },
+        {
+          "name": "MaxOrderQty",
+          "label": "Max Order Qty"
+        },
+        {
+          "name": "OnOrderQty",
+          "label": "On Order Qty"
+        },
+        {
+          "name": "UnitMeasureCode",
+          "label": "Unit Measure Code"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "AverageLeadTime",
+          "label": "Average Lead Time",
+          "operator": "contains",
+          "placeholder": "Search Average Lead Time..."
+        }
+      ],
+      "links": []
+    },
+    "purchaseorderdetail": {
+      "title": "Purchase Order Detail",
+      "schema": "Purchasing",
+      "table": "PurchaseOrderDetail",
+      "keyColumn": "PurchaseOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "PurchaseOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "PurchaseOrderID",
+          "label": "Purchase Order ID"
+        },
+        {
+          "name": "PurchaseOrderDetailID",
+          "label": "Purchase Order Detail ID"
+        },
+        {
+          "name": "DueDate",
+          "label": "Due Date"
+        },
+        {
+          "name": "OrderQty",
+          "label": "Order Qty"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "UnitPrice",
+          "label": "Unit Price"
+        },
+        {
+          "name": "ReceivedQty",
+          "label": "Received Qty"
+        },
+        {
+          "name": "RejectedQty",
+          "label": "Rejected Qty"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "PurchaseOrderID",
+          "label": "Purchase Order ID",
+          "operator": "exact",
+          "placeholder": "Search Purchase Order ID..."
+        },
+        {
+          "column": "PurchaseOrderDetailID",
+          "label": "Purchase Order Detail ID",
+          "operator": "exact",
+          "placeholder": "Search Purchase Order Detail ID..."
+        },
+        {
+          "column": "DueDate",
+          "label": "Due Date",
+          "operator": "contains",
+          "placeholder": "Search Due Date..."
+        }
+      ],
+      "links": []
+    },
+    "purchaseorderheader": {
+      "title": "Purchase Order Header",
+      "schema": "Purchasing",
+      "table": "PurchaseOrderHeader",
+      "keyColumn": "PurchaseOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "PurchaseOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "PurchaseOrderID",
+          "label": "Purchase Order ID"
+        },
+        {
+          "name": "RevisionNumber",
+          "label": "Revision Number"
+        },
+        {
+          "name": "Status",
+          "label": "Status"
+        },
+        {
+          "name": "EmployeeID",
+          "label": "Employee ID"
+        },
+        {
+          "name": "VendorID",
+          "label": "Vendor ID"
+        },
+        {
+          "name": "ShipMethodID",
+          "label": "Ship Method ID"
+        },
+        {
+          "name": "OrderDate",
+          "label": "Order Date"
+        },
+        {
+          "name": "ShipDate",
+          "label": "Ship Date"
+        },
+        {
+          "name": "SubTotal",
+          "label": "Sub Total"
+        },
+        {
+          "name": "TaxAmt",
+          "label": "Tax Amt"
+        },
+        {
+          "name": "Freight",
+          "label": "Freight"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "PurchaseOrderID",
+          "label": "Purchase Order ID",
+          "operator": "exact",
+          "placeholder": "Search Purchase Order ID..."
+        },
+        {
+          "column": "RevisionNumber",
+          "label": "Revision Number",
+          "operator": "contains",
+          "placeholder": "Search Revision Number..."
+        },
+        {
+          "column": "Status",
+          "label": "Status",
+          "operator": "contains",
+          "placeholder": "Search Status..."
+        }
+      ],
+      "links": []
+    },
+    "shipmethod": {
+      "title": "Ship Method",
+      "schema": "Purchasing",
+      "table": "ShipMethod",
+      "keyColumn": "ShipMethodID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ShipMethodID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ShipMethodID",
+          "label": "Ship Method ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ShipBase",
+          "label": "Ship Base"
+        },
+        {
+          "name": "ShipRate",
+          "label": "Ship Rate"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ShipMethodID",
+          "label": "Ship Method ID",
+          "operator": "exact",
+          "placeholder": "Search Ship Method ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ShipBase",
+          "label": "Ship Base",
+          "operator": "contains",
+          "placeholder": "Search Ship Base..."
+        }
+      ],
+      "links": []
+    },
+    "vendor": {
+      "title": "Vendor",
+      "schema": "Purchasing",
+      "table": "Vendor",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "AccountNumber",
+          "label": "Account Number"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "CreditRating",
+          "label": "Credit Rating"
+        },
+        {
+          "name": "PreferredVendorStatus",
+          "label": "Preferred Vendor Status"
+        },
+        {
+          "name": "ActiveFlag",
+          "label": "Active Flag"
+        },
+        {
+          "name": "PurchasingWebServiceURL",
+          "label": "Purchasing Web Service URL"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "AccountNumber",
+          "label": "Account Number",
+          "operator": "contains",
+          "placeholder": "Search Account Number..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        }
+      ],
+      "links": []
+    },
+    "countryregioncurrency": {
+      "title": "Country Region Currency",
+      "schema": "Sales",
+      "table": "CountryRegionCurrency",
+      "keyColumn": "CountryRegionCode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CountryRegionCode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "CurrencyCode",
+          "label": "Currency Code"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CountryRegionCode",
+          "label": "Country Region Code",
+          "operator": "contains",
+          "placeholder": "Search Country Region Code..."
+        },
+        {
+          "column": "CurrencyCode",
+          "label": "Currency Code",
+          "operator": "contains",
+          "placeholder": "Search Currency Code..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "creditcard": {
+      "title": "Credit Card",
+      "schema": "Sales",
+      "table": "CreditCard",
+      "keyColumn": "CreditCardID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CreditCardID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CreditCardID",
+          "label": "Credit Card ID"
+        },
+        {
+          "name": "CardType",
+          "label": "Card Type"
+        },
+        {
+          "name": "CardNumber",
+          "label": "Card Number"
+        },
+        {
+          "name": "ExpMonth",
+          "label": "Exp Month"
+        },
+        {
+          "name": "ExpYear",
+          "label": "Exp Year"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CreditCardID",
+          "label": "Credit Card ID",
+          "operator": "exact",
+          "placeholder": "Search Credit Card ID..."
+        },
+        {
+          "column": "CardType",
+          "label": "Card Type",
+          "operator": "contains",
+          "placeholder": "Search Card Type..."
+        },
+        {
+          "column": "CardNumber",
+          "label": "Card Number",
+          "operator": "contains",
+          "placeholder": "Search Card Number..."
+        }
+      ],
+      "links": []
+    },
+    "currency": {
+      "title": "Currency",
+      "schema": "Sales",
+      "table": "Currency",
+      "keyColumn": "CurrencyCode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CurrencyCode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CurrencyCode",
+          "label": "Currency Code"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CurrencyCode",
+          "label": "Currency Code",
+          "operator": "contains",
+          "placeholder": "Search Currency Code..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "currencyrate": {
+      "title": "Currency Rate",
+      "schema": "Sales",
+      "table": "CurrencyRate",
+      "keyColumn": "CurrencyRateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CurrencyRateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CurrencyRateID",
+          "label": "Currency Rate ID"
+        },
+        {
+          "name": "CurrencyRateDate",
+          "label": "Currency Rate Date"
+        },
+        {
+          "name": "FromCurrencyCode",
+          "label": "From Currency Code"
+        },
+        {
+          "name": "ToCurrencyCode",
+          "label": "To Currency Code"
+        },
+        {
+          "name": "AverageRate",
+          "label": "Average Rate"
+        },
+        {
+          "name": "EndOfDayRate",
+          "label": "End Of Day Rate"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CurrencyRateID",
+          "label": "Currency Rate ID",
+          "operator": "exact",
+          "placeholder": "Search Currency Rate ID..."
+        },
+        {
+          "column": "CurrencyRateDate",
+          "label": "Currency Rate Date",
+          "operator": "contains",
+          "placeholder": "Search Currency Rate Date..."
+        },
+        {
+          "column": "FromCurrencyCode",
+          "label": "From Currency Code",
+          "operator": "contains",
+          "placeholder": "Search From Currency Code..."
+        }
+      ],
+      "links": []
+    },
+    "customer": {
+      "title": "Customer",
+      "schema": "Sales",
+      "table": "Customer",
+      "keyColumn": "CustomerID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CustomerID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CustomerID",
+          "label": "Customer ID"
+        },
+        {
+          "name": "PersonID",
+          "label": "Person ID"
+        },
+        {
+          "name": "StoreID",
+          "label": "Store ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CustomerID",
+          "label": "Customer ID",
+          "operator": "exact",
+          "placeholder": "Search Customer ID..."
+        },
+        {
+          "column": "PersonID",
+          "label": "Person ID",
+          "operator": "exact",
+          "placeholder": "Search Person ID..."
+        },
+        {
+          "column": "StoreID",
+          "label": "Store ID",
+          "operator": "exact",
+          "placeholder": "Search Store ID..."
+        }
+      ],
+      "links": []
+    },
+    "personcreditcard": {
+      "title": "Person Credit Card",
+      "schema": "Sales",
+      "table": "PersonCreditCard",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "CreditCardID",
+          "label": "Credit Card ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "CreditCardID",
+          "label": "Credit Card ID",
+          "operator": "exact",
+          "placeholder": "Search Credit Card ID..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "salesorderdetail": {
+      "title": "Sales Order Detail",
+      "schema": "Sales",
+      "table": "SalesOrderDetail",
+      "keyColumn": "SalesOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "label": "Sales Order ID"
+        },
+        {
+          "name": "SalesOrderDetailID",
+          "label": "Sales Order Detail ID"
+        },
+        {
+          "name": "CarrierTrackingNumber",
+          "label": "Carrier Tracking Number"
+        },
+        {
+          "name": "OrderQty",
+          "label": "Order Qty"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "SpecialOfferID",
+          "label": "Special Offer ID"
+        },
+        {
+          "name": "UnitPrice",
+          "label": "Unit Price"
+        },
+        {
+          "name": "UnitPriceDiscount",
+          "label": "Unit Price Discount"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesOrderID",
+          "label": "Sales Order ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order ID..."
+        },
+        {
+          "column": "SalesOrderDetailID",
+          "label": "Sales Order Detail ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order Detail ID..."
+        },
+        {
+          "column": "CarrierTrackingNumber",
+          "label": "Carrier Tracking Number",
+          "operator": "contains",
+          "placeholder": "Search Carrier Tracking Number..."
+        }
+      ],
+      "links": []
+    },
+    "salesorderheader": {
+      "title": "Sales Order Header",
+      "schema": "Sales",
+      "table": "SalesOrderHeader",
+      "keyColumn": "SalesOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "label": "Sales Order ID"
+        },
+        {
+          "name": "RevisionNumber",
+          "label": "Revision Number"
+        },
+        {
+          "name": "OrderDate",
+          "label": "Order Date"
+        },
+        {
+          "name": "DueDate",
+          "label": "Due Date"
+        },
+        {
+          "name": "ShipDate",
+          "label": "Ship Date"
+        },
+        {
+          "name": "Status",
+          "label": "Status"
+        },
+        {
+          "name": "OnlineOrderFlag",
+          "label": "Online Order Flag"
+        },
+        {
+          "name": "PurchaseOrderNumber",
+          "label": "Purchase Order Number"
+        },
+        {
+          "name": "AccountNumber",
+          "label": "Account Number"
+        },
+        {
+          "name": "CustomerID",
+          "label": "Customer ID"
+        },
+        {
+          "name": "SalesPersonID",
+          "label": "Sales Person ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "BillToAddressID",
+          "label": "Bill To Address ID"
+        },
+        {
+          "name": "ShipToAddressID",
+          "label": "Ship To Address ID"
+        },
+        {
+          "name": "ShipMethodID",
+          "label": "Ship Method ID"
+        },
+        {
+          "name": "CreditCardID",
+          "label": "Credit Card ID"
+        },
+        {
+          "name": "CreditCardApprovalCode",
+          "label": "Credit Card Approval Code"
+        },
+        {
+          "name": "CurrencyRateID",
+          "label": "Currency Rate ID"
+        },
+        {
+          "name": "SubTotal",
+          "label": "Sub Total"
+        },
+        {
+          "name": "TaxAmt",
+          "label": "Tax Amt"
+        },
+        {
+          "name": "Freight",
+          "label": "Freight"
+        },
+        {
+          "name": "Comment",
+          "label": "Comment"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesOrderID",
+          "label": "Sales Order ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order ID..."
+        },
+        {
+          "column": "RevisionNumber",
+          "label": "Revision Number",
+          "operator": "contains",
+          "placeholder": "Search Revision Number..."
+        },
+        {
+          "column": "OrderDate",
+          "label": "Order Date",
+          "operator": "contains",
+          "placeholder": "Search Order Date..."
+        }
+      ],
+      "links": []
+    },
+    "salesorderheadersalesreason": {
+      "title": "Sales Order Header Sales Reason",
+      "schema": "Sales",
+      "table": "SalesOrderHeaderSalesReason",
+      "keyColumn": "SalesOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "label": "Sales Order ID"
+        },
+        {
+          "name": "SalesReasonID",
+          "label": "Sales Reason ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesOrderID",
+          "label": "Sales Order ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order ID..."
+        },
+        {
+          "column": "SalesReasonID",
+          "label": "Sales Reason ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Reason ID..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "contains",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": []
+    },
+    "salesperson": {
+      "title": "Sales Person",
+      "schema": "Sales",
+      "table": "SalesPerson",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "SalesQuota",
+          "label": "Sales Quota"
+        },
+        {
+          "name": "Bonus",
+          "label": "Bonus"
+        },
+        {
+          "name": "CommissionPct",
+          "label": "Commission Pct"
+        },
+        {
+          "name": "SalesYTD",
+          "label": "Sales YTD"
+        },
+        {
+          "name": "SalesLastYear",
+          "label": "Sales Last Year"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "TerritoryID",
+          "label": "Territory ID",
+          "operator": "exact",
+          "placeholder": "Search Territory ID..."
+        },
+        {
+          "column": "SalesQuota",
+          "label": "Sales Quota",
+          "operator": "contains",
+          "placeholder": "Search Sales Quota..."
+        }
+      ],
+      "links": []
+    },
+    "salespersonquotahistory": {
+      "title": "Sales Person Quota History",
+      "schema": "Sales",
+      "table": "SalesPersonQuotaHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "QuotaDate",
+          "label": "Quota Date"
+        },
+        {
+          "name": "SalesQuota",
+          "label": "Sales Quota"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "QuotaDate",
+          "label": "Quota Date",
+          "operator": "contains",
+          "placeholder": "Search Quota Date..."
+        },
+        {
+          "column": "SalesQuota",
+          "label": "Sales Quota",
+          "operator": "contains",
+          "placeholder": "Search Sales Quota..."
+        }
+      ],
+      "links": []
+    },
+    "salesreason": {
+      "title": "Sales Reason",
+      "schema": "Sales",
+      "table": "SalesReason",
+      "keyColumn": "SalesReasonID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesReasonID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesReasonID",
+          "label": "Sales Reason ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ReasonType",
+          "label": "Reason Type"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesReasonID",
+          "label": "Sales Reason ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Reason ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ReasonType",
+          "label": "Reason Type",
+          "operator": "contains",
+          "placeholder": "Search Reason Type..."
+        }
+      ],
+      "links": []
+    },
+    "salestaxrate": {
+      "title": "Sales Tax Rate",
+      "schema": "Sales",
+      "table": "SalesTaxRate",
+      "keyColumn": "SalesTaxRateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesTaxRateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesTaxRateID",
+          "label": "Sales Tax Rate ID"
+        },
+        {
+          "name": "StateProvinceID",
+          "label": "State Province ID"
+        },
+        {
+          "name": "TaxType",
+          "label": "Tax Type"
+        },
+        {
+          "name": "TaxRate",
+          "label": "Tax Rate"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesTaxRateID",
+          "label": "Sales Tax Rate ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Tax Rate ID..."
+        },
+        {
+          "column": "StateProvinceID",
+          "label": "State Province ID",
+          "operator": "exact",
+          "placeholder": "Search State Province ID..."
+        },
+        {
+          "column": "TaxType",
+          "label": "Tax Type",
+          "operator": "contains",
+          "placeholder": "Search Tax Type..."
+        }
+      ],
+      "links": []
+    },
+    "salesterritory": {
+      "title": "Sales Territory",
+      "schema": "Sales",
+      "table": "SalesTerritory",
+      "keyColumn": "TerritoryID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "TerritoryID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "Group",
+          "label": "Group"
+        },
+        {
+          "name": "SalesYTD",
+          "label": "Sales YTD"
+        },
+        {
+          "name": "SalesLastYear",
+          "label": "Sales Last Year"
+        },
+        {
+          "name": "CostYTD",
+          "label": "Cost YTD"
+        },
+        {
+          "name": "CostLastYear",
+          "label": "Cost Last Year"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "TerritoryID",
+          "label": "Territory ID",
+          "operator": "exact",
+          "placeholder": "Search Territory ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "CountryRegionCode",
+          "label": "Country Region Code",
+          "operator": "contains",
+          "placeholder": "Search Country Region Code..."
+        }
+      ],
+      "links": []
+    },
+    "salesterritoryhistory": {
+      "title": "Sales Territory History",
+      "schema": "Sales",
+      "table": "SalesTerritoryHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "TerritoryID",
+          "label": "Territory ID",
+          "operator": "exact",
+          "placeholder": "Search Territory ID..."
+        },
+        {
+          "column": "StartDate",
+          "label": "Start Date",
+          "operator": "contains",
+          "placeholder": "Search Start Date..."
+        }
+      ],
+      "links": []
+    },
+    "shoppingcartitem": {
+      "title": "Shopping Cart Item",
+      "schema": "Sales",
+      "table": "ShoppingCartItem",
+      "keyColumn": "ShoppingCartItemID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ShoppingCartItemID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ShoppingCartItemID",
+          "label": "Shopping Cart Item ID"
+        },
+        {
+          "name": "ShoppingCartID",
+          "label": "Shopping Cart ID"
+        },
+        {
+          "name": "Quantity",
+          "label": "Quantity"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "DateCreated",
+          "label": "Date Created"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ShoppingCartItemID",
+          "label": "Shopping Cart Item ID",
+          "operator": "exact",
+          "placeholder": "Search Shopping Cart Item ID..."
+        },
+        {
+          "column": "ShoppingCartID",
+          "label": "Shopping Cart ID",
+          "operator": "exact",
+          "placeholder": "Search Shopping Cart ID..."
+        },
+        {
+          "column": "Quantity",
+          "label": "Quantity",
+          "operator": "contains",
+          "placeholder": "Search Quantity..."
+        }
+      ],
+      "links": []
+    },
+    "specialoffer": {
+      "title": "Special Offer",
+      "schema": "Sales",
+      "table": "SpecialOffer",
+      "keyColumn": "SpecialOfferID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SpecialOfferID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SpecialOfferID",
+          "label": "Special Offer ID"
+        },
+        {
+          "name": "Description",
+          "label": "Description"
+        },
+        {
+          "name": "DiscountPct",
+          "label": "Discount Pct"
+        },
+        {
+          "name": "Type",
+          "label": "Type"
+        },
+        {
+          "name": "Category",
+          "label": "Category"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date"
+        },
+        {
+          "name": "MinQty",
+          "label": "Min Qty"
+        },
+        {
+          "name": "MaxQty",
+          "label": "Max Qty"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SpecialOfferID",
+          "label": "Special Offer ID",
+          "operator": "exact",
+          "placeholder": "Search Special Offer ID..."
+        },
+        {
+          "column": "Description",
+          "label": "Description",
+          "operator": "contains",
+          "placeholder": "Search Description..."
+        },
+        {
+          "column": "DiscountPct",
+          "label": "Discount Pct",
+          "operator": "contains",
+          "placeholder": "Search Discount Pct..."
+        }
+      ],
+      "links": []
+    },
+    "specialofferproduct": {
+      "title": "Special Offer Product",
+      "schema": "Sales",
+      "table": "SpecialOfferProduct",
+      "keyColumn": "SpecialOfferID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SpecialOfferID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SpecialOfferID",
+          "label": "Special Offer ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SpecialOfferID",
+          "label": "Special Offer ID",
+          "operator": "exact",
+          "placeholder": "Search Special Offer ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        }
+      ],
+      "links": []
+    },
+    "store": {
+      "title": "Store",
+      "schema": "Sales",
+      "table": "Store",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "SalesPersonID",
+          "label": "Sales Person ID"
+        },
+        {
+          "name": "Demographics",
+          "label": "Demographics"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "SalesPersonID",
+          "label": "Sales Person ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Person ID..."
+        }
+      ],
+      "links": []
+    }
+  }
+}

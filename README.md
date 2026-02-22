@@ -11,6 +11,7 @@ A Node.js web application that reads table/view definitions from configuration f
 - Config-driven front-page search forms per view
 - Simple in-browser sort controls
 - Optional cross-table filtering using query parameters
+- CSV export for current grid query (all configured fields, formatted values)
 
 ## Project Structure
 
@@ -37,6 +38,12 @@ npm start
 ```
 
 Open `http://localhost:3000`
+
+On table pages, use **Download CSV** to export the current query result.
+
+- Includes all fields from `views.<name>.columns`, even if `hideOnGrid` is `true`
+- Applies configured formatting (date/time formats, global date format fallback)
+- Uses current filters, sort, and limit from the page query
 
 ## Generate Config From SQL Server DDL
 
@@ -82,12 +89,19 @@ Environment overrides:
 
 - `DB_TYPE`, `DB_SERVER`, `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`, `DB_PORT`, `DUCKDB_PATH`
 
+UI settings in `config/app.config.json`:
+
+- `ui.banner.title`
+- `ui.banner.subtitle`
+- `ui.dateFormat`: Global date format string for all date/datetime/time columns (for example `DD/MM/YYYY`)
+
 ## Configuration Model
 
 `views.config.json` format:
 
 - `views.<name>.schema`: SQL schema (used for SQL Server; optional for DuckDB)
 - `views.<name>.table`: SQL table name
+- `views.<name>.hideOnHome`: Optional boolean to hide a view from the front-page search list
 - `views.<name>.columns`: Columns shown in the table
 - `views.<name>.columns[].hideOnGrid`: Optional boolean to hide a column from the main table grid (still available in row details and links)
 - `views.<name>.columns[].format`: Optional cell formatter (`date`, `datetime`, `time`)
@@ -106,8 +120,57 @@ Example search field object:
 {
   "column": "CompanyName",
   "label": "Company",
+  "type": "text",
   "operator": "contains",
   "placeholder": "Name contains..."
+}
+```
+
+Supported search field types:
+
+- `text` (default): free text input, uses `operator`
+- `select`: dropdown, uses exact match
+- `multiSelect`: dropdown-style checkbox list, uses `IN (...)`
+- `date`: date picker, uses exact match
+- `dateRange`: from/to date pickers, uses `>=` and `<=`
+
+Example `select` field:
+
+```json
+{
+  "column": "Status",
+  "label": "Status",
+  "type": "select",
+  "options": [
+    { "value": "1", "label": "In Process" },
+    { "value": "2", "label": "Approved" },
+    { "value": "3", "label": "Backordered" }
+  ]
+}
+```
+
+Example date range field:
+
+```json
+{
+  "column": "OrderDate",
+  "label": "Order Date",
+  "type": "dateRange"
+}
+```
+
+Example multi-select checkbox field:
+
+```json
+{
+  "column": "Status",
+  "label": "Status",
+  "type": "multiSelect",
+  "options": [
+    { "value": "1", "label": "In Process" },
+    { "value": "2", "label": "Approved" },
+    { "value": "3", "label": "Backordered" }
+  ]
 }
 ```
 
@@ -117,6 +180,10 @@ Supported operators:
 - `contains`
 - `startsWith`
 - `endsWith`
+- `gt`
+- `gte`
+- `lt`
+- `lte`
 
 Example date column formats:
 
@@ -149,6 +216,12 @@ Supported date pattern tokens:
 - `HH`, `H`
 - `mm`, `m`
 - `ss`, `s`
+
+Date format precedence:
+
+1. `views.<name>.columns[].dateFormat` (string or object)
+2. `views.<name>.columns[].formatString`
+3. global `ui.dateFormat` from `config/app.config.json`
 
 Example link object:
 
