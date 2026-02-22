@@ -127,6 +127,22 @@ function collectAllowedColumns(view) {
     columns.add(view.keyColumn);
   }
 
+  for (const column of collectLinkLocalColumns(view)) {
+    columns.add(column);
+  }
+
+  return columns;
+}
+
+function collectLinkLocalColumns(view) {
+  const columns = new Set();
+  for (const link of view.links || []) {
+    for (const mapping of extractLinkKeyMappings(link)) {
+      if (mapping.localColumn) {
+        columns.add(mapping.localColumn);
+      }
+    }
+  }
   return columns;
 }
 
@@ -142,9 +158,27 @@ function resolveTableName(view, dbType) {
 
 function buildQuery(view, options, dbType) {
   const allowedColumns = collectAllowedColumns(view);
-  const columns = view.columns
-    .map((column) => quoteIdentifier(column.name, dbType))
-    .join(", ");
+  const selectColumns = [];
+  const selected = new Set();
+  const addSelectColumn = (columnName) => {
+    if (!columnName || selected.has(columnName)) {
+      return;
+    }
+    selected.add(columnName);
+    selectColumns.push(columnName);
+  };
+
+  for (const column of view.columns || []) {
+    addSelectColumn(column.name);
+  }
+  if (view.keyColumn) {
+    addSelectColumn(view.keyColumn);
+  }
+  for (const column of collectLinkLocalColumns(view)) {
+    addSelectColumn(column);
+  }
+
+  const columns = selectColumns.map((columnName) => quoteIdentifier(columnName, dbType)).join(", ");
 
   const tableRef = resolveTableName(view, dbType);
 
@@ -1092,6 +1126,7 @@ function renderTable(viewName, view, rows, context) {
   const gridColumns = getGridColumns(view);
   const headers = gridColumns.map((column) => `<th>${escapeHtml(column.label || column.name)}</th>`).join("");
   const nextBreadcrumbsToken = context.nextBreadcrumbsToken || "";
+  const linkLocalColumns = Array.from(collectLinkLocalColumns(view));
 
   const relatedHeader = Array.isArray(view.links) && view.links.length ? "<th>Related</th>" : "";
 
@@ -1114,6 +1149,9 @@ function renderTable(viewName, view, rows, context) {
       const rawDetail = {};
       for (const column of view.columns) {
         rawDetail[column.name] = row[column.name];
+      }
+      for (const localColumn of linkLocalColumns) {
+        rawDetail[localColumn] = row[localColumn];
       }
       rowRawDetails.push(rawDetail);
 
