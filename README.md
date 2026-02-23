@@ -93,6 +93,8 @@ UI settings in `config/app.config.json`:
 
 - `ui.banner.title`
 - `ui.banner.subtitle`
+- `ui.fontFamily`: Global font family CSS value (for example `"Segoe UI", Tahoma, sans-serif`)
+- `ui.fontSize`: Global base font size in px (number or `"16px"`, allowed range `10-24`)
 - `ui.dateFormat`: Global date format string for all date/datetime/time columns (for example `DD/MM/YYYY`)
 
 ## Configuration Model
@@ -104,10 +106,18 @@ UI settings in `config/app.config.json`:
 - `views.<name>.hideOnHome`: Optional boolean to hide a view from the front-page search list
 - `views.<name>.columns`: Columns shown in the table
 - `views.<name>.columns[].hideOnGrid`: Optional boolean to hide a column from the main table grid (still available in row details and links)
-- `views.<name>.columns[].format`: Optional cell formatter (`date`, `datetime`, `time`)
+- `views.<name>.columns[].format`: Optional cell formatter (`date`, `datetime`, `time`, `number`)
 - `views.<name>.columns[].dateFormat`: Optional date format, either:
   - string pattern (for example `DD/MM/YYYY`)
   - `Intl.DateTimeFormat` options object
+- `views.<name>.columns[].precision`: Optional fixed decimal places for numeric formatting
+- `views.<name>.columns[].thousandSeparator` / `views.<name>.columns[].thousandsSeparator`: Optional grouping separator override for numeric formatting (for example `","`)
+- `views.<name>.columns[].decimalSeparator`: Optional decimal separator override for numeric formatting
+- `views.<name>.columns[].numberFormat`: Optional object form for numeric formatting:
+  - `precision`: fixed decimal places
+  - `useGrouping`: boolean
+  - `thousandSeparator` / `thousandsSeparator`
+  - `decimalSeparator`
 - `views.<name>.columns[].locale`: Optional locale (for date/time formatting)
 - `views.<name>.columns[].timeZone`: Optional time zone (for date/time formatting)
 - `views.<name>.defaultSort`: Default ordering
@@ -191,6 +201,25 @@ Example date column formats:
 { "name": "OrderDate", "label": "Order Date", "format": "date", "dateFormat": "DD/MM/YYYY" }
 ```
 
+Example number column formats:
+
+```json
+{ "name": "TotalDue", "label": "Total Due", "format": "number", "precision": 2, "thousandSeparator": "," }
+```
+
+```json
+{
+  "name": "UnitPrice",
+  "label": "Unit Price",
+  "numberFormat": {
+    "precision": 4,
+    "useGrouping": true,
+    "thousandSeparator": ",",
+    "decimalSeparator": "."
+  }
+}
+```
+
 ```json
 {
   "name": "CreatedAt",
@@ -233,6 +262,19 @@ Example link object:
   "targetColumn": "CustomerID"
 }
 ```
+
+Link labels can include replacement tags using row fields:
+
+```json
+{
+  "label": "Orders for {{CustomerID}}",
+  "targetView": "orders",
+  "localColumn": "CustomerID",
+  "targetColumn": "CustomerID"
+}
+```
+
+Supported tag forms: `{{FieldName}}` and `{FieldName}`.
 
 Composite-key link (recommended form):
 

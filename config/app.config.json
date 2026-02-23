@@ -1,5 +1,7 @@
 {
   "ui": {
+    "fontFamily": "\"Segoe UI\", Tahoma, sans-serif",
+    "fontSize": 14,
     "dateFormat": "MM-DD-YYYY",
     "banner": {
       "title": "CIDS Data Explorer",

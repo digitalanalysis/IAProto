@@ -413,6 +413,21 @@ function buildLinkFilters(link, row) {
   return filters;
 }
 
+function renderLinkLabel(template, row) {
+  const fallback = template === undefined || template === null ? "" : String(template);
+  return fallback.replace(/\{\{\s*([^{}]+?)\s*\}\}|\{([^{}]+?)\}/g, (match, keyA, keyB) => {
+    const key = String(keyA || keyB || "").trim();
+    if (!key) {
+      return match;
+    }
+    const value = row[key];
+    if (value === undefined || value === null) {
+      return "";
+    }
+    return String(value);
+  });
+}
+
 function collectSearchFilters(view, query) {
   const filters = [];
   const addedColumns = new Set();
@@ -690,9 +705,129 @@ function resolveDateFormatPattern(column) {
   return null;
 }
 
+function escapeRegex(text) {
+  return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function parsePrecision(value) {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return null;
+  }
+  const rounded = Math.round(numeric);
+  return Math.min(20, Math.max(0, rounded));
+}
+
+function coerceNumber(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "bigint") {
+    return Number(value);
+  }
+  if (typeof value === "string") {
+    const normalized = value.replaceAll(",", "").trim();
+    if (!normalized) {
+      return null;
+    }
+    const numeric = Number(normalized);
+    if (Number.isFinite(numeric)) {
+      return numeric;
+    }
+  }
+  return null;
+}
+
+function resolveNumberFormatOptions(column) {
+  const numberConfig = column.numberFormat && typeof column.numberFormat === "object" ? column.numberFormat : {};
+  const format = String(column.format || "").toLowerCase();
+  const hasNumberConfig =
+    format === "number" ||
+    column.precision !== undefined ||
+    column.thousandSeparator !== undefined ||
+    column.thousandsSeparator !== undefined ||
+    column.decimalSeparator !== undefined ||
+    numberConfig.precision !== undefined ||
+    numberConfig.thousandSeparator !== undefined ||
+    numberConfig.thousandsSeparator !== undefined ||
+    numberConfig.decimalSeparator !== undefined ||
+    numberConfig.useGrouping !== undefined;
+
+  if (!hasNumberConfig) {
+    return null;
+  }
+
+  const precision = parsePrecision(
+    numberConfig.precision !== undefined ? numberConfig.precision : column.precision
+  );
+  const useGroupingCandidate =
+    numberConfig.useGrouping !== undefined
+      ? numberConfig.useGrouping
+      : column.useGrouping !== undefined
+        ? column.useGrouping
+        : column.thousandSeparator !== undefined || column.thousandsSeparator !== undefined
+          ? true
+          : format === "number";
+
+  const useGrouping = Boolean(useGroupingCandidate);
+  const thousandSeparator =
+    numberConfig.thousandSeparator ?? numberConfig.thousandsSeparator ?? column.thousandSeparator ?? column.thousandsSeparator;
+  const decimalSeparator = numberConfig.decimalSeparator ?? column.decimalSeparator;
+
+  return {
+    locale: column.locale || undefined,
+    precision,
+    useGrouping,
+    thousandSeparator: typeof thousandSeparator === "string" && thousandSeparator ? thousandSeparator : null,
+    decimalSeparator: typeof decimalSeparator === "string" && decimalSeparator ? decimalSeparator : null
+  };
+}
+
+function applyCustomSeparators(text, formatter, options) {
+  const parts = formatter.formatToParts(12345.6);
+  const groupPart = parts.find((part) => part.type === "group");
+  const decimalPart = parts.find((part) => part.type === "decimal");
+
+  let output = text;
+  if (options.thousandSeparator && groupPart?.value) {
+    output = output.replace(new RegExp(escapeRegex(groupPart.value), "g"), options.thousandSeparator);
+  }
+  if (options.decimalSeparator && decimalPart?.value) {
+    output = output.replace(new RegExp(escapeRegex(decimalPart.value), "g"), options.decimalSeparator);
+  }
+  return output;
+}
+
+function formatNumberValue(value, options) {
+  const numeric = coerceNumber(value);
+  if (numeric === null) {
+    return String(value);
+  }
+
+  const intlOptions = {
+    useGrouping: options.useGrouping
+  };
+  if (options.precision !== null) {
+    intlOptions.minimumFractionDigits = options.precision;
+    intlOptions.maximumFractionDigits = options.precision;
+  }
+
+  const formatter = new Intl.NumberFormat(options.locale, intlOptions);
+  const formatted = formatter.format(numeric);
+  return applyCustomSeparators(formatted, formatter, options);
+}
+
 function formatCellValue(value, column) {
   if (value === null || value === undefined) {
     return "";
+  }
+
+  const numberOptions = resolveNumberFormatOptions(column);
+  if (numberOptions) {
+    return formatNumberValue(value, numberOptions);
   }
 
   const datePattern = resolveDateFormatPattern(column);
@@ -786,10 +921,48 @@ function renderSearchFieldControl(field) {
   return `<label>${label}<input type="text" name="s_${escapeHtml(column)}" placeholder="${escapeHtml(field.placeholder || "")}" /></label>`;
 }
 
+function resolveUiFontFamily(value) {
+  const fallback = '"Segoe UI", Tahoma, sans-serif';
+  if (typeof value !== "string") {
+    return fallback;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return fallback;
+  }
+  if (/[^a-zA-Z0-9 ,"'_\-]/.test(trimmed)) {
+    return fallback;
+  }
+  return trimmed;
+}
+
+function resolveUiFontSize(value) {
+  const fallback = 14;
+  const min = 10;
+  const max = 24;
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.min(max, Math.max(min, Math.round(value)));
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    const match = normalized.match(/^(\d+(?:\.\d+)?)(px)?$/);
+    if (match) {
+      const numeric = Number(match[1]);
+      if (Number.isFinite(numeric)) {
+        return Math.min(max, Math.max(min, Math.round(numeric)));
+      }
+    }
+  }
+  return fallback;
+}
+
 function renderLayout(title, content) {
   const banner = appConfig.ui?.banner || {};
   const bannerTitle = banner.title || "Configurable Data Viewer";
   const bannerSubtitle = banner.subtitle || "SQL Server and DuckDB table explorer";
+  const fontFamily = resolveUiFontFamily(appConfig.ui?.fontFamily);
+  const baseFontSizePx = resolveUiFontSize(appConfig.ui?.fontSize);
 
   return `<!doctype html>
 <html>
@@ -804,11 +977,18 @@ function renderLayout(title, content) {
         --text: #1f2a44;
         --border: #dbe2ef;
         --accent: #0f6fff;
+        --font-family: ${fontFamily};
+        --font-size-base: ${baseFontSizePx}px;
+        --font-size-xs: calc(var(--font-size-base) * 0.86);
+        --font-size-sm: calc(var(--font-size-base) * 0.93);
+        --font-size-lg: calc(var(--font-size-base) * 1.14);
+        --font-size-xl: calc(var(--font-size-base) * 1.43);
       }
       body {
         margin: 0;
         padding: 0;
-        font-family: "Segoe UI", Tahoma, sans-serif;
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
         background: linear-gradient(180deg, #eef3ff 0%, var(--bg) 30%);
         color: var(--text);
       }
@@ -817,14 +997,17 @@ function renderLayout(title, content) {
         color: #fff;
         padding: 16px 24px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 1200;
       }
       .site-banner-title {
-        font-size: 20px;
+        font-size: var(--font-size-xl);
         font-weight: 600;
       }
       .site-banner-subtitle {
         margin-top: 4px;
-        font-size: 13px;
+        font-size: var(--font-size-sm);
         opacity: 0.92;
       }
       .container {
@@ -848,7 +1031,7 @@ function renderLayout(title, content) {
         border-bottom: 1px solid var(--border);
         text-align: left;
         padding: 8px;
-        font-size: 14px;
+        font-size: var(--font-size-base);
       }
       th {
         background: #f0f4fc;
@@ -859,7 +1042,7 @@ function renderLayout(title, content) {
       }
       .muted {
         color: #60708f;
-        font-size: 13px;
+        font-size: var(--font-size-sm);
       }
       .toolbar {
         display: flex;
@@ -875,7 +1058,7 @@ function renderLayout(title, content) {
         border: 1px solid var(--border);
         border-radius: 999px;
         padding: 4px 10px;
-        font-size: 12px;
+        font-size: var(--font-size-xs);
       }
       .breadcrumbs {
         display: flex;
@@ -883,7 +1066,7 @@ function renderLayout(title, content) {
         gap: 8px;
         align-items: center;
         margin: 0 0 10px;
-        font-size: 13px;
+        font-size: var(--font-size-sm);
       }
       .crumb-sep {
         color: #60708f;
@@ -912,7 +1095,7 @@ function renderLayout(title, content) {
       .search-form > label {
         display: grid;
         gap: 4px;
-        font-size: 13px;
+        font-size: var(--font-size-sm);
         position: relative;
         overflow: visible;
       }
@@ -925,7 +1108,7 @@ function renderLayout(title, content) {
       }
       .multi-select summary {
         cursor: pointer;
-        font-size: 13px;
+        font-size: var(--font-size-sm);
         color: #3a4b6b;
       }
       .multi-options {
@@ -948,7 +1131,7 @@ function renderLayout(title, content) {
         display: flex;
         align-items: center;
         gap: 6px;
-        font-size: 13px;
+        font-size: var(--font-size-sm);
       }
       .search-submit {
         width: 120px;
@@ -1026,7 +1209,7 @@ function renderLayout(title, content) {
       }
       .sidebar h2 {
         margin: 0 0 8px;
-        font-size: 16px;
+        font-size: var(--font-size-lg);
       }
       .tabs {
         display: flex;
@@ -1040,7 +1223,7 @@ function renderLayout(title, content) {
         color: var(--text);
         padding: 6px 10px;
         border-radius: 999px;
-        font-size: 12px;
+        font-size: var(--font-size-xs);
       }
       .tab-button.active {
         border-color: var(--accent);
@@ -1074,12 +1257,12 @@ function renderLayout(title, content) {
         gap: 8px;
       }
       .details-grid dt {
-        font-size: 12px;
+        font-size: var(--font-size-xs);
         color: #60708f;
       }
       .details-grid dd {
         margin: 2px 0 0;
-        font-size: 14px;
+        font-size: var(--font-size-base);
       }
     </style>
   </head>
@@ -1171,7 +1354,8 @@ function renderTable(viewName, view, rows, context) {
                   linkParams.set("crumbs", nextBreadcrumbsToken);
                 }
                 const url = `/table/${encodeURIComponent(link.targetView)}?${linkParams.toString()}`;
-                return `<a href="${url}">${escapeHtml(link.label || link.targetView)}</a>`;
+                const label = renderLinkLabel(link.label || link.targetView, row);
+                return `<a href="${url}">${escapeHtml(label)}</a>`;
               })
               .filter(Boolean)
               .join(" | ")}</td>`
@@ -1227,7 +1411,7 @@ function renderTable(viewName, view, rows, context) {
     .join("");
   const linkDefinitions = (view.links || [])
     .map((link) => ({
-      label: link.label || link.targetView,
+      labelTemplate: link.label || link.targetView,
       targetView: link.targetView,
       keys: extractLinkKeyMappings(link)
     }))
@@ -1329,10 +1513,10 @@ function renderTable(viewName, view, rows, context) {
            fieldsEmpty.style.display = index === null || index === undefined || !detailsByRow[index] ? "" : "none";
          }
 
-         function buildLinkUrl(linkDef, rawDetail) {
-           const params = [];
-           for (const key of linkDef.keys) {
-             const value = rawDetail[key.localColumn];
+          function buildLinkUrl(linkDef, rawDetail) {
+            const params = [];
+            for (const key of linkDef.keys) {
+              const value = rawDetail[key.localColumn];
              if (value === undefined || value === null || value === "") {
                return null;
              }
@@ -1343,13 +1527,27 @@ function renderTable(viewName, view, rows, context) {
            }
            if (!params.length) {
              return null;
-           }
-           return "/table/" + encodeURIComponent(linkDef.targetView) + "?" + params.join("&");
-         }
+            }
+            return "/table/" + encodeURIComponent(linkDef.targetView) + "?" + params.join("&");
+          }
 
-         function renderLinks(index) {
-           const rawDetail = rawDetailsByRow[index];
-           if (!rawDetail) {
+          function renderLinkLabel(labelTemplate, rawDetail) {
+            return String(labelTemplate ?? "").replace(/\{\{\s*([^{}]+?)\s*\}\}|\{([^{}]+?)\}/g, (match, keyA, keyB) => {
+              const key = String(keyA || keyB || "").trim();
+              if (!key) {
+                return match;
+              }
+              const value = rawDetail[key];
+              if (value === undefined || value === null) {
+                return "";
+              }
+              return String(value);
+            });
+          }
+
+          function renderLinks(index) {
+            const rawDetail = rawDetailsByRow[index];
+            if (!rawDetail) {
              linksRoot.innerHTML = "";
              linksEmpty.style.display = "";
              return;
@@ -1358,12 +1556,13 @@ function renderTable(viewName, view, rows, context) {
            const items = linkDefinitions
              .map((linkDef) => {
                const url = buildLinkUrl(linkDef, rawDetail);
-               if (!url) {
-                 return "";
-               }
-               return '<li><a href="' + url + '">' + escapeText(linkDef.label) + "</a></li>";
-             })
-             .filter(Boolean);
+                if (!url) {
+                  return "";
+                }
+                const label = renderLinkLabel(linkDef.labelTemplate, rawDetail);
+                return '<li><a href="' + url + '">' + escapeText(label) + "</a></li>";
+              })
+              .filter(Boolean);
 
            linksRoot.innerHTML = items.join("");
            linksEmpty.style.display = items.length ? "none" : "";

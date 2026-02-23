@@ -142,8 +142,9 @@
         {
           "label": "Order Detail",
           "targetView": "salesorderdetail",
-          "localColumn": "SalesOrderID",
-          "targetColumn": "SalesOrderID"
+          "keys":[
+            {"localColumn": "SalesOrderID", "targetColumn": "SalesOrderID"}
+          ]          
         }
       ]
     },
@@ -223,8 +224,10 @@
         {
           "label": "Product Detail",
           "targetView": "product",
-          "localColumn": "ProductID",
-          "targetColumn": "ProductID"
+          "keys":[
+            {"localColumn": "ProductID", "targetColumn": "ProductID"}
+          ]
+          
         }
       ]
     },
