@@ -18,6 +18,7 @@ A Node.js web application that reads table/view definitions from configuration f
 - `src/server.js`: Express app and DB query logic
 - `config/app.config.json`: Database connection config
 - `config/views.config.json`: Table view + link definitions
+- `docs/CODE_DOCUMENTATION.md`: Detailed code architecture and function reference
 
 ## Setup
 
@@ -120,9 +121,19 @@ UI settings in `config/app.config.json`:
   - `decimalSeparator`
 - `views.<name>.columns[].locale`: Optional locale (for date/time formatting)
 - `views.<name>.columns[].timeZone`: Optional time zone (for date/time formatting)
-- `views.<name>.defaultSort`: Default ordering
+- `views.<name>.defaultSort`: Default ordering. Supports either:
+  - object form: `{ "column": "MyColumn", "direction": "ASC" }`
+  - array form (multi-column): `[{ "column": "ColA", "direction": "ASC" }, { "column": "ColB", "direction": "DESC" }]`
 - `views.<name>.searchFields`: Fields rendered on the front-page search screen
 - `views.<name>.links`: Related view links
+
+Sort query parameters on `/table/:viewName`:
+
+- `sortBy`: single column or multiple columns
+- `sortDir`: single direction or multiple directions
+- Multi-column query examples:
+  - repeated keys: `?sortBy=ColA&sortDir=ASC&sortBy=ColB&sortDir=DESC`
+  - comma-separated: `?sortBy=ColA,ColB&sortDir=ASC,DESC`
 
 Example search field object:
 

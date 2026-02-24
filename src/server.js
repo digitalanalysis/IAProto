@@ -250,23 +250,21 @@ function buildQuery(view, options, dbType) {
 
   const whereSql = whereClauses.length ? ` WHERE ${whereClauses.join(" AND ")}` : "";
 
-  const sortColumn = allowedColumns.has(options.sortBy)
-    ? options.sortBy
-    : view.defaultSort?.column || view.columns[0].name;
-
-  const direction =
-    String(options.sortDir || view.defaultSort?.direction || "ASC").toUpperCase() === "DESC"
-      ? "DESC"
-      : "ASC";
+  const sorts = resolveSorts(view, options, allowedColumns);
+  const orderByClause = sorts
+    .map((item) => `${quoteIdentifier(item.column, dbType)} ${item.direction}`)
+    .join(", ");
+  const sortColumn = sorts[0].column;
+  const direction = sorts[0].direction;
 
   const topOrLimit = Number.isInteger(options.limit) && options.limit > 0 ? options.limit : 200;
 
   const query =
     dbType === "duckdb"
-      ? `SELECT ${columns} FROM ${tableRef}${whereSql} ORDER BY ${quoteIdentifier(sortColumn, dbType)} ${direction} LIMIT ${topOrLimit}`
-      : `SELECT TOP (${topOrLimit}) ${columns} FROM ${tableRef}${whereSql} ORDER BY ${quoteIdentifier(sortColumn, dbType)} ${direction}`;
+      ? `SELECT ${columns} FROM ${tableRef}${whereSql} ORDER BY ${orderByClause} LIMIT ${topOrLimit}`
+      : `SELECT TOP (${topOrLimit}) ${columns} FROM ${tableRef}${whereSql} ORDER BY ${orderByClause}`;
 
-  return { query, queryParams, sortColumn, direction };
+  return { query, queryParams, sorts, sortColumn, direction };
 }
 
 function normalizeSearchOperator(operator) {
@@ -318,6 +316,87 @@ function applySearchPattern(value, operator) {
     return `%${value}`;
   }
   return `%${value}%`;
+}
+
+function normalizeSortDirection(direction, fallback = "ASC") {
+  return String(direction || fallback).toUpperCase() === "DESC" ? "DESC" : "ASC";
+}
+
+function splitSortValues(value) {
+  const parts = [];
+  for (const item of asArray(value)) {
+    if (item === undefined || item === null) {
+      continue;
+    }
+    for (const piece of String(item).split(",")) {
+      const normalized = piece.trim();
+      if (normalized) {
+        parts.push(normalized);
+      }
+    }
+  }
+  return parts;
+}
+
+function normalizeDefaultSorts(defaultSort) {
+  if (Array.isArray(defaultSort)) {
+    return defaultSort
+      .map((entry) => ({
+        column: entry?.column,
+        direction: normalizeSortDirection(entry?.direction, "ASC")
+      }))
+      .filter((entry) => entry.column);
+  }
+
+  if (defaultSort && typeof defaultSort === "object" && defaultSort.column) {
+    return [
+      {
+        column: defaultSort.column,
+        direction: normalizeSortDirection(defaultSort.direction, "ASC")
+      }
+    ];
+  }
+
+  return [];
+}
+
+function collectRequestedSorts(sortBy, sortDir) {
+  const columns = splitSortValues(sortBy);
+  const directions = splitSortValues(sortDir);
+  return columns.map((column, index) => ({
+    column,
+    direction: normalizeSortDirection(directions[index], "ASC")
+  }));
+}
+
+function resolveSorts(view, options, allowedColumns) {
+  const normalizeAndFilter = (items) => {
+    const seen = new Set();
+    const result = [];
+    for (const item of items) {
+      if (!item?.column || !allowedColumns.has(item.column) || seen.has(item.column)) {
+        continue;
+      }
+      seen.add(item.column);
+      result.push({
+        column: item.column,
+        direction: normalizeSortDirection(item.direction, "ASC")
+      });
+    }
+    return result;
+  };
+
+  const requestedSorts = normalizeAndFilter(collectRequestedSorts(options.sortBy, options.sortDir));
+  if (requestedSorts.length) {
+    return requestedSorts;
+  }
+
+  const defaultSorts = normalizeAndFilter(normalizeDefaultSorts(view.defaultSort));
+  if (defaultSorts.length) {
+    return defaultSorts;
+  }
+
+  return [{ column: view.columns[0].name, direction: "ASC" }];
 }
 
 function asArray(value) {
@@ -1367,7 +1446,9 @@ function renderTable(viewName, view, rows, context) {
 
   const chips = [
     `Rows: ${rows.length}`,
-    `Sort: ${context.sortColumn} ${context.direction}`,
+    `Sort: ${(context.sorts || [{ column: context.sortColumn, direction: context.direction }])
+      .map((item) => `${item.column} ${item.direction}`)
+      .join(", ")}`,
     context.filters.length
       ? `Filters: ${context.filters
           .map((item) => {
@@ -1765,6 +1846,7 @@ app.get("/table/:viewName", async (req, res) => {
 
     res.send(
       renderTable(req.params.viewName, view, rows, {
+        sorts: built.sorts,
         sortColumn: built.sortColumn,
         direction: built.direction,
         filters,
