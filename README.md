@@ -113,6 +113,7 @@ UI settings in `config/app.config.json`:
 - `views.<name>.hideOnHome`: Optional boolean to hide a view from the front-page search list
 - `views.<name>.columns`: Columns shown in the table
 - `views.<name>.columns[].hideOnGrid`: Optional boolean to hide a column from the main table grid (still available in row details and links)
+- `views.<name>.columns[].align`: Optional text alignment (`left`, `center`, `right`) for grid and row-panel values
 - `views.<name>.columns[].format`: Optional cell formatter (`date`, `datetime`, `time`, `number`)
 - `views.<name>.columns[].dateFormat`: Optional date format, either:
   - string pattern (for example `DD/MM/YYYY`)
@@ -303,7 +304,7 @@ Link labels can include replacement tags using row fields:
 
 Supported tag forms: `{{FieldName}}` and `{FieldName}`.
 
-For `urlTemplate`, tag values are URL-encoded and the final URL must start with `http://` or `https://`.
+For `urlTemplate`, tag values are URL-encoded and the final URL must start with `http://`, `https://`, or `/`.
 
 Composite-key link (recommended form):
 
@@ -338,4 +339,4 @@ Link behavior summary:
 
 - Internal link: use `targetView` + key mapping (`keys`, or `localColumn`/`targetColumn`)
 - External link: use `urlTemplate`
-- Optional `openInNewTab` controls new-tab behavior (defaults to `true` for external URLs)
+- Optional `openInNewTab` controls new-tab behavior (defaults to `true` for `http(s)` URLs)

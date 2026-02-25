@@ -1022,6 +1022,14 @@ function getGridColumns(view) {
   return (view.columns || []).filter((column) => !column.hideOnGrid);
 }
 
+function normalizeColumnAlign(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "right" || normalized === "center" || normalized === "left") {
+    return normalized;
+  }
+  return "left";
+}
+
 function renderSearchFieldControl(field) {
   const column = field.column;
   const label = escapeHtml(field.label || column || "");
@@ -1475,7 +1483,12 @@ function renderHome() {
 
 function renderTable(viewName, view, rows, context) {
   const gridColumns = getGridColumns(view);
-  const headers = gridColumns.map((column) => `<th>${escapeHtml(column.label || column.name)}</th>`).join("");
+  const headers = gridColumns
+    .map((column) => {
+      const align = normalizeColumnAlign(column.align);
+      return `<th style="text-align:${align}">${escapeHtml(column.label || column.name)}</th>`;
+    })
+    .join("");
   const nextBreadcrumbsToken = context.nextBreadcrumbsToken || "";
   const linkLocalColumns = Array.from(collectLinkLocalColumns(view));
 
@@ -1490,7 +1503,8 @@ function renderTable(viewName, view, rows, context) {
       const cells = gridColumns
         .map((column) => {
           const value = formatCellValue(row[column.name], column);
-          return `<td>${escapeHtml(value)}</td>`;
+          const align = normalizeColumnAlign(column.align);
+          return `<td style="text-align:${align}">${escapeHtml(value)}</td>`;
         })
         .join("");
       for (const column of view.columns) {
@@ -1559,7 +1573,8 @@ function renderTable(viewName, view, rows, context) {
 
   const detailColumns = view.columns.map((column) => ({
     name: column.name,
-    label: column.label || column.name
+    label: column.label || column.name,
+    align: normalizeColumnAlign(column.align)
   }));
   const breadcrumbItems = [...(context.breadcrumbs || []), { label: view.title || viewName, url: null }];
   const breadcrumbsHtml = breadcrumbItems
@@ -1670,11 +1685,11 @@ function renderTable(viewName, view, rows, context) {
 
            fieldsRoot.innerHTML = columns
              .map((column) => {
-               const value = detail[column.name];
-               const renderedValue = value === undefined || value === null || value === "" ? "-" : value;
-               return '<div><dt>' + escapeText(column.label) + '</dt><dd>' + escapeText(renderedValue) + '</dd></div>';
-             })
-             .join("");
+                const value = detail[column.name];
+                const renderedValue = value === undefined || value === null || value === "" ? "-" : value;
+                return '<div><dt>' + escapeText(column.label) + '</dt><dd style="text-align:' + escapeText(column.align || "left") + '">' + escapeText(renderedValue) + '</dd></div>';
+              })
+              .join("");
            fieldsEmpty.style.display = index === null || index === undefined || !detailsByRow[index] ? "" : "none";
          }
 
