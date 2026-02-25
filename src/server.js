@@ -546,16 +546,21 @@ function extractTemplateKeys(template) {
   return keys;
 }
 
-function isSafeExternalUrl(url) {
+function isHttpUrl(url) {
   const value = String(url || "").trim();
   return /^https?:\/\//i.test(value);
+}
+
+function isSafeLinkUrl(url) {
+  const value = String(url || "").trim();
+  return isHttpUrl(value) || value.startsWith("/");
 }
 
 function buildLinkUrl(link, row, nextBreadcrumbsToken = "") {
   const urlTemplate = String(link?.urlTemplate || "").trim();
   if (urlTemplate) {
     const rendered = renderLinkTemplate(urlTemplate, row, { encodeValues: true }).trim();
-    if (!isSafeExternalUrl(rendered)) {
+    if (!isSafeLinkUrl(rendered)) {
       return null;
     }
     return rendered;
@@ -580,7 +585,7 @@ function shouldOpenLinkInNewTab(link, url) {
   if (typeof link?.openInNewTab === "boolean") {
     return link.openInNewTab;
   }
-  return isSafeExternalUrl(url);
+  return isHttpUrl(url);
 }
 
 function renderLinkAnchor(link, label, url) {
@@ -1673,8 +1678,13 @@ function renderTable(viewName, view, rows, context) {
            fieldsEmpty.style.display = index === null || index === undefined || !detailsByRow[index] ? "" : "none";
          }
 
-          function isSafeExternalUrl(url) {
+          function isHttpUrl(url) {
             return /^https?:\/\//i.test(String(url || "").trim());
+          }
+
+          function isSafeLinkUrl(url) {
+            const value = String(url || "").trim();
+            return isHttpUrl(value) || value.startsWith("/");
           }
 
           function renderTemplate(template, rawDetail, encodeValues) {
@@ -1695,7 +1705,7 @@ function renderTable(viewName, view, rows, context) {
           function buildLinkUrl(linkDef, rawDetail) {
             if (linkDef.urlTemplate) {
               const rendered = renderTemplate(linkDef.urlTemplate, rawDetail, true).trim();
-              return isSafeExternalUrl(rendered) ? rendered : null;
+              return isSafeLinkUrl(rendered) ? rendered : null;
             }
             const params = [];
             for (const key of linkDef.keys) {
@@ -1718,7 +1728,7 @@ function renderTable(viewName, view, rows, context) {
             if (typeof linkDef.openInNewTab === "boolean") {
               return linkDef.openInNewTab;
             }
-            return isSafeExternalUrl(url);
+            return isHttpUrl(url);
           }
 
           function renderLinkLabel(labelTemplate, rawDetail) {
