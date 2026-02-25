@@ -18,6 +18,7 @@ A Node.js web application that reads table/view definitions from configuration f
 - `src/server.js`: Express app and DB query logic
 - `config/app.config.json`: Database connection config
 - `config/views.config.json`: Table view + link definitions
+- `files/`: Static files served at `/files/...`
 - `docs/CODE_DOCUMENTATION.md`: Detailed code architecture and function reference
 
 ## Setup
@@ -39,6 +40,11 @@ npm start
 ```
 
 Open `http://localhost:3000`
+
+Static files:
+
+- Put files under `files/`
+- Access them at `http://localhost:3000/files/<path>`
 
 On table pages, use **Download CSV** to export the current query result.
 
@@ -274,6 +280,16 @@ Example link object:
 }
 ```
 
+External-site link using URL template:
+
+```json
+{
+  "label": "Track Package",
+  "urlTemplate": "https://carrier.example/track/{CarrierTrackingNumber}",
+  "openInNewTab": true
+}
+```
+
 Link labels can include replacement tags using row fields:
 
 ```json
@@ -286,6 +302,8 @@ Link labels can include replacement tags using row fields:
 ```
 
 Supported tag forms: `{{FieldName}}` and `{FieldName}`.
+
+For `urlTemplate`, tag values are URL-encoded and the final URL must start with `http://` or `https://`.
 
 Composite-key link (recommended form):
 
@@ -315,3 +333,9 @@ Links use exact-filter query params in the target URL:
 
 - `/table/orders?f_CustomerID=<value>` (single key)
 - `/table/order_lines?f_OrderID=<value>&f_LineNo=<value>` (composite key)
+
+Link behavior summary:
+
+- Internal link: use `targetView` + key mapping (`keys`, or `localColumn`/`targetColumn`)
+- External link: use `urlTemplate`
+- Optional `openInNewTab` controls new-tab behavior (defaults to `true` for external URLs)

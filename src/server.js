@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 const appConfigPath = path.join(__dirname, "..", "config", "app.config.json");
 const viewsConfigPath = path.join(__dirname, "..", "config", "views.config.json");
+const servedFilesPath = path.join(__dirname, "..", "files");
 
 let appConfig;
 let viewsConfig;
@@ -141,6 +142,12 @@ function collectLinkLocalColumns(view) {
       if (mapping.localColumn) {
         columns.add(mapping.localColumn);
       }
+    }
+    for (const templateColumn of extractTemplateKeys(link?.label)) {
+      columns.add(templateColumn);
+    }
+    for (const templateColumn of extractTemplateKeys(link?.urlTemplate)) {
+      columns.add(templateColumn);
     }
   }
   return columns;
@@ -505,6 +512,83 @@ function renderLinkLabel(template, row) {
     }
     return String(value);
   });
+}
+
+function renderLinkTemplate(template, row, options = {}) {
+  const fallback = template === undefined || template === null ? "" : String(template);
+  const encodeValues = Boolean(options.encodeValues);
+  return fallback.replace(/\{\{\s*([^{}]+?)\s*\}\}|\{([^{}]+?)\}/g, (match, keyA, keyB) => {
+    const key = String(keyA || keyB || "").trim();
+    if (!key) {
+      return match;
+    }
+    const value = row[key];
+    if (value === undefined || value === null) {
+      return "";
+    }
+    const text = String(value);
+    return encodeValues ? encodeURIComponent(text) : text;
+  });
+}
+
+function extractTemplateKeys(template) {
+  const text = template === undefined || template === null ? "" : String(template);
+  const keys = new Set();
+  const pattern = /\{\{\s*([^{}]+?)\s*\}\}|\{([^{}]+?)\}/g;
+  let match = pattern.exec(text);
+  while (match) {
+    const key = String(match[1] || match[2] || "").trim();
+    if (key) {
+      keys.add(key);
+    }
+    match = pattern.exec(text);
+  }
+  return keys;
+}
+
+function isSafeExternalUrl(url) {
+  const value = String(url || "").trim();
+  return /^https?:\/\//i.test(value);
+}
+
+function buildLinkUrl(link, row, nextBreadcrumbsToken = "") {
+  const urlTemplate = String(link?.urlTemplate || "").trim();
+  if (urlTemplate) {
+    const rendered = renderLinkTemplate(urlTemplate, row, { encodeValues: true }).trim();
+    if (!isSafeExternalUrl(rendered)) {
+      return null;
+    }
+    return rendered;
+  }
+
+  const linkFilters = buildLinkFilters(link, row);
+  if (!linkFilters.length || !link.targetView) {
+    return null;
+  }
+
+  const linkParams = new URLSearchParams();
+  for (const filter of linkFilters) {
+    linkParams.set(`f_${filter.column}`, filter.value);
+  }
+  if (nextBreadcrumbsToken) {
+    linkParams.set("crumbs", nextBreadcrumbsToken);
+  }
+  return `/table/${encodeURIComponent(link.targetView)}?${linkParams.toString()}`;
+}
+
+function shouldOpenLinkInNewTab(link, url) {
+  if (typeof link?.openInNewTab === "boolean") {
+    return link.openInNewTab;
+  }
+  return isSafeExternalUrl(url);
+}
+
+function renderLinkAnchor(link, label, url) {
+  if (!url) {
+    return "";
+  }
+  const targetAttr = shouldOpenLinkInNewTab(link, url) ? ` target="_blank" rel="noopener noreferrer"` : "";
+  return `<a href="${escapeHtml(url)}"${targetAttr}>${escapeHtml(label)}</a>`;
 }
 
 function collectSearchFilters(view, query) {
@@ -1421,20 +1505,13 @@ function renderTable(viewName, view, rows, context) {
         Array.isArray(view.links) && view.links.length
           ? `<td>${view.links
               .map((link) => {
-                const linkFilters = buildLinkFilters(link, row);
-                if (!linkFilters.length || !link.targetView) {
+                const url = buildLinkUrl(link, row, nextBreadcrumbsToken);
+                if (!url) {
                   return "";
                 }
-                const linkParams = new URLSearchParams();
-                for (const filter of linkFilters) {
-                  linkParams.set(`f_${filter.column}`, filter.value);
-                }
-                if (nextBreadcrumbsToken) {
-                  linkParams.set("crumbs", nextBreadcrumbsToken);
-                }
-                const url = `/table/${encodeURIComponent(link.targetView)}?${linkParams.toString()}`;
-                const label = renderLinkLabel(link.label || link.targetView, row);
-                return `<a href="${url}">${escapeHtml(label)}</a>`;
+                const defaultLabel = link.targetView || link.urlTemplate || "Link";
+                const label = renderLinkLabel(link.label || defaultLabel, row);
+                return renderLinkAnchor(link, label, url);
               })
               .filter(Boolean)
               .join(" | ")}</td>`
@@ -1492,11 +1569,13 @@ function renderTable(viewName, view, rows, context) {
     .join("");
   const linkDefinitions = (view.links || [])
     .map((link) => ({
-      labelTemplate: link.label || link.targetView,
+      labelTemplate: link.label || link.targetView || link.urlTemplate || "Link",
       targetView: link.targetView,
-      keys: extractLinkKeyMappings(link)
+      keys: extractLinkKeyMappings(link),
+      urlTemplate: String(link.urlTemplate || "").trim(),
+      openInNewTab: typeof link.openInNewTab === "boolean" ? link.openInNewTab : null
     }))
-    .filter((link) => link.targetView && link.keys.length);
+    .filter((link) => (link.targetView && link.keys.length) || link.urlTemplate);
   const detailsJson = toInlineJson(rowDetails);
   const rawDetailsJson = toInlineJson(rowRawDetails);
   const detailColumnsJson = toInlineJson(detailColumns);
@@ -1594,7 +1673,30 @@ function renderTable(viewName, view, rows, context) {
            fieldsEmpty.style.display = index === null || index === undefined || !detailsByRow[index] ? "" : "none";
          }
 
+          function isSafeExternalUrl(url) {
+            return /^https?:\/\//i.test(String(url || "").trim());
+          }
+
+          function renderTemplate(template, rawDetail, encodeValues) {
+            return String(template ?? "").replace(/\{\{\s*([^{}]+?)\s*\}\}|\{([^{}]+?)\}/g, (match, keyA, keyB) => {
+              const key = String(keyA || keyB || "").trim();
+              if (!key) {
+                return match;
+              }
+              const value = rawDetail[key];
+              if (value === undefined || value === null) {
+                return "";
+              }
+              const text = String(value);
+              return encodeValues ? encodeURIComponent(text) : text;
+            });
+          }
+
           function buildLinkUrl(linkDef, rawDetail) {
+            if (linkDef.urlTemplate) {
+              const rendered = renderTemplate(linkDef.urlTemplate, rawDetail, true).trim();
+              return isSafeExternalUrl(rendered) ? rendered : null;
+            }
             const params = [];
             for (const key of linkDef.keys) {
               const value = rawDetail[key.localColumn];
@@ -1612,18 +1714,15 @@ function renderTable(viewName, view, rows, context) {
             return "/table/" + encodeURIComponent(linkDef.targetView) + "?" + params.join("&");
           }
 
+          function shouldOpenInNewTab(linkDef, url) {
+            if (typeof linkDef.openInNewTab === "boolean") {
+              return linkDef.openInNewTab;
+            }
+            return isSafeExternalUrl(url);
+          }
+
           function renderLinkLabel(labelTemplate, rawDetail) {
-            return String(labelTemplate ?? "").replace(/\{\{\s*([^{}]+?)\s*\}\}|\{([^{}]+?)\}/g, (match, keyA, keyB) => {
-              const key = String(keyA || keyB || "").trim();
-              if (!key) {
-                return match;
-              }
-              const value = rawDetail[key];
-              if (value === undefined || value === null) {
-                return "";
-              }
-              return String(value);
-            });
+            return renderTemplate(labelTemplate, rawDetail, false);
           }
 
           function renderLinks(index) {
@@ -1641,7 +1740,8 @@ function renderTable(viewName, view, rows, context) {
                   return "";
                 }
                 const label = renderLinkLabel(linkDef.labelTemplate, rawDetail);
-                return '<li><a href="' + url + '">' + escapeText(label) + "</a></li>";
+                const targetAttrs = shouldOpenInNewTab(linkDef, url) ? ' target="_blank" rel="noopener noreferrer"' : "";
+                return '<li><a href="' + escapeText(url) + '"' + targetAttrs + ">" + escapeText(label) + "</a></li>";
               })
               .filter(Boolean);
 
@@ -1863,6 +1963,8 @@ app.get("/table/:viewName", async (req, res) => {
 });
 
 loadConfigs();
+fs.mkdirSync(servedFilesPath, { recursive: true });
+app.use("/files", express.static(servedFilesPath));
 
 app.listen(PORT, () => {
   console.log(`App running at http://localhost:${PORT}`);
