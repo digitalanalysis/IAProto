@@ -153,9 +153,46 @@ function collectLinkLocalColumns(view) {
   return columns;
 }
 
+function normalizeRowKeyVariants(input) {
+  const text = String(input || "").trim();
+  if (!text) {
+    return [];
+  }
+  const variants = new Set();
+  const add = (value) => {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (normalized) {
+      variants.add(normalized);
+    }
+  };
+
+  const stripWrappers = (value) =>
+    String(value || "")
+      .trim()
+      .replace(/^\[([^\]]+)\]$/u, "$1")
+      .replace(/^"(.+)"$/u, "$1")
+      .replace(/^`(.+)`$/u, "$1");
+
+  add(text);
+  const unwrapped = stripWrappers(text);
+  add(unwrapped);
+
+  const parts = unwrapped.split(".").map((part) => stripWrappers(part));
+  if (parts.length > 1) {
+    add(parts[parts.length - 1]);
+  }
+
+  return Array.from(variants);
+}
+
 function buildRowKeyIndex(row) {
   const index = new Map();
   for (const key of Object.keys(row || {})) {
+    for (const variant of normalizeRowKeyVariants(key)) {
+      if (!index.has(variant)) {
+        index.set(variant, key);
+      }
+    }
     const lowered = key.toLowerCase();
     if (!index.has(lowered)) {
       index.set(lowered, key);
@@ -168,15 +205,18 @@ function getRowValue(row, columnName, rowKeyIndex = null) {
   if (!row || !columnName) {
     return undefined;
   }
-  if (Object.prototype.hasOwnProperty.call(row, columnName)) {
-    return row[columnName];
+  const requestedKey = String(columnName).trim();
+  if (Object.prototype.hasOwnProperty.call(row, requestedKey)) {
+    return row[requestedKey];
   }
   const index = rowKeyIndex || buildRowKeyIndex(row);
-  const matchedKey = index.get(String(columnName).toLowerCase());
-  if (!matchedKey) {
-    return undefined;
+  for (const variant of normalizeRowKeyVariants(requestedKey)) {
+    const matchedKey = index.get(variant);
+    if (matchedKey) {
+      return row[matchedKey];
+    }
   }
-  return row[matchedKey];
+  return undefined;
 }
 
 function resolveTableName(view, dbType) {
@@ -2318,6 +2358,45 @@ async function fetchViewRows(view, query) {
   };
 }
 
+function buildRowDebugSummary(view, rows) {
+  const configuredColumns = (view.columns || []).map((column) => column.name).filter(Boolean);
+  const rowSummaries = rows.map((row, index) => {
+    const keyIndex = buildRowKeyIndex(row);
+    const rawKeys = Object.keys(row || {});
+    const resolved = [];
+    const missing = [];
+
+    for (const columnName of configuredColumns) {
+      const value = getRowValue(row, columnName, keyIndex);
+      const keyVariants = normalizeRowKeyVariants(columnName);
+      const matchedVariant = keyVariants.find((variant) => keyIndex.has(variant));
+      const matchedKey = matchedVariant ? keyIndex.get(matchedVariant) : null;
+      const entry = {
+        column: columnName,
+        matchedKey: matchedKey || null,
+        hasValue: !(value === undefined || value === null || value === "")
+      };
+      resolved.push(entry);
+      if (!matchedKey) {
+        missing.push(columnName);
+      }
+    }
+
+    return {
+      rowIndex: index,
+      rawKeys,
+      missingColumns: missing,
+      resolvedColumns: resolved
+    };
+  });
+
+  return {
+    configuredColumns,
+    rowCount: rows.length,
+    rows: rowSummaries
+  };
+}
+
 app.get("/", (_req, res) => {
   res.send(renderHome());
 });
@@ -2397,6 +2476,37 @@ app.get("/table/:viewName", async (req, res) => {
     res
       .status(500)
       .send(renderLayout("Error", `<h1>Database error</h1><pre>${escapeHtml(error.message)}</pre>`));
+  }
+});
+
+app.get("/debug/:viewName/keys", async (req, res) => {
+  const view = getView(req.params.viewName);
+  if (!view) {
+    res.status(404).json({ error: `View not found: ${req.params.viewName}` });
+    return;
+  }
+
+  try {
+    const sampleLimit = Math.min(parsePositiveInt(req.query.sample, 25), 200);
+    const debugQuery = {
+      ...req.query,
+      limit: sampleLimit,
+      page: 1
+    };
+    delete debugQuery.sample;
+    const { rows, built, filters } = await fetchViewRows(view, debugQuery);
+    const summary = buildRowDebugSummary(view, rows);
+
+    res.json({
+      viewName: req.params.viewName,
+      title: view.title || req.params.viewName,
+      sampleLimit,
+      filters,
+      generatedQuery: built.query,
+      summary
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
