@@ -153,6 +153,32 @@ function collectLinkLocalColumns(view) {
   return columns;
 }
 
+function buildRowKeyIndex(row) {
+  const index = new Map();
+  for (const key of Object.keys(row || {})) {
+    const lowered = key.toLowerCase();
+    if (!index.has(lowered)) {
+      index.set(lowered, key);
+    }
+  }
+  return index;
+}
+
+function getRowValue(row, columnName, rowKeyIndex = null) {
+  if (!row || !columnName) {
+    return undefined;
+  }
+  if (Object.prototype.hasOwnProperty.call(row, columnName)) {
+    return row[columnName];
+  }
+  const index = rowKeyIndex || buildRowKeyIndex(row);
+  const matchedKey = index.get(String(columnName).toLowerCase());
+  if (!matchedKey) {
+    return undefined;
+  }
+  return row[matchedKey];
+}
+
 function resolveTableName(view, dbType) {
   const table = quoteIdentifier(view.table, dbType);
 
@@ -567,9 +593,10 @@ function extractLinkKeyMappings(link) {
 function buildLinkFilters(link, row) {
   const mappings = extractLinkKeyMappings(link);
   const filters = [];
+  const rowKeyIndex = buildRowKeyIndex(row);
 
   for (const mapping of mappings) {
-    const localValue = row[mapping.localColumn];
+    const localValue = getRowValue(row, mapping.localColumn, rowKeyIndex);
     if (localValue === undefined || localValue === null) {
       continue;
     }
@@ -584,12 +611,13 @@ function buildLinkFilters(link, row) {
 
 function renderLinkLabel(template, row) {
   const fallback = template === undefined || template === null ? "" : String(template);
+  const rowKeyIndex = buildRowKeyIndex(row);
   return fallback.replace(/\{\{\s*([^{}]+?)\s*\}\}|\{([^{}]+?)\}/g, (match, keyA, keyB) => {
     const key = String(keyA || keyB || "").trim();
     if (!key) {
       return match;
     }
-    const value = row[key];
+    const value = getRowValue(row, key, rowKeyIndex);
     if (value === undefined || value === null) {
       return "";
     }
@@ -600,12 +628,13 @@ function renderLinkLabel(template, row) {
 function renderLinkTemplate(template, row, options = {}) {
   const fallback = template === undefined || template === null ? "" : String(template);
   const encodeValues = Boolean(options.encodeValues);
+  const rowKeyIndex = buildRowKeyIndex(row);
   return fallback.replace(/\{\{\s*([^{}]+?)\s*\}\}|\{([^{}]+?)\}/g, (match, keyA, keyB) => {
     const key = String(keyA || keyB || "").trim();
     if (!key) {
       return match;
     }
-    const value = row[key];
+    const value = getRowValue(row, key, rowKeyIndex);
     if (value === undefined || value === null) {
       return "";
     }
@@ -1786,24 +1815,25 @@ function renderTable(viewName, view, rows, context) {
 
   const body = rows
     .map((row, index) => {
+      const rowKeyIndex = buildRowKeyIndex(row);
       const detail = {};
       const cells = gridColumns
         .map((column) => {
-          const value = formatCellValue(row[column.name], column);
+          const value = formatCellValue(getRowValue(row, column.name, rowKeyIndex), column);
           const align = normalizeColumnAlign(column.align);
           return `<td style="text-align:${align}">${escapeHtml(value)}</td>`;
         })
         .join("");
       for (const column of view.columns) {
-        detail[column.name] = formatCellValue(row[column.name], column);
+        detail[column.name] = formatCellValue(getRowValue(row, column.name, rowKeyIndex), column);
       }
       rowDetails.push(detail);
       const rawDetail = {};
       for (const column of view.columns) {
-        rawDetail[column.name] = row[column.name];
+        rawDetail[column.name] = getRowValue(row, column.name, rowKeyIndex);
       }
       for (const localColumn of linkLocalColumns) {
-        rawDetail[localColumn] = row[localColumn];
+        rawDetail[localColumn] = getRowValue(row, localColumn, rowKeyIndex);
       }
       rowRawDetails.push(rawDetail);
 
@@ -2303,9 +2333,12 @@ app.get("/table/:viewName/download.csv", async (req, res) => {
   try {
     const { rows } = await fetchViewRows(view, req.query);
     const headers = view.columns.map((column) => escapeCsv(column.label || column.name)).join(",");
-    const lines = rows.map((row) =>
-      view.columns.map((column) => escapeCsv(formatCellValue(row[column.name], column))).join(",")
-    );
+    const lines = rows.map((row) => {
+      const rowKeyIndex = buildRowKeyIndex(row);
+      return view.columns
+        .map((column) => escapeCsv(formatCellValue(getRowValue(row, column.name, rowKeyIndex), column)))
+        .join(",");
+    });
     const csv = [headers, ...lines].join("\r\n");
 
     const fileBase = String(view.title || req.params.viewName)
