@@ -142,6 +142,16 @@ Sort query parameters on `/table/:viewName`:
   - repeated keys: `?sortBy=ColA&sortDir=ASC&sortBy=ColB&sortDir=DESC`
   - comma-separated: `?sortBy=ColA,ColB&sortDir=ASC,DESC`
 
+Pagination query parameter on `/table/:viewName`:
+
+- `page`: 1-based page number for result paging
+
+Table paging UI includes `First`, `Previous`, `Next`, `Last`, and a direct page-number jump box.
+
+Column filter query parameters on `/table/:viewName`:
+
+- `cf_<ColumnName>`: contains-match filter for a grid column (for example `?cf_Name=bike`)
+
 Example search field object:
 
 ```json

@@ -264,14 +264,89 @@ function buildQuery(view, options, dbType) {
   const sortColumn = sorts[0].column;
   const direction = sorts[0].direction;
 
-  const topOrLimit = Number.isInteger(options.limit) && options.limit > 0 ? options.limit : 200;
+  const pageSize = parsePositiveInt(options.limit, 200);
+  const page = parsePositiveInt(options.page, 1);
+  const fetchLimit = parsePositiveInt(options.fetchLimit, pageSize);
+  const offset = (page - 1) * pageSize;
 
   const query =
     dbType === "duckdb"
-      ? `SELECT ${columns} FROM ${tableRef}${whereSql} ORDER BY ${orderByClause} LIMIT ${topOrLimit}`
-      : `SELECT TOP (${topOrLimit}) ${columns} FROM ${tableRef}${whereSql} ORDER BY ${orderByClause}`;
+      ? `SELECT ${columns} FROM ${tableRef}${whereSql} ORDER BY ${orderByClause} LIMIT ${fetchLimit} OFFSET ${offset}`
+      : `SELECT ${columns} FROM ${tableRef}${whereSql} ORDER BY ${orderByClause} OFFSET ${offset} ROWS FETCH NEXT ${fetchLimit} ROWS ONLY`;
 
-  return { query, queryParams, sorts, sortColumn, direction };
+  return { query, queryParams, sorts, sortColumn, direction, pageSize, page };
+}
+
+function buildCountQuery(view, options, dbType) {
+  const allowedColumns = collectAllowedColumns(view);
+  const tableRef = resolveTableName(view, dbType);
+  const whereClauses = [];
+  const queryParams = [];
+  let paramIndex = 0;
+
+  for (const filter of options.filters || []) {
+    if (
+      filter.operator === "in" &&
+      filter.column &&
+      allowedColumns.has(filter.column) &&
+      Array.isArray(filter.values) &&
+      filter.values.length
+    ) {
+      const nonEmptyValues = filter.values
+        .map((value) => String(value))
+        .filter((value) => value.trim() !== "");
+      if (!nonEmptyValues.length) {
+        continue;
+      }
+      if (dbType === "duckdb") {
+        const placeholders = nonEmptyValues.map(() => "?").join(", ");
+        whereClauses.push(`${quoteIdentifier(filter.column, dbType)} IN (${placeholders})`);
+        queryParams.push(...nonEmptyValues);
+      } else {
+        const paramNames = nonEmptyValues.map(() => `filterValue${paramIndex++}`);
+        whereClauses.push(
+          `${quoteIdentifier(filter.column, dbType)} IN (${paramNames.map((name) => `@${name}`).join(", ")})`
+        );
+        for (let i = 0; i < nonEmptyValues.length; i += 1) {
+          queryParams.push({
+            name: paramNames[i],
+            value: nonEmptyValues[i]
+          });
+        }
+      }
+      continue;
+    }
+
+    if (
+      !filter.column ||
+      filter.value === undefined ||
+      filter.value === null ||
+      String(filter.value).trim() === "" ||
+      !allowedColumns.has(filter.column)
+    ) {
+      continue;
+    }
+
+    const normalizedOperator = normalizeSearchOperator(filter.operator);
+    const sqlOperator = resolveSqlOperator(normalizedOperator);
+
+    if (dbType === "duckdb") {
+      whereClauses.push(`${quoteIdentifier(filter.column, dbType)} ${sqlOperator} ?`);
+      queryParams.push(applySearchPattern(String(filter.value), normalizedOperator));
+      continue;
+    }
+
+    const paramName = `filterValue${paramIndex++}`;
+    whereClauses.push(`${quoteIdentifier(filter.column, dbType)} ${sqlOperator} @${paramName}`);
+    queryParams.push({
+      name: paramName,
+      value: applySearchPattern(String(filter.value), normalizedOperator)
+    });
+  }
+
+  const whereSql = whereClauses.length ? ` WHERE ${whereClauses.join(" AND ")}` : "";
+  const query = `SELECT COUNT(1) AS totalCount FROM ${tableRef}${whereSql}`;
+  return { query, queryParams };
 }
 
 function normalizeSearchOperator(operator) {
@@ -418,6 +493,14 @@ function firstQueryValue(value) {
     return value[0];
   }
   return value;
+}
+
+function parsePositiveInt(value, fallback) {
+  const parsed = Number(value);
+  if (Number.isInteger(parsed) && parsed > 0) {
+    return parsed;
+  }
+  return fallback;
 }
 
 function normalizeSearchFieldType(type) {
@@ -696,6 +779,31 @@ function collectSearchFilters(view, query) {
       operator: "exact",
       label: filterColumn,
       source: "exact"
+    });
+  }
+
+  for (const [queryKey, queryValue] of Object.entries(query)) {
+    if (!queryKey.startsWith("cf_")) {
+      continue;
+    }
+    const filterColumn = queryKey.slice(3);
+    const filterValue = firstQueryValue(queryValue);
+    if (
+      !filterColumn ||
+      filterValue === undefined ||
+      filterValue === null ||
+      String(filterValue).trim() === "" ||
+      addedColumns.has(filterColumn)
+    ) {
+      continue;
+    }
+    addedColumns.add(filterColumn);
+    filters.push({
+      column: filterColumn,
+      value: String(filterValue),
+      operator: "contains",
+      label: `${filterColumn} contains`,
+      source: "column"
     });
   }
 
@@ -1097,6 +1205,22 @@ function renderSearchFieldControl(field) {
   return `<label>${label}<input type="text" name="s_${escapeHtml(column)}" placeholder="${escapeHtml(field.placeholder || "")}" /></label>`;
 }
 
+function renderHiddenQueryInputs(query, excludedPrefixes = [], excludedKeys = []) {
+  return Object.entries(query || {})
+    .filter(([key]) => {
+      if (excludedKeys.includes(key)) {
+        return false;
+      }
+      return !excludedPrefixes.some((prefix) => key.startsWith(prefix));
+    })
+    .flatMap(([key, value]) => asArray(value).map((item) => ({ key, value: item })))
+    .map(
+      (entry) =>
+        `<input type="hidden" name="${escapeHtml(entry.key)}" value="${escapeHtml(entry.value === undefined || entry.value === null ? "" : String(entry.value))}" />`
+    )
+    .join("");
+}
+
 function resolveUiFontFamily(value) {
   const fallback = '"Segoe UI", Tahoma, sans-serif';
   if (typeof value !== "string") {
@@ -1224,6 +1348,43 @@ function renderLayout(title, content) {
         display: flex;
         gap: 12px;
         margin: 8px 0 16px;
+      }
+      .pager {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 10px;
+        font-size: var(--font-size-sm);
+        flex-wrap: wrap;
+      }
+      .pager form {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+      }
+      .pager input[type="number"] {
+        width: 88px;
+        padding: 4px 6px;
+      }
+      .column-filter-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 8px;
+        margin: 8px 0 12px;
+      }
+      .column-filter-form label {
+        display: grid;
+        gap: 4px;
+        font-size: var(--font-size-xs);
+      }
+      .column-filter-actions {
+        display: flex;
+        gap: 8px;
+        align-items: end;
+      }
+      .column-filter-actions a {
+        font-size: var(--font-size-sm);
       }
       .chips {
         display: flex;
@@ -1483,6 +1644,11 @@ function renderHome() {
 
 function renderTable(viewName, view, rows, context) {
   const gridColumns = getGridColumns(view);
+  const currentQuery = context.currentQuery || {};
+  const currentPage = parsePositiveInt(context.page, 1);
+  const totalPages = parsePositiveInt(context.totalPages, 1);
+  const hasPrevPage = currentPage > 1;
+  const hasNextPage = Boolean(context.hasNext);
   const headers = gridColumns
     .map((column) => {
       const align = normalizeColumnAlign(column.align);
@@ -1493,6 +1659,56 @@ function renderTable(viewName, view, rows, context) {
   const linkLocalColumns = Array.from(collectLinkLocalColumns(view));
 
   const relatedHeader = Array.isArray(view.links) && view.links.length ? "<th>Related</th>" : "";
+  const preservedFilterInputs = renderHiddenQueryInputs(currentQuery, ["cf_"], ["page"]);
+  const columnFilterControls = gridColumns
+    .map((column) => {
+      const paramName = `cf_${column.name}`;
+      const value = firstQueryValue(currentQuery[paramName]);
+      return `<label>${escapeHtml(column.label || column.name)}<input type="text" name="${escapeHtml(paramName)}" value="${escapeHtml(
+        value === undefined || value === null ? "" : String(value)
+      )}" placeholder="Contains..." /></label>`;
+    })
+    .join("");
+  const columnFilterForm = `<form method="get" action="/table/${encodeURIComponent(viewName)}" class="column-filter-form">
+    ${preservedFilterInputs}
+    ${columnFilterControls}
+    <div class="column-filter-actions">
+      <button type="submit">Apply Filters</button>
+      <a href="/table/${encodeURIComponent(viewName)}">Clear</a>
+    </div>
+  </form>`;
+
+  const makePageUrl = (targetPage) => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(currentQuery || {})) {
+      if (key === "page") {
+        continue;
+      }
+      for (const item of asArray(value)) {
+        if (item === undefined || item === null) {
+          continue;
+        }
+        params.append(key, String(item));
+      }
+    }
+    if (targetPage > 1) {
+      params.set("page", String(targetPage));
+    }
+    const queryString = params.toString();
+    return queryString ? `/table/${encodeURIComponent(viewName)}?${queryString}` : `/table/${encodeURIComponent(viewName)}`;
+  };
+  const pager = `<div class="pager">
+    ${hasPrevPage ? `<a href="${makePageUrl(1)}">First</a>` : `<span class="muted">First</span>`}
+    ${hasPrevPage ? `<a href="${makePageUrl(currentPage - 1)}">Previous</a>` : `<span class="muted">Previous</span>`}
+    <span>Page ${currentPage} of ${totalPages}</span>
+    ${hasNextPage ? `<a href="${makePageUrl(currentPage + 1)}">Next</a>` : `<span class="muted">Next</span>`}
+    ${hasNextPage ? `<a href="${makePageUrl(totalPages)}">Last</a>` : `<span class="muted">Last</span>`}
+    <form method="get" action="/table/${encodeURIComponent(viewName)}">
+      ${renderHiddenQueryInputs(currentQuery, [], ["page"])}
+      <label>Go to page <input type="number" name="page" min="1" max="${totalPages}" value="${currentPage}" /></label>
+      <button type="submit">Go</button>
+    </form>
+  </div>`;
 
   const rowDetails = [];
   const rowRawDetails = [];
@@ -1607,11 +1823,13 @@ function renderTable(viewName, view, rows, context) {
     view.title || viewName,
     `<h1>${escapeHtml(view.title || viewName)}</h1>
      <nav class="breadcrumbs">${breadcrumbsHtml}</nav>
-     <div class="toolbar">
-       <a href="/">All views</a>
-       <a href="${downloadUrl}">Download CSV</a>
-     </div>
-     <div class="table-page">
+      <div class="toolbar">
+        <a href="/">All views</a>
+        <a href="${downloadUrl}">Download CSV</a>
+      </div>
+      ${pager}
+      ${columnFilterForm}
+      <div class="table-page">
        <div class="table-grid">
          <div class="chips">${chips}</div>
          <div class="table-main">
@@ -1880,38 +2098,74 @@ let duckDbConnection;
 async function fetchViewRows(view, query) {
   const dbType = getDatabaseType();
   const filters = collectSearchFilters(view, query);
-  const options = {
+  const limit = parsePositiveInt(query.limit, parsePositiveInt(view.limit, 200));
+  const requestedPage = parsePositiveInt(query.page, 1);
+  const baseOptions = {
     sortBy: query.sortBy,
     sortDir: query.sortDir,
     filters,
-    limit: Number(query.limit || view.limit || 200)
+    limit
   };
-
-  const built = buildQuery(view, options, dbType);
-  let rows;
+  const countBuilt = buildCountQuery(view, baseOptions, dbType);
+  let totalCount = 0;
 
   if (dbType === "duckdb") {
     if (!duckDbConnection) {
       duckDbConnection = createDuckDbConnection();
     }
-    rows = await runDuckDbQuery(duckDbConnection, built.query, built.queryParams);
+    const countRows = await runDuckDbQuery(duckDbConnection, countBuilt.query, countBuilt.queryParams);
+    const countRow = countRows[0] || {};
+    totalCount = Number(countRow.totalCount ?? Object.values(countRow)[0] ?? 0) || 0;
   } else {
     if (!sqlServerPoolPromise) {
       sqlServerPoolPromise = createSqlServerPool();
     }
 
     const pool = await sqlServerPoolPromise;
-    const request = pool.request();
+    const countRequest = pool.request();
+    for (const queryParam of countBuilt.queryParams) {
+      countRequest.input(queryParam.name, queryParam.value);
+    }
+    const countResult = await countRequest.query(countBuilt.query);
+    const countRow = (countResult.recordset || [])[0] || {};
+    totalCount = Number(countRow.totalCount ?? Object.values(countRow)[0] ?? 0) || 0;
+  }
 
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const page = Math.max(1, Math.min(requestedPage, totalPages));
+  const options = {
+    ...baseOptions,
+    page,
+    fetchLimit: limit + 1
+  };
+  const built = buildQuery(view, options, dbType);
+  let rows;
+
+  if (dbType === "duckdb") {
+    rows = await runDuckDbQuery(duckDbConnection, built.query, built.queryParams);
+  } else {
+    const pool = await sqlServerPoolPromise;
+    const request = pool.request();
     for (const queryParam of built.queryParams) {
       request.input(queryParam.name, queryParam.value);
     }
-
     const result = await request.query(built.query);
     rows = result.recordset || [];
   }
 
-  return { rows, built, filters };
+  const hasNext = page < totalPages;
+  const pagedRows = rows.slice(0, limit);
+
+  return {
+    rows: pagedRows,
+    built,
+    filters,
+    page,
+    limit,
+    hasNext,
+    totalCount,
+    totalPages
+  };
 }
 
 app.get("/", (_req, res) => {
@@ -1966,7 +2220,7 @@ app.get("/table/:viewName", async (req, res) => {
     const currentUrl = stripQueryParam(req.originalUrl, "crumbs");
     const currentCrumb = { label: view.title || req.params.viewName, url: currentUrl };
     const nextBreadcrumbsToken = encodeBreadcrumbs([...breadcrumbs, currentCrumb]);
-    const { rows, built, filters } = await fetchViewRows(view, req.query);
+    const { rows, built, filters, page, limit, hasNext, totalCount, totalPages } = await fetchViewRows(view, req.query);
     const currentQueryString = buildQueryString(req.query);
 
     res.send(
@@ -1977,7 +2231,13 @@ app.get("/table/:viewName", async (req, res) => {
         filters,
         breadcrumbs,
         nextBreadcrumbsToken,
-        currentQueryString
+        currentQueryString,
+        currentQuery: req.query,
+        page,
+        limit,
+        hasNext,
+        totalCount,
+        totalPages
       })
     );
   } catch (error) {
