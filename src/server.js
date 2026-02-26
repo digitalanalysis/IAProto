@@ -1335,6 +1335,7 @@ function renderLayout(title, content) {
       }
       th {
         background: #f0f4fc;
+        position: relative;
       }
       a {
         color: var(--accent);
@@ -1367,23 +1368,69 @@ function renderLayout(title, content) {
         width: 88px;
         padding: 4px 6px;
       }
-      .column-filter-form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 8px;
-        margin: 8px 0 12px;
+      .th-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        position: relative;
       }
-      .column-filter-form label {
+      .col-filter-toggle {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #4f6387;
+        border-radius: 999px;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        line-height: 1;
+        font-size: 12px;
+      }
+      .col-filter-toggle svg {
+        width: 11px;
+        height: 11px;
+        display: block;
+        margin: 0 auto;
+        fill: currentColor;
+      }
+      .col-filter-toggle.active {
+        border-color: var(--accent);
+        color: #fff;
+        background: var(--accent);
+      }
+      .col-filter-popover {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        min-width: 240px;
+        max-width: 280px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 10px 20px rgba(31, 42, 68, 0.18);
+        padding: 8px;
+        z-index: 40;
+      }
+      .col-filter-popover[hidden] {
+        display: none;
+      }
+      .col-filter-popover form {
+        display: grid;
+        gap: 8px;
+      }
+      .col-filter-popover label {
         display: grid;
         gap: 4px;
         font-size: var(--font-size-xs);
       }
-      .column-filter-actions {
+      .col-filter-popover input[type="text"] {
+        padding: 6px;
+      }
+      .col-filter-popover-actions {
         display: flex;
         gap: 8px;
-        align-items: end;
+        align-items: center;
       }
-      .column-filter-actions a {
+      .col-filter-popover-actions a {
         font-size: var(--font-size-sm);
       }
       .chips {
@@ -1652,31 +1699,55 @@ function renderTable(viewName, view, rows, context) {
   const headers = gridColumns
     .map((column) => {
       const align = normalizeColumnAlign(column.align);
-      return `<th style="text-align:${align}">${escapeHtml(column.label || column.name)}</th>`;
+      const label = column.label || column.name;
+      const paramName = `cf_${column.name}`;
+      const filterValue = firstQueryValue(currentQuery[paramName]);
+      const hasFilterValue = filterValue !== undefined && filterValue !== null && String(filterValue).trim() !== "";
+      const filterId = `filter_${String(column.name).replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+      const clearParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(currentQuery || {})) {
+        if (key === "page" || key === paramName) {
+          continue;
+        }
+        for (const item of asArray(value)) {
+          if (item === undefined || item === null) {
+            continue;
+          }
+          clearParams.append(key, String(item));
+        }
+      }
+      const clearQuery = clearParams.toString();
+      const clearUrl = clearQuery
+        ? `/table/${encodeURIComponent(viewName)}?${clearQuery}`
+        : `/table/${encodeURIComponent(viewName)}`;
+      return `<th style="text-align:${align}">
+        <div class="th-wrap">
+          <span>${escapeHtml(label)}</span>
+          <button type="button" class="col-filter-toggle${hasFilterValue ? " active" : ""}" data-filter-target="${escapeHtml(
+            filterId
+          )}" aria-expanded="false" aria-label="Filter ${escapeHtml(label)}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 3.5h13L10 8.6v3.2l-4 2V8.6z"/></svg></button>
+          <div class="col-filter-popover" id="${escapeHtml(filterId)}" hidden>
+            <form method="get" action="/table/${encodeURIComponent(viewName)}">
+              ${renderHiddenQueryInputs(currentQuery, [], ["page", paramName])}
+              <label>${escapeHtml(label)} contains
+                <input type="text" name="${escapeHtml(paramName)}" value="${escapeHtml(
+                  hasFilterValue ? String(filterValue) : ""
+                )}" />
+              </label>
+              <div class="col-filter-popover-actions">
+                <button type="submit">Apply</button>
+                ${hasFilterValue ? `<a href="${escapeHtml(clearUrl)}">Clear</a>` : ""}
+              </div>
+            </form>
+          </div>
+        </div>
+      </th>`;
     })
     .join("");
   const nextBreadcrumbsToken = context.nextBreadcrumbsToken || "";
   const linkLocalColumns = Array.from(collectLinkLocalColumns(view));
 
   const relatedHeader = Array.isArray(view.links) && view.links.length ? "<th>Related</th>" : "";
-  const preservedFilterInputs = renderHiddenQueryInputs(currentQuery, ["cf_"], ["page"]);
-  const columnFilterControls = gridColumns
-    .map((column) => {
-      const paramName = `cf_${column.name}`;
-      const value = firstQueryValue(currentQuery[paramName]);
-      return `<label>${escapeHtml(column.label || column.name)}<input type="text" name="${escapeHtml(paramName)}" value="${escapeHtml(
-        value === undefined || value === null ? "" : String(value)
-      )}" placeholder="Contains..." /></label>`;
-    })
-    .join("");
-  const columnFilterForm = `<form method="get" action="/table/${encodeURIComponent(viewName)}" class="column-filter-form">
-    ${preservedFilterInputs}
-    ${columnFilterControls}
-    <div class="column-filter-actions">
-      <button type="submit">Apply Filters</button>
-      <a href="/table/${encodeURIComponent(viewName)}">Clear</a>
-    </div>
-  </form>`;
 
   const makePageUrl = (targetPage) => {
     const params = new URLSearchParams();
@@ -1828,7 +1899,6 @@ function renderTable(viewName, view, rows, context) {
         <a href="${downloadUrl}">Download CSV</a>
       </div>
       ${pager}
-      ${columnFilterForm}
       <div class="table-page">
        <div class="table-grid">
          <div class="chips">${chips}</div>
@@ -1873,13 +1943,15 @@ function renderTable(viewName, view, rows, context) {
          const tableMain = document.querySelector(".table-main");
          const dataTable = tableMain ? tableMain.querySelector("table") : null;
          const tableScrollbar = document.getElementById("table-scrollbar");
-         const tableScrollbarInner = document.getElementById("table-scrollbar-inner");
-         const tabButtons = Array.from(document.querySelectorAll(".tab-button"))
-           .sort((a, b) => Number(a.dataset.order || 0) - Number(b.dataset.order || 0));
-         const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
-         let selectedRow = null;
-         let syncingMain = false;
-         let syncingBar = false;
+          const tableScrollbarInner = document.getElementById("table-scrollbar-inner");
+          const tabButtons = Array.from(document.querySelectorAll(".tab-button"))
+            .sort((a, b) => Number(a.dataset.order || 0) - Number(b.dataset.order || 0));
+          const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
+          const filterToggles = Array.from(document.querySelectorAll(".col-filter-toggle"));
+          const filterPopovers = Array.from(document.querySelectorAll(".col-filter-popover"));
+          let selectedRow = null;
+          let syncingMain = false;
+          let syncingBar = false;
          function escapeText(value) {
            return String(value ?? "")
              .replaceAll("&", "&amp;")
@@ -1992,11 +2064,59 @@ function renderTable(viewName, view, rows, context) {
            linksEmpty.style.display = items.length ? "none" : "";
          }
 
-         tabButtons.forEach((button) => {
-           button.addEventListener("click", () => {
-             activateTab(button.dataset.tab);
-           });
-         });
+          tabButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              activateTab(button.dataset.tab);
+            });
+          });
+
+          function closeHeaderFilters(exceptId) {
+            filterPopovers.forEach((popover) => {
+              if (exceptId && popover.id === exceptId) {
+                return;
+              }
+              popover.hidden = true;
+            });
+            filterToggles.forEach((toggle) => {
+              if (exceptId && toggle.dataset.filterTarget === exceptId) {
+                toggle.setAttribute("aria-expanded", "true");
+                return;
+              }
+              toggle.setAttribute("aria-expanded", "false");
+            });
+          }
+
+          filterToggles.forEach((toggle) => {
+            toggle.addEventListener("click", (event) => {
+              event.stopPropagation();
+              const targetId = toggle.dataset.filterTarget;
+              const popover = targetId ? document.getElementById(targetId) : null;
+              if (!popover) {
+                return;
+              }
+              const willOpen = popover.hidden;
+              closeHeaderFilters(willOpen ? targetId : "");
+              popover.hidden = !willOpen;
+              toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+              if (willOpen) {
+                const input = popover.querySelector('input[type="text"]');
+                if (input) {
+                  input.focus();
+                  input.select();
+                }
+              }
+            });
+          });
+
+          filterPopovers.forEach((popover) => {
+            popover.addEventListener("click", (event) => {
+              event.stopPropagation();
+            });
+          });
+
+          document.addEventListener("click", () => {
+            closeHeaderFilters("");
+          });
 
          const defaultTab = "fields";
          activateTab(defaultTab);
