@@ -18,6 +18,12 @@ function loadConfigs() {
   viewsConfig = JSON.parse(fs.readFileSync(viewsConfigPath, "utf8"));
 }
 
+function saveViewsConfig() {
+  fs.writeFileSync(viewsConfigPath, `${JSON.stringify(viewsConfig, null, 2)}\n`, "utf8");
+}
+
+app.use(express.urlencoded({ extended: false }));
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -1418,6 +1424,10 @@ function renderLayout(title, content) {
         display: flex;
         gap: 12px;
         margin: 8px 0 16px;
+        flex-wrap: wrap;
+      }
+      .toolbar.secondary {
+        margin-top: 0;
       }
       .pager {
         display: flex;
@@ -1538,6 +1548,12 @@ function renderLayout(title, content) {
       }
       .view-title {
         margin-bottom: 8px;
+      }
+      .view-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        font-size: var(--font-size-sm);
       }
       .search-form {
         display: grid;
@@ -1717,6 +1733,81 @@ function renderLayout(title, content) {
         margin: 2px 0 0;
         font-size: var(--font-size-base);
       }
+      .config-layout {
+        display: grid;
+        gap: 16px;
+      }
+      .config-panel {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fafcff;
+        padding: 16px;
+      }
+      .config-panel h2 {
+        margin: 0 0 12px;
+        font-size: var(--font-size-lg);
+      }
+      .config-columns {
+        display: grid;
+        gap: 10px;
+      }
+      .config-column-row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+      }
+      .config-column-row input[type="checkbox"] {
+        margin-top: 2px;
+      }
+      .config-column-meta {
+        display: grid;
+        gap: 4px;
+      }
+      .config-column-title {
+        font-weight: 600;
+      }
+      .config-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 16px;
+      }
+      .notice {
+        border: 1px solid #b7d6ff;
+        background: #edf5ff;
+        color: #0a4fbc;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 16px;
+      }
+      .error-notice {
+        border-color: #f3b8b8;
+        background: #fff2f2;
+        color: #b42318;
+      }
+      .config-summary {
+        display: grid;
+        gap: 8px;
+        font-size: var(--font-size-sm);
+      }
+      .config-summary code {
+        font-size: inherit;
+      }
+      @media (max-width: 900px) {
+        .table-page {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          position: static;
+          max-height: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1746,6 +1837,10 @@ function renderHome() {
 
       return `<li>
         <div class="view-title"><a href="/table/${encodeURIComponent(viewName)}">${escapeHtml(view.title || viewName)}</a> <span class="muted">(${escapeHtml(tableLabel)})</span></div>
+        <div class="view-actions">
+          <a href="/table/${encodeURIComponent(viewName)}">Open table</a>
+          <a href="/config/${encodeURIComponent(viewName)}">Edit view config</a>
+        </div>
         ${searchForm}
       </li>`;
     })
@@ -1755,6 +1850,79 @@ function renderHome() {
     "Search",
     `<h1>Search</h1>
      <ul class="view-list">${viewItems}</ul>`
+  );
+}
+
+function renderViewConfig(viewName, view, options = {}) {
+  const tableLabel = view.schema && getDatabaseType() !== "duckdb" ? `${view.schema}.${view.table}` : view.table;
+  const saveError = String(options.error || "").trim();
+  const saveMessage = String(options.message || "").trim();
+  const selectedColumns = new Set(
+    (options.selectedColumns || getGridColumns(view).map((column) => column.name))
+      .map((column) => String(column || "").trim())
+      .filter(Boolean)
+  );
+  const visibleCount = (view.columns || []).filter((column) => selectedColumns.has(column.name)).length;
+  const hiddenCount = Math.max(0, (view.columns || []).length - visibleCount);
+  const noticeHtml = saveError
+    ? `<div class="notice error-notice">${escapeHtml(saveError)}</div>`
+    : saveMessage
+      ? `<div class="notice">${escapeHtml(saveMessage)}</div>`
+      : "";
+  const columnItems = (view.columns || [])
+    .map((column, index) => {
+      const checked = selectedColumns.has(column.name) ? " checked" : "";
+      const label = column.label || column.name;
+      const meta = [];
+      meta.push(`Column: <code>${escapeHtml(column.name)}</code>`);
+      if (column.align) {
+        meta.push(`Align: <code>${escapeHtml(column.align)}</code>`);
+      }
+      if (column.format) {
+        meta.push(`Format: <code>${escapeHtml(column.format)}</code>`);
+      }
+      return `<label class="config-column-row">
+        <input type="checkbox" name="visibleColumns" value="${escapeHtml(column.name)}"${checked} />
+        <span class="config-column-meta">
+          <span class="config-column-title">${escapeHtml(label)}</span>
+          <span class="muted">${meta.join(" | ")}</span>
+          <span class="muted">Order: ${index + 1} in configured column list</span>
+        </span>
+      </label>`;
+    })
+    .join("");
+
+  return renderLayout(
+    `${view.title || viewName} Config`,
+    `<h1>${escapeHtml(view.title || viewName)} Config</h1>
+     <div class="toolbar secondary">
+       <a href="/">All views</a>
+       <a href="/table/${encodeURIComponent(viewName)}">Back to table</a>
+     </div>
+     ${noticeHtml}
+     <div class="config-layout">
+       <section class="config-panel">
+         <h2>View Summary</h2>
+         <div class="config-summary">
+           <div>View key: <code>${escapeHtml(viewName)}</code></div>
+           <div>Source: <code>${escapeHtml(tableLabel)}</code></div>
+           <div>Configured columns: ${view.columns.length}</div>
+           <div>Shown in grid: ${visibleCount}</div>
+           <div>Hidden from grid: ${hiddenCount}</div>
+         </div>
+       </section>
+       <section class="config-panel">
+         <h2>Grid Columns</h2>
+         <p class="muted">Select which configured columns appear in the main table. Unselected columns stay available in the row details panel and CSV export.</p>
+         <form method="post" action="/config/${encodeURIComponent(viewName)}">
+           <div class="config-columns">${columnItems}</div>
+           <div class="config-actions">
+             <button type="submit">Save view config</button>
+             <a href="/table/${encodeURIComponent(viewName)}">Cancel</a>
+           </div>
+         </form>
+       </section>
+     </div>`
   );
 }
 
@@ -1962,13 +2130,14 @@ function renderTable(viewName, view, rows, context) {
 
   return renderLayout(
     view.title || viewName,
-    `<h1>${escapeHtml(view.title || viewName)}</h1>
-     <nav class="breadcrumbs">${breadcrumbsHtml}</nav>
-      <div class="toolbar">
-        <a href="/">All views</a>
-        <a href="${downloadUrl}">Download CSV</a>
-      </div>
-      ${pager}
+      `<h1>${escapeHtml(view.title || viewName)}</h1>
+      <nav class="breadcrumbs">${breadcrumbsHtml}</nav>
+       <div class="toolbar">
+         <a href="/">All views</a>
+         <a href="/config/${encodeURIComponent(viewName)}">Edit view config</a>
+         <a href="${downloadUrl}">Download CSV</a>
+       </div>
+       ${pager}
       <div class="table-page">
        <div class="table-grid">
          <div class="chips">${chips}</div>
@@ -2399,6 +2568,74 @@ function buildRowDebugSummary(view, rows) {
 
 app.get("/", (_req, res) => {
   res.send(renderHome());
+});
+
+app.get("/config/:viewName", (req, res) => {
+  const view = getView(req.params.viewName);
+
+  if (!view) {
+    res
+      .status(404)
+      .send(
+        renderLayout(
+          "Not Found",
+          `<h1>View not found</h1><p>No config exists for <code>${escapeHtml(req.params.viewName)}</code>.</p>`
+        )
+      );
+    return;
+  }
+
+  const message = firstQueryValue(req.query.saved) ? "View config saved." : "";
+  res.send(renderViewConfig(req.params.viewName, view, { message }));
+});
+
+app.post("/config/:viewName", (req, res) => {
+  const viewName = req.params.viewName;
+  const view = getView(viewName);
+
+  if (!view) {
+    res
+      .status(404)
+      .send(
+        renderLayout(
+          "Not Found",
+          `<h1>View not found</h1><p>No config exists for <code>${escapeHtml(viewName)}</code>.</p>`
+        )
+      );
+    return;
+  }
+
+  const selectedColumns = new Set(
+    asArray(req.body?.visibleColumns)
+      .map((column) => String(column || "").trim())
+      .filter(Boolean)
+  );
+  const validColumns = new Set((view.columns || []).map((column) => column.name).filter(Boolean));
+  const normalizedSelectedColumns = Array.from(selectedColumns).filter((column) => validColumns.has(column));
+
+  if (!normalizedSelectedColumns.length) {
+    res
+      .status(400)
+      .send(
+        renderViewConfig(viewName, view, {
+          error: "Select at least one column to show in the grid.",
+          selectedColumns: []
+        })
+      );
+    return;
+  }
+
+  for (const column of view.columns || []) {
+    if (selectedColumns.has(column.name)) {
+      delete column.hideOnGrid;
+      continue;
+    }
+    column.hideOnGrid = true;
+  }
+
+  saveViewsConfig();
+  loadConfigs();
+  res.redirect(`/config/${encodeURIComponent(viewName)}?saved=1`);
 });
 
 app.get("/table/:viewName/download.csv", async (req, res) => {

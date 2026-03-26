@@ -52,6 +52,12 @@ On table pages, use **Download CSV** to export the current query result.
 - Applies configured formatting (date/time formats, global date format fallback)
 - Uses current filters, sort, and limit from the page query
 
+Each view also has an **Edit view config** screen at `/config/:viewName`.
+
+- Saves column visibility changes back to `config/views.config.json`
+- Updates `views.<name>.columns[].hideOnGrid`
+- Keeps hidden grid columns available in the row details panel and CSV export
+
 ## Generate Config From SQL Server DDL
 
 You can generate a starter `views.config.json` structure from a SQL Server DDL file:
@@ -134,6 +140,10 @@ UI settings in `config/app.config.json`:
 - `views.<name>.searchFields`: Fields rendered on the front-page search screen
 - `views.<name>.links`: Related view links
 
+UI config route:
+
+- `/config/:viewName`: Per-view config screen for choosing which configured columns appear in the main table grid
+
 Sort query parameters on `/table/:viewName`:
 
 - `sortBy`: single column or multiple columns
@@ -151,6 +161,12 @@ Table paging UI includes `First`, `Previous`, `Next`, `Last`, and a direct page-
 Column filter query parameters on `/table/:viewName`:
 
 - `cf_<ColumnName>`: contains-match filter for a grid column (for example `?cf_Name=bike`)
+
+Debug endpoint for column/key mapping issues:
+
+- `/debug/<viewName>/keys`
+- Optional `sample` query param (default `25`, max `200`)
+- Accepts the same filter/sort query params as `/table/<viewName>`
 
 Example search field object:
 
