@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const sql = require("mssql");
+const { buildViewsConfigFromSchemaTables } = require("./utils/buildViewsConfigFromSchema");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,10 @@ function loadConfigs() {
 
 function saveViewsConfig() {
   fs.writeFileSync(viewsConfigPath, `${JSON.stringify(viewsConfig, null, 2)}\n`, "utf8");
+}
+
+function saveAppConfig() {
+  fs.writeFileSync(appConfigPath, `${JSON.stringify(appConfig, null, 2)}\n`, "utf8");
 }
 
 app.use(express.urlencoded({ extended: false }));
@@ -113,8 +118,83 @@ function quoteIdentifier(identifier, dbType) {
   return `[${safe.replaceAll("]", "]]" )}]`;
 }
 
-function getDatabaseType() {
-  return String(process.env.DB_TYPE || appConfig.database.type || "sqlserver").toLowerCase();
+function normalizeDatabaseName(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, "_");
+}
+
+function getDatabaseCatalog() {
+  const databaseConfig = appConfig.database || {};
+  const connections = {};
+  let defaultConnection = normalizeDatabaseName(databaseConfig.defaultConnection || databaseConfig.activeConnection);
+
+  if (databaseConfig.connections && typeof databaseConfig.connections === "object") {
+    for (const [name, definition] of Object.entries(databaseConfig.connections)) {
+      const normalizedName = normalizeDatabaseName(name);
+      if (normalizedName) {
+        connections[normalizedName] = definition;
+      }
+    }
+  }
+
+  if (!Object.keys(connections).length) {
+    connections.default = {
+      type: String(process.env.DB_TYPE || databaseConfig.type || "sqlserver").toLowerCase(),
+      sqlserver: {
+        server: process.env.DB_SERVER || databaseConfig.sqlserver?.server || databaseConfig.server || "",
+        database: process.env.DB_DATABASE || databaseConfig.sqlserver?.database || databaseConfig.database || "",
+        user: process.env.DB_USER || databaseConfig.sqlserver?.user || databaseConfig.user || "",
+        password: process.env.DB_PASSWORD || databaseConfig.sqlserver?.password || databaseConfig.password || "",
+        port: Number(process.env.DB_PORT || databaseConfig.sqlserver?.port || databaseConfig.port || 1433),
+        options: {
+          encrypt: databaseConfig.sqlserver?.options?.encrypt ?? databaseConfig.options?.encrypt ?? true,
+          trustServerCertificate:
+            databaseConfig.sqlserver?.options?.trustServerCertificate ??
+            databaseConfig.options?.trustServerCertificate ??
+            true
+        }
+      },
+      duckdb: {
+        path: process.env.DUCKDB_PATH || databaseConfig.duckdb?.path || ":memory:"
+      }
+    };
+    defaultConnection = "default";
+  }
+
+  if (!defaultConnection || !connections[defaultConnection]) {
+    defaultConnection = Object.keys(connections)[0] || "default";
+  }
+
+  return { connections, defaultConnection };
+}
+
+function resolveDatabaseConnection(databaseName = "") {
+  const catalog = getDatabaseCatalog();
+  const requestedName = normalizeDatabaseName(databaseName);
+  if (requestedName && !catalog.connections[requestedName]) {
+    throw new Error(`Database connection not found: ${requestedName}`);
+  }
+  const resolvedName = requestedName || catalog.defaultConnection;
+  const connection = catalog.connections[resolvedName];
+  if (!connection) {
+    throw new Error(`Database connection not found: ${requestedName || catalog.defaultConnection || "default"}`);
+  }
+  return {
+    name: resolvedName,
+    type: String(connection.type || "sqlserver").trim().toLowerCase(),
+    config: connection,
+    defaultConnection: catalog.defaultConnection,
+    availableNames: Object.keys(catalog.connections)
+  };
+}
+
+function getViewDatabaseConnection(view) {
+  return resolveDatabaseConnection(view?.database);
+}
+
+function getDatabaseType(view = null) {
+  return view ? getViewDatabaseConnection(view).type : resolveDatabaseConnection().type;
 }
 
 function getView(viewName) {
@@ -1555,6 +1635,15 @@ function renderLayout(title, content) {
         flex-wrap: wrap;
         font-size: var(--font-size-sm);
       }
+      .badge {
+        display: inline-block;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: var(--font-size-xs);
+        background: #fff;
+        color: #4f6387;
+      }
       .search-form {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1815,6 +1904,77 @@ function renderLayout(title, content) {
       .config-summary code {
         font-size: inherit;
       }
+      .settings-grid {
+        display: grid;
+        gap: 16px;
+      }
+      .settings-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fafcff;
+        padding: 16px;
+      }
+      .settings-card h2 {
+        margin: 0 0 12px;
+        font-size: var(--font-size-lg);
+      }
+      .form-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .form-grid label {
+        display: grid;
+        gap: 4px;
+        font-size: var(--font-size-sm);
+      }
+      .form-grid input[type="text"],
+      .form-grid input[type="password"],
+      .form-grid input[type="number"],
+      .form-grid select {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px;
+        font: inherit;
+        color: inherit;
+        background: #fff;
+        box-sizing: border-box;
+        width: 100%;
+      }
+      .settings-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 14px;
+      }
+      .inline-checks {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .inline-checks label {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .database-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+        padding: 14px;
+      }
+      .database-card + .database-card {
+        margin-top: 12px;
+      }
+      .database-card-title {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 10px;
+      }
       @media (max-width: 900px) {
         .table-page {
           grid-template-columns: 1fr;
@@ -1839,10 +1999,11 @@ function renderLayout(title, content) {
 }
 
 function renderHome() {
-  const dbType = getDatabaseType();
   const viewItems = Object.entries(viewsConfig.views)
     .filter(([, view]) => !view.hideOnHome)
     .map(([viewName, view]) => {
+      const connection = getViewDatabaseConnection(view);
+      const dbType = connection.type;
       const tableLabel = view.schema && dbType !== "duckdb" ? `${view.schema}.${view.table}` : view.table;
       const searchFields = (view.searchFields || [])
         .map((field) => renderSearchFieldControl(field))
@@ -1853,6 +2014,7 @@ function renderHome() {
 
       return `<li>
         <div class="view-title"><a href="/table/${encodeURIComponent(viewName)}">${escapeHtml(view.title || viewName)}</a> <span class="muted">(${escapeHtml(tableLabel)})</span></div>
+        <div class="view-actions"><span class="badge">${escapeHtml(connection.name)}</span></div>
         <div class="view-actions">
           <a href="/table/${encodeURIComponent(viewName)}">Open table</a>
           <a href="/config/${encodeURIComponent(viewName)}">Edit view config</a>
@@ -1865,12 +2027,14 @@ function renderHome() {
   return renderLayout(
     "Search",
     `<h1>Search</h1>
+     <div class="toolbar secondary"><a href="/settings">Settings</a></div>
      <ul class="view-list">${viewItems}</ul>`
   );
 }
 
 function renderViewConfig(viewName, view, options = {}) {
-  const tableLabel = view.schema && getDatabaseType() !== "duckdb" ? `${view.schema}.${view.table}` : view.table;
+  const connection = getViewDatabaseConnection(view);
+  const tableLabel = view.schema && connection.type !== "duckdb" ? `${view.schema}.${view.table}` : view.table;
   const saveError = String(options.error || "").trim();
   const saveMessage = String(options.message || "").trim();
   const selectedColumns = new Set(
@@ -1919,14 +2083,16 @@ function renderViewConfig(viewName, view, options = {}) {
      <div class="toolbar secondary">
        <a href="/">All views</a>
        <a href="/table/${encodeURIComponent(viewName)}">Back to table</a>
-     </div>
+       <a href="/settings">Settings</a>
+      </div>
      ${noticeHtml}
      <div class="config-layout">
        <section class="config-panel">
          <h2>View Summary</h2>
          <div class="config-summary">
-           <div>View key: <code>${escapeHtml(viewName)}</code></div>
-           <div>Source: <code>${escapeHtml(tableLabel)}</code></div>
+            <div>View key: <code>${escapeHtml(viewName)}</code></div>
+            <div>Database: <code>${escapeHtml(connection.name)}</code> <span class="badge">${escapeHtml(connection.type)}</span></div>
+            <div>Source: <code>${escapeHtml(tableLabel)}</code></div>
            <div>Configured columns: ${view.columns.length}</div>
            <div>Shown in grid: ${visibleCount}</div>
            <div>Hidden from grid: ${hiddenCount}</div>
@@ -1994,6 +2160,208 @@ function renderViewConfig(viewName, view, options = {}) {
          });
 
          refreshOrderUi();
+       })();
+     </script>`
+  );
+}
+
+function renderSettings(options = {}) {
+  const noticeMessage = String(options.message || "").trim();
+  const noticeError = String(options.error || "").trim();
+  const catalog = getDatabaseCatalog();
+  const connectionOptions = Object.entries(catalog.connections);
+  const selectedScanConnection =
+    normalizeDatabaseName(options.scanConnectionName) || options.lastSavedConnectionName || catalog.defaultConnection;
+  const noticeHtml = noticeError
+    ? `<div class="notice error-notice">${escapeHtml(noticeError)}</div>`
+    : noticeMessage
+      ? `<div class="notice">${escapeHtml(noticeMessage)}</div>`
+      : "";
+
+  const connectionCards = connectionOptions
+    .map(([name, connection]) => {
+      const type = String(connection.type || "sqlserver").toLowerCase();
+      const isDefault = name === catalog.defaultConnection;
+      const sqlServerConfig = connection.sqlserver || {};
+      const sqlServerOptions = sqlServerConfig.options || {};
+      const duckdbConfig = connection.duckdb || {};
+      return `<div class="database-card">
+        <div class="database-card-title">
+          <strong>${escapeHtml(name)}</strong>
+          <span class="badge">${escapeHtml(type)}</span>
+          ${isDefault ? '<span class="badge">default</span>' : ""}
+        </div>
+        <form method="post" action="/settings/database/save" data-database-form>
+          <input type="hidden" name="originalName" value="${escapeHtml(name)}" />
+          <div class="form-grid">
+            <label>Name
+              <input type="text" name="name" value="${escapeHtml(name)}" required />
+            </label>
+            <label>Type
+              <select name="type" data-database-type>
+                <option value="sqlserver"${type === "sqlserver" ? " selected" : ""}>SQL Server</option>
+                <option value="duckdb"${type === "duckdb" ? " selected" : ""}>DuckDB</option>
+              </select>
+            </label>
+            <label data-sqlserver-field>Server
+              <input type="text" name="server" value="${escapeHtml(sqlServerConfig.server || "")}" />
+            </label>
+            <label data-sqlserver-field>Port
+              <input type="number" name="port" min="1" value="${escapeHtml(
+                sqlServerConfig.port === undefined || sqlServerConfig.port === null ? "" : String(sqlServerConfig.port)
+              )}" />
+            </label>
+            <label data-sqlserver-field>Database
+              <input type="text" name="database" value="${escapeHtml(sqlServerConfig.database || "")}" />
+            </label>
+            <label data-sqlserver-field>User
+              <input type="text" name="user" value="${escapeHtml(sqlServerConfig.user || "")}" />
+            </label>
+            <label data-sqlserver-field>Password
+              <input type="password" name="password" value="${escapeHtml(sqlServerConfig.password || "")}" />
+            </label>
+            <label data-duckdb-field>DuckDB Path
+              <input type="text" name="path" value="${escapeHtml(duckdbConfig.path || "")}" />
+            </label>
+          </div>
+          <div class="settings-actions">
+            <span class="inline-checks" data-sqlserver-field>
+              <label><input type="checkbox" name="encrypt"${sqlServerOptions.encrypt ? " checked" : ""} /> Encrypt</label>
+              <label><input type="checkbox" name="trustServerCertificate"${
+                sqlServerOptions.trustServerCertificate ? " checked" : ""
+              } /> Trust server certificate</label>
+            </span>
+            <label><input type="checkbox" name="setDefault"${isDefault ? " checked" : ""} /> Default connection</label>
+          </div>
+          <div class="settings-actions">
+            <button type="submit">Save connection</button>
+          </div>
+        </form>
+        ${
+          connectionOptions.length > 1
+            ? `<form method="post" action="/settings/database/delete" onsubmit="return confirm('Delete connection ${escapeHtml(
+                name
+              )}?');">
+                <input type="hidden" name="name" value="${escapeHtml(name)}" />
+                <div class="settings-actions">
+                  <button type="submit">Delete connection</button>
+                </div>
+              </form>`
+            : ""
+        }
+      </div>`;
+    })
+    .join("");
+
+  const scanOptionsHtml = connectionOptions
+    .map(
+      ([name, connection]) =>
+        `<option value="${escapeHtml(name)}"${
+          name === selectedScanConnection ? " selected" : ""
+        }>${escapeHtml(name)} (${escapeHtml(connection.type || "sqlserver")})</option>`
+    )
+    .join("");
+
+  return renderLayout(
+    "Settings",
+    `<h1>Settings</h1>
+     <div class="toolbar secondary">
+       <a href="/">All views</a>
+     </div>
+     ${noticeHtml}
+     <div class="settings-grid">
+       <section class="settings-card">
+         <h2>Database Connections</h2>
+         <p class="muted">Views can point at a named database connection. The default connection is used when a view does not specify one.</p>
+         ${connectionCards}
+       </section>
+       <section class="settings-card">
+         <h2>Add Database</h2>
+         <form method="post" action="/settings/database/save" data-database-form>
+           <div class="form-grid">
+             <label>Name
+               <input type="text" name="name" value="" required />
+             </label>
+             <label>Type
+               <select name="type" data-database-type>
+                 <option value="sqlserver">SQL Server</option>
+                 <option value="duckdb">DuckDB</option>
+               </select>
+             </label>
+             <label data-sqlserver-field>Server
+               <input type="text" name="server" value="" />
+             </label>
+             <label data-sqlserver-field>Port
+               <input type="number" name="port" min="1" value="1433" />
+             </label>
+             <label data-sqlserver-field>Database
+               <input type="text" name="database" value="" />
+             </label>
+             <label data-sqlserver-field>User
+               <input type="text" name="user" value="" />
+             </label>
+             <label data-sqlserver-field>Password
+               <input type="password" name="password" value="" />
+             </label>
+             <label data-duckdb-field>DuckDB Path
+               <input type="text" name="path" value="" />
+             </label>
+           </div>
+           <div class="settings-actions">
+             <span class="inline-checks" data-sqlserver-field>
+               <label><input type="checkbox" name="encrypt" checked /> Encrypt</label>
+               <label><input type="checkbox" name="trustServerCertificate" checked /> Trust server certificate</label>
+             </span>
+             <label><input type="checkbox" name="setDefault" /> Default connection</label>
+           </div>
+           <div class="settings-actions">
+             <button type="submit">Add connection</button>
+           </div>
+         </form>
+       </section>
+       <section class="settings-card">
+         <h2>Scan Database Into Views Config</h2>
+         <p class="muted">This reads live table metadata from the selected database and replaces the current <code>config/views.config.json</code>.</p>
+         <form method="post" action="/settings/scan">
+           <div class="form-grid">
+             <label>Connection
+               <select name="connectionName">${scanOptionsHtml}</select>
+             </label>
+             <label>Default row limit
+               <input type="number" name="limit" min="1" value="${escapeHtml(String(options.limit || 200))}" />
+             </label>
+             <label>Max search fields
+               <input type="number" name="maxSearchFields" min="1" value="${escapeHtml(
+                 String(options.maxSearchFields || 3)
+               )}" />
+             </label>
+           </div>
+           <div class="settings-actions">
+             <button type="submit">Scan and rebuild views config</button>
+           </div>
+         </form>
+       </section>
+     </div>
+     <script>
+       (() => {
+         const forms = Array.from(document.querySelectorAll("[data-database-form]"));
+         function syncForm(form) {
+           const typeSelect = form.querySelector("[data-database-type]");
+           const currentType = typeSelect ? String(typeSelect.value || "sqlserver").toLowerCase() : "sqlserver";
+           form.querySelectorAll("[data-sqlserver-field]").forEach((field) => {
+             field.style.display = currentType === "sqlserver" ? "" : "none";
+           });
+           form.querySelectorAll("[data-duckdb-field]").forEach((field) => {
+             field.style.display = currentType === "duckdb" ? "" : "none";
+           });
+         }
+         forms.forEach((form) => {
+           syncForm(form);
+           const typeSelect = form.querySelector("[data-database-type]");
+           if (typeSelect) {
+             typeSelect.addEventListener("change", () => syncForm(form));
+           }
+         });
        })();
      </script>`
   );
@@ -2207,6 +2575,7 @@ function renderTable(viewName, view, rows, context) {
       <nav class="breadcrumbs">${breadcrumbsHtml}</nav>
        <div class="toolbar">
          <a href="/">All views</a>
+         <a href="/settings">Settings</a>
          <a href="/config/${encodeURIComponent(viewName)}">Edit view config</a>
          <a href="${downloadUrl}">Download CSV</a>
        </div>
@@ -2486,28 +2855,26 @@ function renderTable(viewName, view, rows, context) {
   );
 }
 
-async function createSqlServerPool() {
-  return sql.connect({
-    server: process.env.DB_SERVER || appConfig.database.sqlserver?.server || appConfig.database.server,
-    database: process.env.DB_DATABASE || appConfig.database.sqlserver?.database || appConfig.database.database,
-    user: process.env.DB_USER || appConfig.database.sqlserver?.user || appConfig.database.user,
-    password: process.env.DB_PASSWORD || appConfig.database.sqlserver?.password || appConfig.database.password,
-    port: Number(process.env.DB_PORT || appConfig.database.sqlserver?.port || appConfig.database.port || 1433),
+async function createSqlServerPool(connectionConfig) {
+  const sqlServerConfig = connectionConfig.sqlserver || {};
+  const pool = new sql.ConnectionPool({
+    server: sqlServerConfig.server,
+    database: sqlServerConfig.database,
+    user: sqlServerConfig.user,
+    password: sqlServerConfig.password,
+    port: Number(sqlServerConfig.port || 1433),
     options: {
-      encrypt:
-        appConfig.database.sqlserver?.options?.encrypt ?? appConfig.database.options?.encrypt ?? true,
-      trustServerCertificate:
-        appConfig.database.sqlserver?.options?.trustServerCertificate ??
-        appConfig.database.options?.trustServerCertificate ??
-        true
+      encrypt: sqlServerConfig.options?.encrypt ?? true,
+      trustServerCertificate: sqlServerConfig.options?.trustServerCertificate ?? true
     }
   });
+  return pool.connect();
 }
 
-function createDuckDbConnection() {
+function createDuckDbConnection(connectionConfig) {
   // Lazy load so SQL Server-only installs do not require duckdb dependency.
   const duckdb = require("duckdb");
-  const dbPath = process.env.DUCKDB_PATH || appConfig.database.duckdb?.path || ":memory:";
+  const dbPath = connectionConfig.duckdb?.path || ":memory:";
   const db = new duckdb.Database(dbPath);
   return db.connect();
 }
@@ -2524,11 +2891,142 @@ function runDuckDbQuery(connection, query, params) {
   });
 }
 
-let sqlServerPoolPromise;
-let duckDbConnection;
+const sqlServerPoolPromises = new Map();
+const duckDbConnections = new Map();
+
+async function getSqlServerPool(connection) {
+  if (!sqlServerPoolPromises.has(connection.name)) {
+    sqlServerPoolPromises.set(connection.name, createSqlServerPool(connection.config));
+  }
+  return sqlServerPoolPromises.get(connection.name);
+}
+
+function getDuckDbConnection(connection) {
+  if (!duckDbConnections.has(connection.name)) {
+    duckDbConnections.set(connection.name, createDuckDbConnection(connection.config));
+  }
+  return duckDbConnections.get(connection.name);
+}
+
+async function resetDatabaseClients() {
+  for (const poolPromise of sqlServerPoolPromises.values()) {
+    try {
+      const pool = await poolPromise;
+      if (pool?.close) {
+        await pool.close();
+      }
+    } catch {
+      // Ignore failed/half-open pool shutdowns during config changes.
+    }
+  }
+  sqlServerPoolPromises.clear();
+
+  for (const connection of duckDbConnections.values()) {
+    try {
+      if (connection?.close) {
+        connection.close();
+      }
+    } catch {
+      // Ignore close failures for cached DuckDB connections.
+    }
+  }
+  duckDbConnections.clear();
+}
+
+async function scanSqlServerSchema(connection) {
+  const pool = await getSqlServerPool(connection);
+  const result = await pool.request().query(`
+    SELECT
+      t.TABLE_SCHEMA AS table_schema,
+      t.TABLE_NAME AS table_name,
+      c.COLUMN_NAME AS column_name,
+      c.DATA_TYPE AS data_type,
+      c.ORDINAL_POSITION AS ordinal_position,
+      CASE WHEN pk.COLUMN_NAME IS NULL THEN 0 ELSE 1 END AS is_primary_key
+    FROM INFORMATION_SCHEMA.TABLES t
+    INNER JOIN INFORMATION_SCHEMA.COLUMNS c
+      ON c.TABLE_SCHEMA = t.TABLE_SCHEMA
+      AND c.TABLE_NAME = t.TABLE_NAME
+    LEFT JOIN (
+      SELECT kcu.TABLE_SCHEMA, kcu.TABLE_NAME, kcu.COLUMN_NAME
+      FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+      INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+        ON kcu.CONSTRAINT_NAME = tc.CONSTRAINT_NAME
+        AND kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA
+        AND kcu.TABLE_NAME = tc.TABLE_NAME
+      WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
+    ) pk
+      ON pk.TABLE_SCHEMA = c.TABLE_SCHEMA
+      AND pk.TABLE_NAME = c.TABLE_NAME
+      AND pk.COLUMN_NAME = c.COLUMN_NAME
+    WHERE t.TABLE_TYPE IN ('BASE TABLE', 'VIEW')
+    ORDER BY t.TABLE_SCHEMA, t.TABLE_NAME, c.ORDINAL_POSITION
+  `);
+  const groups = new Map();
+
+  for (const row of result.recordset || []) {
+    const schema = String(row.table_schema || "").trim();
+    const table = String(row.table_name || "").trim();
+    const key = `${schema}.${table}`;
+    if (!groups.has(key)) {
+      groups.set(key, { schema, table, columns: [] });
+    }
+    groups.get(key).columns.push({
+      name: row.column_name,
+      sqlType: row.data_type,
+      isPrimaryKey: Boolean(row.is_primary_key)
+    });
+  }
+
+  return Array.from(groups.values());
+}
+
+async function scanDuckDbSchema(connection) {
+  const db = getDuckDbConnection(connection);
+  const tableRows = await runDuckDbQuery(
+    db,
+    `SELECT table_schema, table_name
+     FROM information_schema.tables
+     WHERE table_schema NOT IN ('information_schema', 'pg_catalog')
+       AND table_type IN ('BASE TABLE', 'VIEW')
+     ORDER BY table_schema, table_name`,
+    []
+  );
+  const tables = [];
+
+  for (const row of tableRows) {
+    const schema = String(row.table_schema || "").trim();
+    const table = String(row.table_name || "").trim();
+    const targetName = (schema ? `${schema}.` : "") + table;
+    const pragmaRows = await runDuckDbQuery(
+      db,
+      `SELECT * FROM pragma_table_info('${targetName.replaceAll("'", "''")}')`,
+      []
+    );
+    tables.push({
+      schema,
+      table,
+      columns: pragmaRows.map((column) => ({
+        name: column.name,
+        sqlType: column.type,
+        isPrimaryKey: Boolean(column.pk)
+      }))
+    });
+  }
+
+  return tables;
+}
+
+async function scanDatabaseSchema(connection) {
+  if (connection.type === "duckdb") {
+    return scanDuckDbSchema(connection);
+  }
+  return scanSqlServerSchema(connection);
+}
 
 async function fetchViewRows(view, query) {
-  const dbType = getDatabaseType();
+  const connection = getViewDatabaseConnection(view);
+  const dbType = connection.type;
   const filters = collectSearchFilters(view, query);
   const limit = parsePositiveInt(query.limit, parsePositiveInt(view.limit, 200));
   const requestedPage = parsePositiveInt(query.page, 1);
@@ -2542,18 +3040,12 @@ async function fetchViewRows(view, query) {
   let totalCount = 0;
 
   if (dbType === "duckdb") {
-    if (!duckDbConnection) {
-      duckDbConnection = createDuckDbConnection();
-    }
+    const duckDbConnection = getDuckDbConnection(connection);
     const countRows = await runDuckDbQuery(duckDbConnection, countBuilt.query, countBuilt.queryParams);
     const countRow = countRows[0] || {};
     totalCount = Number(countRow.totalCount ?? Object.values(countRow)[0] ?? 0) || 0;
   } else {
-    if (!sqlServerPoolPromise) {
-      sqlServerPoolPromise = createSqlServerPool();
-    }
-
-    const pool = await sqlServerPoolPromise;
+    const pool = await getSqlServerPool(connection);
     const countRequest = pool.request();
     for (const queryParam of countBuilt.queryParams) {
       countRequest.input(queryParam.name, queryParam.value);
@@ -2574,9 +3066,10 @@ async function fetchViewRows(view, query) {
   let rows;
 
   if (dbType === "duckdb") {
+    const duckDbConnection = getDuckDbConnection(connection);
     rows = await runDuckDbQuery(duckDbConnection, built.query, built.queryParams);
   } else {
-    const pool = await sqlServerPoolPromise;
+    const pool = await getSqlServerPool(connection);
     const request = pool.request();
     for (const queryParam of built.queryParams) {
       request.input(queryParam.name, queryParam.value);
@@ -2641,6 +3134,192 @@ function buildRowDebugSummary(view, rows) {
 
 app.get("/", (_req, res) => {
   res.send(renderHome());
+});
+
+app.get("/settings", (req, res) => {
+  res.send(
+    renderSettings({
+      message: firstQueryValue(req.query.message),
+      error: firstQueryValue(req.query.error),
+      scanConnectionName: firstQueryValue(req.query.connectionName),
+      limit: parsePositiveInt(req.query.limit, 200),
+      maxSearchFields: parsePositiveInt(req.query.maxSearchFields, 3)
+    })
+  );
+});
+
+app.post("/settings/database/save", async (req, res) => {
+  const originalName = normalizeDatabaseName(req.body?.originalName);
+  const name = normalizeDatabaseName(req.body?.name);
+  const type = String(req.body?.type || "sqlserver").trim().toLowerCase();
+  const catalog = getDatabaseCatalog();
+  const connections = { ...catalog.connections };
+
+  if (!name) {
+    res.status(400).send(renderSettings({ error: "Database connection name is required." }));
+    return;
+  }
+  if (type !== "sqlserver" && type !== "duckdb") {
+    res.status(400).send(renderSettings({ error: "Database type must be sqlserver or duckdb." }));
+    return;
+  }
+  if (originalName && originalName !== name && connections[name]) {
+    res.status(400).send(renderSettings({ error: `A database connection named ${name} already exists.` }));
+    return;
+  }
+
+  const nextConnection =
+    type === "duckdb"
+      ? {
+          type: "duckdb",
+          duckdb: {
+            path: String(req.body?.path || "").trim() || ":memory:"
+          }
+        }
+      : {
+          type: "sqlserver",
+          sqlserver: {
+            server: String(req.body?.server || "").trim(),
+            database: String(req.body?.database || "").trim(),
+            user: String(req.body?.user || "").trim(),
+            password: String(req.body?.password || ""),
+            port: parsePositiveInt(req.body?.port, 1433),
+            options: {
+              encrypt: req.body?.encrypt === "on",
+              trustServerCertificate: req.body?.trustServerCertificate === "on"
+            }
+          }
+        };
+
+  if (type === "sqlserver" && (!nextConnection.sqlserver.server || !nextConnection.sqlserver.database)) {
+    res
+      .status(400)
+      .send(renderSettings({ error: "SQL Server connections require both server and database values." }));
+    return;
+  }
+
+  if (originalName && originalName !== name) {
+    delete connections[originalName];
+    for (const view of Object.values(viewsConfig.views || {})) {
+      if (view?.database === originalName) {
+        view.database = name;
+      }
+    }
+    saveViewsConfig();
+  }
+
+  connections[name] = nextConnection;
+  appConfig.database = {
+    ...(appConfig.database || {}),
+    defaultConnection:
+      req.body?.setDefault === "on"
+        ? name
+        : normalizeDatabaseName(appConfig.database?.defaultConnection) || (connections[name] ? name : Object.keys(connections)[0]),
+    connections
+  };
+
+  if (!appConfig.database.defaultConnection || !connections[appConfig.database.defaultConnection]) {
+    appConfig.database.defaultConnection = name;
+  }
+
+  saveAppConfig();
+  loadConfigs();
+  await resetDatabaseClients();
+  res.redirect(`/settings?message=${encodeURIComponent(`Saved database connection ${name}.`)}`);
+});
+
+app.post("/settings/database/delete", async (req, res) => {
+  const name = normalizeDatabaseName(req.body?.name);
+  const catalog = getDatabaseCatalog();
+  const connections = { ...catalog.connections };
+
+  if (!name || !connections[name]) {
+    res.status(400).send(renderSettings({ error: "Database connection not found." }));
+    return;
+  }
+  if (Object.keys(connections).length <= 1) {
+    res.status(400).send(renderSettings({ error: "At least one database connection must remain configured." }));
+    return;
+  }
+
+  const dependentViews = Object.entries(viewsConfig.views || {})
+    .filter(([, view]) => normalizeDatabaseName(view?.database) === name)
+    .map(([viewName]) => viewName);
+
+  if (dependentViews.length) {
+    res
+      .status(400)
+      .send(
+        renderSettings({
+          error: `Cannot delete ${name} because these views still use it: ${dependentViews.join(", ")}.`
+        })
+      );
+    return;
+  }
+
+  delete connections[name];
+  appConfig.database = {
+    ...(appConfig.database || {}),
+    defaultConnection:
+      catalog.defaultConnection === name ? Object.keys(connections)[0] : appConfig.database?.defaultConnection,
+    connections
+  };
+
+  saveAppConfig();
+  loadConfigs();
+  await resetDatabaseClients();
+  res.redirect(`/settings?message=${encodeURIComponent(`Deleted database connection ${name}.`)}`);
+});
+
+app.post("/settings/scan", async (req, res) => {
+  const connectionName = normalizeDatabaseName(req.body?.connectionName);
+  const limit = parsePositiveInt(req.body?.limit, 200);
+  const maxSearchFields = parsePositiveInt(req.body?.maxSearchFields, 3);
+
+  try {
+    const connection = resolveDatabaseConnection(connectionName);
+    const tables = await scanDatabaseSchema(connection);
+    const generatedConfig = buildViewsConfigFromSchemaTables(tables, {
+      limit,
+      maxSearchFields,
+      databaseName: connection.name
+    });
+    const viewCount = Object.keys(generatedConfig.views || {}).length;
+
+    if (!viewCount) {
+      res
+        .status(400)
+        .send(
+          renderSettings({
+            error: `Scan completed for ${connection.name}, but no tables or views were discovered.`,
+            scanConnectionName: connection.name,
+            limit,
+            maxSearchFields
+          })
+        );
+      return;
+    }
+
+    viewsConfig = generatedConfig;
+    saveViewsConfig();
+    loadConfigs();
+    res.redirect(
+      `/settings?message=${encodeURIComponent(
+        `Scanned ${connection.name} and rebuilt views config with ${viewCount} view(s).`
+      )}&connectionName=${encodeURIComponent(connection.name)}&limit=${limit}&maxSearchFields=${maxSearchFields}`
+    );
+  } catch (error) {
+    res
+      .status(500)
+      .send(
+        renderSettings({
+          error: `Scan failed: ${error.message}`,
+          scanConnectionName: connectionName,
+          limit,
+          maxSearchFields
+        })
+      );
+  }
 });
 
 app.get("/config/:viewName", (req, res) => {

@@ -54,8 +54,9 @@ On table pages, use **Download CSV** to export the current query result.
 
 Each view also has an **Edit view config** screen at `/config/:viewName`.
 
-- Saves column visibility changes back to `config/views.config.json`
+- Saves column visibility and order changes back to `config/views.config.json`
 - Updates `views.<name>.columns[].hideOnGrid`
+- Updates the order of `views.<name>.columns`
 - Keeps hidden grid columns available in the row details panel and CSV export
 
 ## Generate Config From SQL Server DDL
@@ -81,26 +82,31 @@ npm run generate:views-config -- ./schema.sql ./config/views.generated.config.js
 
 ## Database Config
 
-Select engine with:
+The app now supports multiple named database connections in `config/app.config.json`, managed from the UI at `/settings`.
 
-- `database.type`: `"sqlserver"` or `"duckdb"`
+Recommended structure:
 
-DuckDB settings:
+- `database.defaultConnection`: name of the default connection
+- `database.connections.<name>.type`: `"sqlserver"` or `"duckdb"`
+- `database.connections.<name>.sqlserver.server`
+- `database.connections.<name>.sqlserver.database`
+- `database.connections.<name>.sqlserver.user`
+- `database.connections.<name>.sqlserver.password`
+- `database.connections.<name>.sqlserver.port`
+- `database.connections.<name>.sqlserver.options`
+- `database.connections.<name>.duckdb.path`
 
-- `database.duckdb.path`: path to `.duckdb` file (or `":memory:"`)
+Legacy single-database config is still accepted and is treated as a `default` connection.
 
-SQL Server settings:
+Settings UI:
 
-- `database.sqlserver.server`
-- `database.sqlserver.database`
-- `database.sqlserver.user`
-- `database.sqlserver.password`
-- `database.sqlserver.port`
-- `database.sqlserver.options`
+- `/settings`: manage database connections and trigger schema scans
+- `/settings/scan`: scans a selected database and rebuilds `config/views.config.json` from live schema metadata
 
 Environment overrides:
 
 - `DB_TYPE`, `DB_SERVER`, `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`, `DB_PORT`, `DUCKDB_PATH`
+- These apply to the legacy/single default connection path
 
 UI settings in `config/app.config.json`:
 
@@ -116,6 +122,7 @@ UI settings in `config/app.config.json`:
 
 - `views.<name>.schema`: SQL schema (used for SQL Server; optional for DuckDB)
 - `views.<name>.table`: SQL table name
+- `views.<name>.database`: Optional database connection name from `app.config.json`
 - `views.<name>.hideOnHome`: Optional boolean to hide a view from the front-page search list
 - `views.<name>.columns`: Columns shown in the table
 - `views.<name>.columns[].hideOnGrid`: Optional boolean to hide a column from the main table grid (still available in row details and links)
@@ -142,7 +149,8 @@ UI settings in `config/app.config.json`:
 
 UI config route:
 
-- `/config/:viewName`: Per-view config screen for choosing which configured columns appear in the main table grid
+- `/config/:viewName`: Per-view config screen for choosing which configured columns appear in the main table grid and in what order
+- `/settings`: Settings screen for database connections and live schema scanning
 
 Sort query parameters on `/table/:viewName`:
 
