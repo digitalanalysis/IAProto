@@ -1753,7 +1753,7 @@ function renderLayout(title, content) {
       }
       .config-column-row {
         display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-columns: auto minmax(0, 1fr) auto;
         gap: 10px;
         align-items: start;
         padding: 10px 12px;
@@ -1770,6 +1770,22 @@ function renderLayout(title, content) {
       }
       .config-column-title {
         font-weight: 600;
+      }
+      .config-order-controls {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .config-order-button {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        min-width: 34px;
+        padding: 6px 8px;
+      }
+      .config-order-button[disabled] {
+        opacity: 0.45;
+        cursor: default;
       }
       .config-actions {
         display: flex;
@@ -1881,14 +1897,19 @@ function renderViewConfig(viewName, view, options = {}) {
       if (column.format) {
         meta.push(`Format: <code>${escapeHtml(column.format)}</code>`);
       }
-      return `<label class="config-column-row">
+      return `<div class="config-column-row" data-column-name="${escapeHtml(column.name)}">
+        <input type="hidden" name="columnOrder" value="${escapeHtml(column.name)}" />
         <input type="checkbox" name="visibleColumns" value="${escapeHtml(column.name)}"${checked} />
         <span class="config-column-meta">
           <span class="config-column-title">${escapeHtml(label)}</span>
           <span class="muted">${meta.join(" | ")}</span>
           <span class="muted">Order: ${index + 1} in configured column list</span>
         </span>
-      </label>`;
+        <span class="config-order-controls">
+          <button type="button" class="config-order-button" data-move="up" aria-label="Move ${escapeHtml(label)} up">Up</button>
+          <button type="button" class="config-order-button" data-move="down" aria-label="Move ${escapeHtml(label)} down">Down</button>
+        </span>
+      </div>`;
     })
     .join("");
 
@@ -1912,17 +1933,69 @@ function renderViewConfig(viewName, view, options = {}) {
          </div>
        </section>
        <section class="config-panel">
-         <h2>Grid Columns</h2>
-         <p class="muted">Select which configured columns appear in the main table. Unselected columns stay available in the row details panel and CSV export.</p>
+          <h2>Grid Columns</h2>
+         <p class="muted">Select which configured columns appear in the main table. Use Up and Down to change column order. Unselected columns stay available in the row details panel and CSV export.</p>
          <form method="post" action="/config/${encodeURIComponent(viewName)}">
-           <div class="config-columns">${columnItems}</div>
+           <div class="config-columns" id="config-columns">${columnItems}</div>
            <div class="config-actions">
              <button type="submit">Save view config</button>
              <a href="/table/${encodeURIComponent(viewName)}">Cancel</a>
            </div>
          </form>
        </section>
-     </div>`
+     </div>
+     <script>
+       (() => {
+         const root = document.getElementById("config-columns");
+         if (!root) {
+           return;
+         }
+
+         function refreshOrderUi() {
+           const rows = Array.from(root.querySelectorAll(".config-column-row"));
+           rows.forEach((row, index) => {
+             const meta = row.querySelector(".config-column-meta .muted:last-child");
+             if (meta) {
+               meta.textContent = "Order: " + (index + 1) + " in configured column list";
+             }
+             const upButton = row.querySelector('[data-move="up"]');
+             const downButton = row.querySelector('[data-move="down"]');
+             if (upButton) {
+               upButton.disabled = index === 0;
+             }
+             if (downButton) {
+               downButton.disabled = index === rows.length - 1;
+             }
+           });
+         }
+
+         root.addEventListener("click", (event) => {
+           const button = event.target.closest(".config-order-button");
+           if (!button) {
+             return;
+           }
+           const row = button.closest(".config-column-row");
+           if (!row) {
+             return;
+           }
+           if (button.dataset.move === "up") {
+             const previous = row.previousElementSibling;
+             if (previous) {
+               root.insertBefore(row, previous);
+             }
+           }
+           if (button.dataset.move === "down") {
+             const next = row.nextElementSibling;
+             if (next) {
+               root.insertBefore(next, row);
+             }
+           }
+           refreshOrderUi();
+         });
+
+         refreshOrderUi();
+       })();
+     </script>`
   );
 }
 
@@ -2610,7 +2683,25 @@ app.post("/config/:viewName", (req, res) => {
       .map((column) => String(column || "").trim())
       .filter(Boolean)
   );
-  const validColumns = new Set((view.columns || []).map((column) => column.name).filter(Boolean));
+  const existingColumns = view.columns || [];
+  const validColumns = new Set(existingColumns.map((column) => column.name).filter(Boolean));
+  const requestedOrder = asArray(req.body?.columnOrder)
+    .map((column) => String(column || "").trim())
+    .filter((column) => column && validColumns.has(column));
+  const normalizedOrder = [];
+  const seenOrderedColumns = new Set();
+  for (const columnName of requestedOrder) {
+    if (!seenOrderedColumns.has(columnName)) {
+      seenOrderedColumns.add(columnName);
+      normalizedOrder.push(columnName);
+    }
+  }
+  for (const column of existingColumns) {
+    if (column?.name && !seenOrderedColumns.has(column.name)) {
+      seenOrderedColumns.add(column.name);
+      normalizedOrder.push(column.name);
+    }
+  }
   const normalizedSelectedColumns = Array.from(selectedColumns).filter((column) => validColumns.has(column));
 
   if (!normalizedSelectedColumns.length) {
@@ -2624,6 +2715,9 @@ app.post("/config/:viewName", (req, res) => {
       );
     return;
   }
+
+  const columnByName = new Map(existingColumns.map((column) => [column.name, column]));
+  view.columns = normalizedOrder.map((columnName) => columnByName.get(columnName)).filter(Boolean);
 
   for (const column of view.columns || []) {
     if (selectedColumns.has(column.name)) {
