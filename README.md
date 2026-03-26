@@ -17,7 +17,7 @@ A Node.js web application that reads table/view definitions from configuration f
 
 - `src/server.js`: Express app and DB query logic
 - `config/app.config.json`: Database connection config
-- `config/views.config.json`: Table view + link definitions
+- `config/views*.json`: Per-source table view + link definitions
 - `files/`: Static files served at `/files/...`
 - `docs/CODE_DOCUMENTATION.md`: Detailed code architecture and function reference
 
@@ -31,7 +31,7 @@ npm install
 
 2. Set database type and connection in `config/app.config.json`.
 
-3. Update view definitions in `config/views.config.json` to match your schema/tables.
+3. Update the relevant source views config file to match your schema/tables.
 
 ## Run
 
@@ -54,14 +54,14 @@ On table pages, use **Download CSV** to export the current query result.
 
 Each view also has an **Edit view config** screen at `/config/:viewName`.
 
-- Saves column visibility and order changes back to `config/views.config.json`
+- Saves column visibility and order changes back to the active source's views config file
 - Updates `views.<name>.columns[].hideOnGrid`
 - Updates the order of `views.<name>.columns`
 - Keeps hidden grid columns available in the row details panel and CSV export
 
 ## Generate Config From SQL Server DDL
 
-You can generate a starter `views.config.json` structure from a SQL Server DDL file:
+You can generate a starter views config structure from a SQL Server DDL file:
 
 ```bash
 npm run generate:views-config -- ./schema.sql ./config/views.generated.config.json
@@ -88,6 +88,7 @@ Recommended structure:
 
 - `database.defaultConnection`: name of the default connection
 - `database.connections.<name>.type`: `"sqlserver"` or `"duckdb"`
+- `database.connections.<name>.viewsConfigPath`: optional path to that source's views config file
 - `database.connections.<name>.sqlserver.server`
 - `database.connections.<name>.sqlserver.database`
 - `database.connections.<name>.sqlserver.user`
@@ -101,7 +102,14 @@ Legacy single-database config is still accepted and is treated as a `default` co
 Settings UI:
 
 - `/settings`: manage database connections and trigger schema scans
-- `/settings/scan`: scans a selected database and rebuilds `config/views.config.json` from live schema metadata
+- `/settings/scan`: scans a selected database and rebuilds that source's views config file from live schema metadata
+
+Views config files:
+
+- Each data source can have its own views config JSON file
+- If `viewsConfigPath` is omitted, the app uses `config/views.<source>.config.json`
+- Legacy single-source setups still use `config/views.config.json`
+- The top toolbar lets users switch between sources and their corresponding view sets
 
 Environment overrides:
 
@@ -118,7 +126,7 @@ UI settings in `config/app.config.json`:
 
 ## Configuration Model
 
-`views.config.json` format:
+Views config format:
 
 - `views.<name>.schema`: SQL schema (used for SQL Server; optional for DuckDB)
 - `views.<name>.table`: SQL table name
@@ -151,6 +159,7 @@ UI config route:
 
 - `/config/:viewName`: Per-view config screen for choosing which configured columns appear in the main table grid and in what order
 - `/settings`: Settings screen for database connections and live schema scanning
+- Source switching: use the top toolbar to switch between data sources and their separate views config files
 
 Sort query parameters on `/table/:viewName`:
 

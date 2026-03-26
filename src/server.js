@@ -8,19 +8,39 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const appConfigPath = path.join(__dirname, "..", "config", "app.config.json");
-const viewsConfigPath = path.join(__dirname, "..", "config", "views.config.json");
+const legacyViewsConfigPath = path.join(__dirname, "..", "config", "views.config.json");
 const servedFilesPath = path.join(__dirname, "..", "files");
 
 let appConfig;
-let viewsConfig;
+let viewsConfigsBySource = new Map();
 
 function loadConfigs() {
   appConfig = JSON.parse(fs.readFileSync(appConfigPath, "utf8"));
-  viewsConfig = JSON.parse(fs.readFileSync(viewsConfigPath, "utf8"));
+  viewsConfigsBySource = new Map();
+  const catalog = getDatabaseCatalog();
+  for (const sourceName of Object.keys(catalog.connections)) {
+    viewsConfigsBySource.set(sourceName, readViewsConfigFromPath(getViewsConfigPath(sourceName)));
+  }
 }
 
-function saveViewsConfig() {
-  fs.writeFileSync(viewsConfigPath, `${JSON.stringify(viewsConfig, null, 2)}\n`, "utf8");
+function readViewsConfigFromPath(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return { views: {} };
+  }
+  const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { views: {} };
+  }
+  if (!parsed.views || typeof parsed.views !== "object" || Array.isArray(parsed.views)) {
+    return { views: {} };
+  }
+  return parsed;
+}
+
+function saveViewsConfig(sourceName) {
+  const targetPath = getViewsConfigPath(sourceName);
+  const config = getViewsConfig(sourceName);
+  fs.writeFileSync(targetPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
 }
 
 function saveAppConfig() {
@@ -141,6 +161,7 @@ function getDatabaseCatalog() {
   if (!Object.keys(connections).length) {
     connections.default = {
       type: String(process.env.DB_TYPE || databaseConfig.type || "sqlserver").toLowerCase(),
+      viewsConfigPath: legacyViewsConfigPath,
       sqlserver: {
         server: process.env.DB_SERVER || databaseConfig.sqlserver?.server || databaseConfig.server || "",
         database: process.env.DB_DATABASE || databaseConfig.sqlserver?.database || databaseConfig.database || "",
@@ -169,6 +190,35 @@ function getDatabaseCatalog() {
   return { connections, defaultConnection };
 }
 
+function getViewsConfigPath(sourceName) {
+  const connection = resolveDatabaseConnection(sourceName);
+  const configuredPath = String(connection.config.viewsConfigPath || "").trim();
+  if (configuredPath) {
+    return path.isAbsolute(configuredPath) ? configuredPath : path.join(__dirname, "..", configuredPath);
+  }
+  if (connection.name === "default" && !connection.config.viewsConfigPath) {
+    return legacyViewsConfigPath;
+  }
+  return path.join(__dirname, "..", "config", `views.${connection.name}.config.json`);
+}
+
+function getViewsConfig(sourceName) {
+  const connection = resolveDatabaseConnection(sourceName);
+  if (!viewsConfigsBySource.has(connection.name)) {
+    viewsConfigsBySource.set(connection.name, readViewsConfigFromPath(getViewsConfigPath(connection.name)));
+  }
+  return viewsConfigsBySource.get(connection.name) || { views: {} };
+}
+
+function setViewsConfig(sourceName, config) {
+  const connection = resolveDatabaseConnection(sourceName);
+  viewsConfigsBySource.set(connection.name, config && typeof config === "object" ? config : { views: {} });
+}
+
+function getActiveSourceName(requestedSource = "") {
+  return resolveDatabaseConnection(requestedSource).name;
+}
+
 function resolveDatabaseConnection(databaseName = "") {
   const catalog = getDatabaseCatalog();
   const requestedName = normalizeDatabaseName(databaseName);
@@ -189,16 +239,21 @@ function resolveDatabaseConnection(databaseName = "") {
   };
 }
 
-function getViewDatabaseConnection(view) {
-  return resolveDatabaseConnection(view?.database);
+function getViewDatabaseConnection(view, sourceName = "") {
+  return resolveDatabaseConnection(view?.database || sourceName);
 }
 
-function getDatabaseType(view = null) {
-  return view ? getViewDatabaseConnection(view).type : resolveDatabaseConnection().type;
+function getDatabaseType(view = null, sourceName = "") {
+  return view ? getViewDatabaseConnection(view, sourceName).type : resolveDatabaseConnection(sourceName).type;
 }
 
-function getView(viewName) {
-  return viewsConfig.views[viewName] || null;
+function getView(viewName, sourceName = "") {
+  const viewsConfig = getViewsConfig(sourceName);
+  return viewsConfig.views?.[viewName] || null;
+}
+
+function getAllViews(sourceName = "") {
+  return getViewsConfig(sourceName).views || {};
 }
 
 function collectAllowedColumns(view) {
@@ -794,7 +849,7 @@ function isSafeLinkUrl(url) {
   return isHttpUrl(value) || value.startsWith("/");
 }
 
-function buildLinkUrl(link, row, nextBreadcrumbsToken = "") {
+function buildLinkUrl(link, row, nextBreadcrumbsToken = "", sourceName = "") {
   const urlTemplate = String(link?.urlTemplate || "").trim();
   if (urlTemplate) {
     const rendered = renderLinkTemplate(urlTemplate, row, { encodeValues: true }).trim();
@@ -815,6 +870,9 @@ function buildLinkUrl(link, row, nextBreadcrumbsToken = "") {
   }
   if (nextBreadcrumbsToken) {
     linkParams.set("crumbs", nextBreadcrumbsToken);
+  }
+  if (sourceName) {
+    linkParams.set("source", sourceName);
   }
   return `/table/${encodeURIComponent(link.targetView)}?${linkParams.toString()}`;
 }
@@ -1376,6 +1434,32 @@ function renderHiddenQueryInputs(query, excludedPrefixes = [], excludedKeys = []
     .join("");
 }
 
+function buildSourceHomeUrl(sourceName) {
+  const params = new URLSearchParams();
+  if (sourceName) {
+    params.set("source", sourceName);
+  }
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
+
+function buildSourceAwarePath(pathname, sourceName, extraQuery = null) {
+  const params = new URLSearchParams();
+  if (sourceName) {
+    params.set("source", sourceName);
+  }
+  for (const [key, value] of Object.entries(extraQuery || {})) {
+    for (const item of asArray(value)) {
+      if (item === undefined || item === null || item === "") {
+        continue;
+      }
+      params.append(key, String(item));
+    }
+  }
+  const query = params.toString();
+  return query ? `${pathname}?${query}` : pathname;
+}
+
 function resolveUiFontFamily(value) {
   const fallback = '"Segoe UI", Tahoma, sans-serif';
   if (typeof value !== "string") {
@@ -1412,12 +1496,21 @@ function resolveUiFontSize(value) {
   return fallback;
 }
 
-function renderLayout(title, content) {
+function renderLayout(title, content, options = {}) {
   const banner = appConfig.ui?.banner || {};
   const bannerTitle = banner.title || "Configurable Data Viewer";
   const bannerSubtitle = banner.subtitle || "SQL Server and DuckDB table explorer";
   const fontFamily = resolveUiFontFamily(appConfig.ui?.fontFamily);
   const baseFontSizePx = resolveUiFontSize(appConfig.ui?.fontSize);
+  const activeSourceName = getActiveSourceName(options.activeSourceName);
+  const sourceTabs = Object.entries(getDatabaseCatalog().connections)
+    .map(([sourceName, connection]) => {
+      const activeClass = sourceName === activeSourceName ? " active" : "";
+      return `<a class="source-tab${activeClass}" href="${escapeHtml(buildSourceHomeUrl(sourceName))}">${escapeHtml(
+        sourceName
+      )} <span>${escapeHtml(String(connection.type || "sqlserver"))}</span></a>`;
+    })
+    .join("");
 
   return `<!doctype html>
 <html>
@@ -1464,6 +1557,32 @@ function renderLayout(title, content) {
         margin-top: 4px;
         font-size: var(--font-size-sm);
         opacity: 0.92;
+      }
+      .source-toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .source-tab {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        padding: 6px 12px;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: var(--font-size-sm);
+      }
+      .source-tab span {
+        opacity: 0.8;
+        font-size: var(--font-size-xs);
+      }
+      .source-tab.active {
+        background: #fff;
+        color: #0a4fbc;
+        border-color: #fff;
       }
       .container {
         max-width: none;
@@ -1990,6 +2109,7 @@ function renderLayout(title, content) {
     <header class="site-banner">
       <div class="site-banner-title">${escapeHtml(bannerTitle)}</div>
       <div class="site-banner-subtitle">${escapeHtml(bannerSubtitle)}</div>
+      <nav class="source-toolbar">${sourceTabs}</nav>
     </header>
     <div class="container">
       ${content}
@@ -1998,26 +2118,32 @@ function renderLayout(title, content) {
 </html>`;
 }
 
-function renderHome() {
-  const viewItems = Object.entries(viewsConfig.views)
+function renderHome(sourceName) {
+  const activeSourceName = getActiveSourceName(sourceName);
+  const viewItems = Object.entries(getAllViews(activeSourceName))
     .filter(([, view]) => !view.hideOnHome)
     .map(([viewName, view]) => {
-      const connection = getViewDatabaseConnection(view);
+      const connection = getViewDatabaseConnection(view, activeSourceName);
       const dbType = connection.type;
       const tableLabel = view.schema && dbType !== "duckdb" ? `${view.schema}.${view.table}` : view.table;
       const searchFields = (view.searchFields || [])
         .map((field) => renderSearchFieldControl(field))
         .join("");
       const searchForm = searchFields
-        ? `<form method="get" action="/table/${encodeURIComponent(viewName)}" class="search-form">${searchFields}<button type="submit" class="search-submit">Search</button></form>`
+        ? `<form method="get" action="/table/${encodeURIComponent(viewName)}" class="search-form"><input type="hidden" name="source" value="${escapeHtml(
+            activeSourceName
+          )}" />${searchFields}<button type="submit" class="search-submit">Search</button></form>`
         : `<p class="muted">No search fields configured.</p>`;
 
       return `<li>
-        <div class="view-title"><a href="/table/${encodeURIComponent(viewName)}">${escapeHtml(view.title || viewName)}</a> <span class="muted">(${escapeHtml(tableLabel)})</span></div>
+        <div class="view-title"><a href="${buildSourceAwarePath(
+          `/table/${encodeURIComponent(viewName)}`,
+          activeSourceName
+        )}">${escapeHtml(view.title || viewName)}</a> <span class="muted">(${escapeHtml(tableLabel)})</span></div>
         <div class="view-actions"><span class="badge">${escapeHtml(connection.name)}</span></div>
         <div class="view-actions">
-          <a href="/table/${encodeURIComponent(viewName)}">Open table</a>
-          <a href="/config/${encodeURIComponent(viewName)}">Edit view config</a>
+          <a href="${buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName)}">Open table</a>
+          <a href="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">Edit view config</a>
         </div>
         ${searchForm}
       </li>`;
@@ -2027,13 +2153,15 @@ function renderHome() {
   return renderLayout(
     "Search",
     `<h1>Search</h1>
-     <div class="toolbar secondary"><a href="/settings">Settings</a></div>
-     <ul class="view-list">${viewItems}</ul>`
+     <div class="toolbar secondary"><a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a></div>
+     <ul class="view-list">${viewItems}</ul>`,
+    { activeSourceName }
   );
 }
 
-function renderViewConfig(viewName, view, options = {}) {
-  const connection = getViewDatabaseConnection(view);
+function renderViewConfig(sourceName, viewName, view, options = {}) {
+  const activeSourceName = getActiveSourceName(sourceName);
+  const connection = getViewDatabaseConnection(view, activeSourceName);
   const tableLabel = view.schema && connection.type !== "duckdb" ? `${view.schema}.${view.table}` : view.table;
   const saveError = String(options.error || "").trim();
   const saveMessage = String(options.message || "").trim();
@@ -2081,9 +2209,9 @@ function renderViewConfig(viewName, view, options = {}) {
     `${view.title || viewName} Config`,
     `<h1>${escapeHtml(view.title || viewName)} Config</h1>
      <div class="toolbar secondary">
-       <a href="/">All views</a>
-       <a href="/table/${encodeURIComponent(viewName)}">Back to table</a>
-       <a href="/settings">Settings</a>
+       <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
+       <a href="${buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName)}">Back to table</a>
+       <a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a>
       </div>
      ${noticeHtml}
      <div class="config-layout">
@@ -2101,13 +2229,13 @@ function renderViewConfig(viewName, view, options = {}) {
        <section class="config-panel">
           <h2>Grid Columns</h2>
          <p class="muted">Select which configured columns appear in the main table. Use Up and Down to change column order. Unselected columns stay available in the row details panel and CSV export.</p>
-         <form method="post" action="/config/${encodeURIComponent(viewName)}">
+         <form method="post" action="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">
            <div class="config-columns" id="config-columns">${columnItems}</div>
            <div class="config-actions">
-             <button type="submit">Save view config</button>
-             <a href="/table/${encodeURIComponent(viewName)}">Cancel</a>
-           </div>
-         </form>
+              <button type="submit">Save view config</button>
+              <a href="${buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName)}">Cancel</a>
+            </div>
+          </form>
        </section>
      </div>
      <script>
@@ -2161,11 +2289,13 @@ function renderViewConfig(viewName, view, options = {}) {
 
          refreshOrderUi();
        })();
-     </script>`
+     </script>`,
+    { activeSourceName }
   );
 }
 
 function renderSettings(options = {}) {
+  const activeSourceName = getActiveSourceName(options.activeSourceName || options.scanConnectionName);
   const noticeMessage = String(options.message || "").trim();
   const noticeError = String(options.error || "").trim();
   const catalog = getDatabaseCatalog();
@@ -2191,7 +2321,7 @@ function renderSettings(options = {}) {
           <span class="badge">${escapeHtml(type)}</span>
           ${isDefault ? '<span class="badge">default</span>' : ""}
         </div>
-        <form method="post" action="/settings/database/save" data-database-form>
+        <form method="post" action="${buildSourceAwarePath("/settings/database/save", activeSourceName)}" data-database-form>
           <input type="hidden" name="originalName" value="${escapeHtml(name)}" />
           <div class="form-grid">
             <label>Name
@@ -2202,6 +2332,9 @@ function renderSettings(options = {}) {
                 <option value="sqlserver"${type === "sqlserver" ? " selected" : ""}>SQL Server</option>
                 <option value="duckdb"${type === "duckdb" ? " selected" : ""}>DuckDB</option>
               </select>
+            </label>
+            <label>Views Config Path
+              <input type="text" name="viewsConfigPath" value="${escapeHtml(connection.viewsConfigPath || "")}" />
             </label>
             <label data-sqlserver-field>Server
               <input type="text" name="server" value="${escapeHtml(sqlServerConfig.server || "")}" />
@@ -2239,7 +2372,10 @@ function renderSettings(options = {}) {
         </form>
         ${
           connectionOptions.length > 1
-            ? `<form method="post" action="/settings/database/delete" onsubmit="return confirm('Delete connection ${escapeHtml(
+            ? `<form method="post" action="${buildSourceAwarePath(
+                "/settings/database/delete",
+                activeSourceName
+              )}" onsubmit="return confirm('Delete connection ${escapeHtml(
                 name
               )}?');">
                 <input type="hidden" name="name" value="${escapeHtml(name)}" />
@@ -2266,7 +2402,7 @@ function renderSettings(options = {}) {
     "Settings",
     `<h1>Settings</h1>
      <div class="toolbar secondary">
-       <a href="/">All views</a>
+       <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
      </div>
      ${noticeHtml}
      <div class="settings-grid">
@@ -2277,17 +2413,20 @@ function renderSettings(options = {}) {
        </section>
        <section class="settings-card">
          <h2>Add Database</h2>
-         <form method="post" action="/settings/database/save" data-database-form>
+         <form method="post" action="${buildSourceAwarePath("/settings/database/save", activeSourceName)}" data-database-form>
            <div class="form-grid">
              <label>Name
                <input type="text" name="name" value="" required />
              </label>
-             <label>Type
-               <select name="type" data-database-type>
-                 <option value="sqlserver">SQL Server</option>
-                 <option value="duckdb">DuckDB</option>
-               </select>
-             </label>
+              <label>Type
+                <select name="type" data-database-type>
+                  <option value="sqlserver">SQL Server</option>
+                  <option value="duckdb">DuckDB</option>
+                </select>
+              </label>
+              <label>Views Config Path
+                <input type="text" name="viewsConfigPath" value="" placeholder="config/views.my_source.config.json" />
+              </label>
              <label data-sqlserver-field>Server
                <input type="text" name="server" value="" />
              </label>
@@ -2319,10 +2458,10 @@ function renderSettings(options = {}) {
            </div>
          </form>
        </section>
-       <section class="settings-card">
-         <h2>Scan Database Into Views Config</h2>
-         <p class="muted">This reads live table metadata from the selected database and replaces the current <code>config/views.config.json</code>.</p>
-         <form method="post" action="/settings/scan">
+        <section class="settings-card">
+          <h2>Scan Database Into Views Config</h2>
+          <p class="muted">This reads live table metadata from the selected database and replaces that source's configured views config file.</p>
+         <form method="post" action="${buildSourceAwarePath("/settings/scan", activeSourceName)}">
            <div class="form-grid">
              <label>Connection
                <select name="connectionName">${scanOptionsHtml}</select>
@@ -2363,11 +2502,13 @@ function renderSettings(options = {}) {
            }
          });
        })();
-     </script>`
+      </script>`,
+    { activeSourceName }
   );
 }
 
-function renderTable(viewName, view, rows, context) {
+function renderTable(sourceName, viewName, view, rows, context) {
+  const activeSourceName = getActiveSourceName(sourceName);
   const gridColumns = getGridColumns(view);
   const currentQuery = context.currentQuery || {};
   const currentPage = parsePositiveInt(context.page, 1);
@@ -2396,8 +2537,8 @@ function renderTable(viewName, view, rows, context) {
       }
       const clearQuery = clearParams.toString();
       const clearUrl = clearQuery
-        ? `/table/${encodeURIComponent(viewName)}?${clearQuery}`
-        : `/table/${encodeURIComponent(viewName)}`;
+         ? `/table/${encodeURIComponent(viewName)}?${clearQuery}`
+         : buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName);
       return `<th style="text-align:${align}">
         <div class="th-wrap">
           <span>${escapeHtml(label)}</span>
@@ -2444,7 +2585,9 @@ function renderTable(viewName, view, rows, context) {
       params.set("page", String(targetPage));
     }
     const queryString = params.toString();
-    return queryString ? `/table/${encodeURIComponent(viewName)}?${queryString}` : `/table/${encodeURIComponent(viewName)}`;
+     return queryString
+       ? `/table/${encodeURIComponent(viewName)}?${queryString}`
+       : buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName);
   };
   const pager = `<div class="pager">
     ${hasPrevPage ? `<a href="${makePageUrl(1)}">First</a>` : `<span class="muted">First</span>`}
@@ -2490,7 +2633,7 @@ function renderTable(viewName, view, rows, context) {
         Array.isArray(view.links) && view.links.length
           ? `<td>${view.links
               .map((link) => {
-                const url = buildLinkUrl(link, row, nextBreadcrumbsToken);
+                 const url = buildLinkUrl(link, row, nextBreadcrumbsToken, activeSourceName);
                 if (!url) {
                   return "";
                 }
@@ -2566,17 +2709,27 @@ function renderTable(viewName, view, rows, context) {
   const rawDetailsJson = toInlineJson(rowRawDetails);
   const detailColumnsJson = toInlineJson(detailColumns);
   const linkDefinitionsJson = toInlineJson(linkDefinitions);
-  const downloadQuery = context.currentQueryString ? `?${context.currentQueryString}` : "";
-  const downloadUrl = `/table/${encodeURIComponent(viewName)}/download.csv${downloadQuery}`;
+  const downloadParams = {};
+  for (const [key, value] of Object.entries(currentQuery || {})) {
+    if (key === "source") {
+      continue;
+    }
+    downloadParams[key] = value;
+  }
+  const downloadUrl = buildSourceAwarePath(
+    `/table/${encodeURIComponent(viewName)}/download.csv`,
+    activeSourceName,
+    downloadParams
+  );
 
   return renderLayout(
     view.title || viewName,
       `<h1>${escapeHtml(view.title || viewName)}</h1>
       <nav class="breadcrumbs">${breadcrumbsHtml}</nav>
        <div class="toolbar">
-         <a href="/">All views</a>
-         <a href="/settings">Settings</a>
-         <a href="/config/${encodeURIComponent(viewName)}">Edit view config</a>
+         <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
+         <a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a>
+         <a href="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">Edit view config</a>
          <a href="${downloadUrl}">Download CSV</a>
        </div>
        ${pager}
@@ -2616,7 +2769,8 @@ function renderTable(viewName, view, rows, context) {
          const rawDetailsByRow = ${rawDetailsJson};
          const columns = ${detailColumnsJson};
          const linkDefinitions = ${linkDefinitionsJson};
-         const nextBreadcrumbsToken = ${toInlineJson(nextBreadcrumbsToken)};
+          const nextBreadcrumbsToken = ${toInlineJson(nextBreadcrumbsToken)};
+          const activeSourceName = ${toInlineJson(activeSourceName)};
          const linksRoot = document.getElementById("row-links");
          const linksEmpty = document.getElementById("row-links-empty");
          const fieldsRoot = document.getElementById("row-fields");
@@ -2704,9 +2858,12 @@ function renderTable(viewName, view, rows, context) {
            if (nextBreadcrumbsToken) {
              params.push("crumbs=" + encodeURIComponent(nextBreadcrumbsToken));
            }
-           if (!params.length) {
-             return null;
+            if (activeSourceName) {
+              params.push("source=" + encodeURIComponent(activeSourceName));
             }
+            if (!params.length) {
+              return null;
+             }
             return "/table/" + encodeURIComponent(linkDef.targetView) + "?" + params.join("&");
           }
 
@@ -2851,7 +3008,8 @@ function renderTable(viewName, view, rows, context) {
            });
          });
        })();
-     </script>`
+      </script>`,
+    { activeSourceName }
   );
 }
 
@@ -3024,8 +3182,8 @@ async function scanDatabaseSchema(connection) {
   return scanSqlServerSchema(connection);
 }
 
-async function fetchViewRows(view, query) {
-  const connection = getViewDatabaseConnection(view);
+async function fetchViewRows(view, query, sourceName = "") {
+  const connection = getViewDatabaseConnection(view, sourceName);
   const dbType = connection.type;
   const filters = collectSearchFilters(view, query);
   const limit = parsePositiveInt(query.limit, parsePositiveInt(view.limit, 200));
@@ -3133,22 +3291,26 @@ function buildRowDebugSummary(view, rows) {
 }
 
 app.get("/", (_req, res) => {
-  res.send(renderHome());
+  const activeSourceName = getActiveSourceName(_req.query?.source);
+  res.send(renderHome(activeSourceName));
 });
 
 app.get("/settings", (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source || req.query?.connectionName);
   res.send(
     renderSettings({
       message: firstQueryValue(req.query.message),
       error: firstQueryValue(req.query.error),
       scanConnectionName: firstQueryValue(req.query.connectionName),
       limit: parsePositiveInt(req.query.limit, 200),
-      maxSearchFields: parsePositiveInt(req.query.maxSearchFields, 3)
+      maxSearchFields: parsePositiveInt(req.query.maxSearchFields, 3),
+      activeSourceName
     })
   );
 });
 
 app.post("/settings/database/save", async (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source || req.body?.originalName || req.body?.name);
   const originalName = normalizeDatabaseName(req.body?.originalName);
   const name = normalizeDatabaseName(req.body?.name);
   const type = String(req.body?.type || "sqlserver").trim().toLowerCase();
@@ -3156,15 +3318,15 @@ app.post("/settings/database/save", async (req, res) => {
   const connections = { ...catalog.connections };
 
   if (!name) {
-    res.status(400).send(renderSettings({ error: "Database connection name is required." }));
+    res.status(400).send(renderSettings({ error: "Database connection name is required.", activeSourceName }));
     return;
   }
   if (type !== "sqlserver" && type !== "duckdb") {
-    res.status(400).send(renderSettings({ error: "Database type must be sqlserver or duckdb." }));
+    res.status(400).send(renderSettings({ error: "Database type must be sqlserver or duckdb.", activeSourceName }));
     return;
   }
   if (originalName && originalName !== name && connections[name]) {
-    res.status(400).send(renderSettings({ error: `A database connection named ${name} already exists.` }));
+    res.status(400).send(renderSettings({ error: `A database connection named ${name} already exists.`, activeSourceName }));
     return;
   }
 
@@ -3172,12 +3334,14 @@ app.post("/settings/database/save", async (req, res) => {
     type === "duckdb"
       ? {
           type: "duckdb",
+          viewsConfigPath: String(req.body?.viewsConfigPath || "").trim(),
           duckdb: {
             path: String(req.body?.path || "").trim() || ":memory:"
           }
         }
       : {
           type: "sqlserver",
+          viewsConfigPath: String(req.body?.viewsConfigPath || "").trim(),
           sqlserver: {
             server: String(req.body?.server || "").trim(),
             database: String(req.body?.database || "").trim(),
@@ -3194,18 +3358,20 @@ app.post("/settings/database/save", async (req, res) => {
   if (type === "sqlserver" && (!nextConnection.sqlserver.server || !nextConnection.sqlserver.database)) {
     res
       .status(400)
-      .send(renderSettings({ error: "SQL Server connections require both server and database values." }));
+      .send(renderSettings({ error: "SQL Server connections require both server and database values.", activeSourceName }));
     return;
   }
 
   if (originalName && originalName !== name) {
     delete connections[originalName];
-    for (const view of Object.values(viewsConfig.views || {})) {
+    const sourceViewsConfig = getViewsConfig(originalName);
+    for (const view of Object.values(sourceViewsConfig.views || {})) {
       if (view?.database === originalName) {
         view.database = name;
       }
     }
-    saveViewsConfig();
+    setViewsConfig(name, sourceViewsConfig);
+    saveViewsConfig(name);
   }
 
   connections[name] = nextConnection;
@@ -3225,33 +3391,33 @@ app.post("/settings/database/save", async (req, res) => {
   saveAppConfig();
   loadConfigs();
   await resetDatabaseClients();
-  res.redirect(`/settings?message=${encodeURIComponent(`Saved database connection ${name}.`)}`);
+  res.redirect(buildSourceAwarePath("/settings", name, { message: `Saved database connection ${name}.` }));
 });
 
 app.post("/settings/database/delete", async (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source || req.body?.name);
   const name = normalizeDatabaseName(req.body?.name);
   const catalog = getDatabaseCatalog();
   const connections = { ...catalog.connections };
 
   if (!name || !connections[name]) {
-    res.status(400).send(renderSettings({ error: "Database connection not found." }));
+    res.status(400).send(renderSettings({ error: "Database connection not found.", activeSourceName }));
     return;
   }
   if (Object.keys(connections).length <= 1) {
-    res.status(400).send(renderSettings({ error: "At least one database connection must remain configured." }));
+    res.status(400).send(renderSettings({ error: "At least one database connection must remain configured.", activeSourceName }));
     return;
   }
 
-  const dependentViews = Object.entries(viewsConfig.views || {})
-    .filter(([, view]) => normalizeDatabaseName(view?.database) === name)
-    .map(([viewName]) => viewName);
+  const dependentViews = Object.keys(getViewsConfig(name).views || {});
 
   if (dependentViews.length) {
     res
       .status(400)
       .send(
         renderSettings({
-          error: `Cannot delete ${name} because these views still use it: ${dependentViews.join(", ")}.`
+          error: `Cannot delete ${name} because these views still use it: ${dependentViews.join(", ")}.`,
+          activeSourceName
         })
       );
     return;
@@ -3268,7 +3434,9 @@ app.post("/settings/database/delete", async (req, res) => {
   saveAppConfig();
   loadConfigs();
   await resetDatabaseClients();
-  res.redirect(`/settings?message=${encodeURIComponent(`Deleted database connection ${name}.`)}`);
+  const nextSourceName =
+    catalog.defaultConnection === name || activeSourceName === name ? Object.keys(connections)[0] : activeSourceName;
+  res.redirect(buildSourceAwarePath("/settings", nextSourceName, { message: `Deleted database connection ${name}.` }));
 });
 
 app.post("/settings/scan", async (req, res) => {
@@ -3300,14 +3468,15 @@ app.post("/settings/scan", async (req, res) => {
       return;
     }
 
-    viewsConfig = generatedConfig;
-    saveViewsConfig();
+    setViewsConfig(connection.name, generatedConfig);
+    saveViewsConfig(connection.name);
     loadConfigs();
-    res.redirect(
-      `/settings?message=${encodeURIComponent(
-        `Scanned ${connection.name} and rebuilt views config with ${viewCount} view(s).`
-      )}&connectionName=${encodeURIComponent(connection.name)}&limit=${limit}&maxSearchFields=${maxSearchFields}`
-    );
+    res.redirect(buildSourceAwarePath("/settings", connection.name, {
+      message: `Scanned ${connection.name} and rebuilt views config with ${viewCount} view(s).`,
+      connectionName: connection.name,
+      limit,
+      maxSearchFields
+    }));
   } catch (error) {
     res
       .status(500)
@@ -3316,14 +3485,16 @@ app.post("/settings/scan", async (req, res) => {
           error: `Scan failed: ${error.message}`,
           scanConnectionName: connectionName,
           limit,
-          maxSearchFields
+          maxSearchFields,
+          activeSourceName: connectionName
         })
       );
   }
 });
 
 app.get("/config/:viewName", (req, res) => {
-  const view = getView(req.params.viewName);
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  const view = getView(req.params.viewName, activeSourceName);
 
   if (!view) {
     res
@@ -3338,12 +3509,13 @@ app.get("/config/:viewName", (req, res) => {
   }
 
   const message = firstQueryValue(req.query.saved) ? "View config saved." : "";
-  res.send(renderViewConfig(req.params.viewName, view, { message }));
+  res.send(renderViewConfig(activeSourceName, req.params.viewName, view, { message }));
 });
 
 app.post("/config/:viewName", (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source || req.body?.source);
   const viewName = req.params.viewName;
-  const view = getView(viewName);
+  const view = getView(viewName, activeSourceName);
 
   if (!view) {
     res
@@ -3387,7 +3559,7 @@ app.post("/config/:viewName", (req, res) => {
     res
       .status(400)
       .send(
-        renderViewConfig(viewName, view, {
+        renderViewConfig(activeSourceName, viewName, view, {
           error: "Select at least one column to show in the grid.",
           selectedColumns: []
         })
@@ -3406,13 +3578,14 @@ app.post("/config/:viewName", (req, res) => {
     column.hideOnGrid = true;
   }
 
-  saveViewsConfig();
+  saveViewsConfig(activeSourceName);
   loadConfigs();
-  res.redirect(`/config/${encodeURIComponent(viewName)}?saved=1`);
+  res.redirect(buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName, { saved: 1 }));
 });
 
 app.get("/table/:viewName/download.csv", async (req, res) => {
-  const view = getView(req.params.viewName);
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  const view = getView(req.params.viewName, activeSourceName);
 
   if (!view) {
     res.status(404).send("View not found");
@@ -3420,7 +3593,7 @@ app.get("/table/:viewName/download.csv", async (req, res) => {
   }
 
   try {
-    const { rows } = await fetchViewRows(view, req.query);
+    const { rows } = await fetchViewRows(view, req.query, activeSourceName);
     const headers = view.columns.map((column) => escapeCsv(column.label || column.name)).join(",");
     const lines = rows.map((row) => {
       const rowKeyIndex = buildRowKeyIndex(row);
@@ -3443,7 +3616,8 @@ app.get("/table/:viewName/download.csv", async (req, res) => {
 });
 
 app.get("/table/:viewName", async (req, res) => {
-  const view = getView(req.params.viewName);
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  const view = getView(req.params.viewName, activeSourceName);
 
   if (!view) {
     res
@@ -3462,11 +3636,15 @@ app.get("/table/:viewName", async (req, res) => {
     const currentUrl = stripQueryParam(req.originalUrl, "crumbs");
     const currentCrumb = { label: view.title || req.params.viewName, url: currentUrl };
     const nextBreadcrumbsToken = encodeBreadcrumbs([...breadcrumbs, currentCrumb]);
-    const { rows, built, filters, page, limit, hasNext, totalCount, totalPages } = await fetchViewRows(view, req.query);
+    const { rows, built, filters, page, limit, hasNext, totalCount, totalPages } = await fetchViewRows(
+      view,
+      req.query,
+      activeSourceName
+    );
     const currentQueryString = buildQueryString(req.query);
 
     res.send(
-      renderTable(req.params.viewName, view, rows, {
+      renderTable(activeSourceName, req.params.viewName, view, rows, {
         sorts: built.sorts,
         sortColumn: built.sortColumn,
         direction: built.direction,
@@ -3490,7 +3668,8 @@ app.get("/table/:viewName", async (req, res) => {
 });
 
 app.get("/debug/:viewName/keys", async (req, res) => {
-  const view = getView(req.params.viewName);
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  const view = getView(req.params.viewName, activeSourceName);
   if (!view) {
     res.status(404).json({ error: `View not found: ${req.params.viewName}` });
     return;
@@ -3504,7 +3683,7 @@ app.get("/debug/:viewName/keys", async (req, res) => {
       page: 1
     };
     delete debugQuery.sample;
-    const { rows, built, filters } = await fetchViewRows(view, debugQuery);
+    const { rows, built, filters } = await fetchViewRows(view, debugQuery, activeSourceName);
     const summary = buildRowDebugSummary(view, rows);
 
     res.json({
