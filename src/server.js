@@ -901,11 +901,58 @@ function shouldOpenLinkInNewTab(link, url) {
   return isHttpUrl(url);
 }
 
+function resolveLinkIconName(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  switch (normalized) {
+    case "link":
+    case "external":
+    case "open":
+    case "arrow-right":
+    case "search":
+    case "magnifying-glass":
+    case "file":
+    case "document":
+    case "info":
+      return normalized;
+    default:
+      return "";
+  }
+}
+
+function renderLinkIconMarkup(iconName) {
+  switch (resolveLinkIconName(iconName)) {
+    case "external":
+      return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2h5v5h-1.5V4.56L7.03 10.03l-1.06-1.06L11.44 3.5H9z"/><path d="M3 4h4v1.5H4.5v6h6V9H12v4H3z"/></svg>';
+    case "open":
+      return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.5 2H14v5.5h-1.5V4.56L6.03 11.03l-1.06-1.06L11.44 3.5H8.5z"/><path d="M2 4h5v1.5H3.5v7h7V9H12v5H2z"/></svg>';
+    case "arrow-right":
+      return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h8.38L8.7 5.32l1.06-1.06L14.56 9l-4.8 4.74-1.06-1.06L11.38 9.5H3z"/></svg>';
+    case "magnifying-glass":
+    case "search":
+      return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.75 2a4.75 4.75 0 1 1 0 9.5a4.75 4.75 0 0 1 0-9.5m0-1.5a6.25 6.25 0 1 0 3.9 11.14l3.1 3.1l1.06-1.06l-3.1-3.1A6.25 6.25 0 0 0 6.75.5"/></svg>';
+    case "document":
+    case "file":
+      return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1h5.5L13 4.5V15H4zm5 1.5v2.5h2.5zM5.5 2.5v11h6v-5h-4v-6z"/></svg>';
+    case "info":
+      return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 1 1 0 13a6.5 6.5 0 0 1 0-13m0 1.5a5 5 0 1 0 0 10a5 5 0 0 0 0-10"/><path d="M7.25 6.5h1.5V11h-1.5zm0-2.5h1.5v1.5h-1.5z"/></svg>';
+    case "link":
+    default:
+      return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.35 10.71l-.71.7a2.5 2.5 0 0 1-3.54-3.53l2.12-2.12a2.5 2.5 0 0 1 3.53 0l.36.35l-1.06 1.06l-.35-.35a1 1 0 0 0-1.42 0L3.17 8.94a1 1 0 1 0 1.41 1.41l.71-.7zm3.3-5.42l.71-.7a2.5 2.5 0 0 1 3.54 3.53l-2.12 2.12a2.5 2.5 0 0 1-3.53 0l-.36-.35l1.06-1.06l.35.35a1 1 0 0 0 1.42 0l2.11-2.12a1 1 0 1 0-1.41-1.41l-.71.7z"/><path d="M5.7 11.35l-1.06-1.06l5.66-5.64l1.06 1.06z"/></svg>';
+  }
+}
+
 function renderLinkAnchor(link, label, url) {
   if (!url) {
     return "";
   }
   const targetAttr = shouldOpenLinkInNewTab(link, url) ? ` target="_blank" rel="noopener noreferrer"` : "";
+  const iconName = resolveLinkIconName(link?.icon);
+  if (iconName) {
+    const accessibleLabel = String(label || "Link").trim() || "Link";
+    return `<a href="${escapeHtml(url)}"${targetAttr} class="icon-link" aria-label="${escapeHtml(
+      accessibleLabel
+    )}" title="${escapeHtml(accessibleLabel)}"><span class="link-icon">${renderLinkIconMarkup(iconName)}</span></a>`;
+  }
   return `<a href="${escapeHtml(url)}"${targetAttr}>${escapeHtml(label)}</a>`;
 }
 
@@ -1648,6 +1695,26 @@ function renderLayout(title, content, options = {}) {
       a {
         color: var(--accent);
         text-decoration: none;
+      }
+      .icon-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: #fff;
+      }
+      .link-icon {
+        display: inline-flex;
+        width: 14px;
+        height: 14px;
+      }
+      .link-icon svg {
+        width: 14px;
+        height: 14px;
+        fill: currentColor;
       }
       .muted {
         color: #60708f;
@@ -2737,7 +2804,8 @@ function renderTable(sourceName, viewName, view, rows, context) {
       targetView: link.targetView,
       keys: extractLinkKeyMappings(link),
       urlTemplate: String(link.urlTemplate || "").trim(),
-      openInNewTab: typeof link.openInNewTab === "boolean" ? link.openInNewTab : null
+      openInNewTab: typeof link.openInNewTab === "boolean" ? link.openInNewTab : null,
+      icon: resolveLinkIconName(link.icon)
     }))
     .filter((link) => (link.targetView && link.keys.length) || link.urlTemplate);
   const detailsJson = toInlineJson(rowDetails);
@@ -2913,6 +2981,28 @@ function renderTable(sourceName, viewName, view, rows, context) {
             return renderTemplate(labelTemplate, rawDetail, false);
           }
 
+          function renderLinkIcon(iconName) {
+            switch (String(iconName || "").toLowerCase()) {
+              case "external":
+                return '<span class="link-icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2h5v5h-1.5V4.56L7.03 10.03l-1.06-1.06L11.44 3.5H9z"/><path d="M3 4h4v1.5H4.5v6h6V9H12v4H3z"/></svg></span>';
+              case "open":
+                return '<span class="link-icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.5 2H14v5.5h-1.5V4.56L6.03 11.03l-1.06-1.06L11.44 3.5H8.5z"/><path d="M2 4h5v1.5H3.5v7h7V9H12v5H2z"/></svg></span>';
+              case "arrow-right":
+                return '<span class="link-icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h8.38L8.7 5.32l1.06-1.06L14.56 9l-4.8 4.74-1.06-1.06L11.38 9.5H3z"/></svg></span>';
+              case "magnifying-glass":
+              case "search":
+                return '<span class="link-icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.75 2a4.75 4.75 0 1 1 0 9.5a4.75 4.75 0 0 1 0-9.5m0-1.5a6.25 6.25 0 1 0 3.9 11.14l3.1 3.1l1.06-1.06l-3.1-3.1A6.25 6.25 0 0 0 6.75.5"/></svg></span>';
+              case "document":
+              case "file":
+                return '<span class="link-icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1h5.5L13 4.5V15H4zm5 1.5v2.5h2.5zM5.5 2.5v11h6v-5h-4v-6z"/></svg></span>';
+              case "info":
+                return '<span class="link-icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 1 1 0 13a6.5 6.5 0 0 1 0-13m0 1.5a5 5 0 1 0 0 10a5 5 0 0 0 0-10"/><path d="M7.25 6.5h1.5V11h-1.5zm0-2.5h1.5v1.5h-1.5z"/></svg></span>';
+              case "link":
+              default:
+                return '<span class="link-icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.35 10.71l-.71.7a2.5 2.5 0 0 1-3.54-3.53l2.12-2.12a2.5 2.5 0 0 1 3.53 0l.36.35l-1.06 1.06l-.35-.35a1 1 0 0 0-1.42 0L3.17 8.94a1 1 0 1 0 1.41 1.41l.71-.7zm3.3-5.42l.71-.7a2.5 2.5 0 0 1 3.54 3.53l-2.12 2.12a2.5 2.5 0 0 1-3.53 0l-.36-.35l1.06-1.06l.35.35a1 1 0 0 0 1.42 0l2.11-2.12a1 1 0 1 0-1.41-1.41l-.71.7z"/><path d="M5.7 11.35l-1.06-1.06l5.66-5.64l1.06 1.06z"/></svg></span>';
+            }
+          }
+
           function renderLinks(index) {
             const rawDetail = rawDetailsByRow[index];
             if (!rawDetail) {
@@ -2922,15 +3012,19 @@ function renderTable(sourceName, viewName, view, rows, context) {
            }
 
            const items = linkDefinitions
-             .map((linkDef) => {
-               const url = buildLinkUrl(linkDef, rawDetail);
-                if (!url) {
-                  return "";
-                }
-                const label = renderLinkLabel(linkDef.labelTemplate, rawDetail);
-                const targetAttrs = shouldOpenInNewTab(linkDef, url) ? ' target="_blank" rel="noopener noreferrer"' : "";
-                return '<li><a href="' + escapeText(url) + '"' + targetAttrs + ">" + escapeText(label) + "</a></li>";
-              })
+              .map((linkDef) => {
+                const url = buildLinkUrl(linkDef, rawDetail);
+                 if (!url) {
+                   return "";
+                 }
+                 const label = renderLinkLabel(linkDef.labelTemplate, rawDetail);
+                 const targetAttrs = shouldOpenInNewTab(linkDef, url) ? ' target="_blank" rel="noopener noreferrer"' : "";
+                 if (linkDef.icon) {
+                   const accessibleLabel = label || "Link";
+                   return '<li><a class="icon-link" href="' + escapeText(url) + '"' + targetAttrs + ' aria-label="' + escapeText(accessibleLabel) + '" title="' + escapeText(accessibleLabel) + '">' + renderLinkIcon(linkDef.icon) + "</a></li>";
+                 }
+                 return '<li><a href="' + escapeText(url) + '"' + targetAttrs + ">" + escapeText(label) + "</a></li>";
+               })
               .filter(Boolean);
 
            linksRoot.innerHTML = items.join("");

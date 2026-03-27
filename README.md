@@ -162,7 +162,9 @@ Column links:
 - `views.<name>.columns[].link.urlTemplate`: Or render the cell as an external/internal URL template
 - `views.<name>.columns[].link.keys`: Optional key mappings, same shape as `views.<name>.links[].keys`
 - `views.<name>.columns[].link.label`: Optional label template; defaults to the formatted cell value
+- `views.<name>.columns[].link.icon`: Optional icon-only link rendering (`link`, `external`, `open`, `arrow-right`, `search`, `magnifying-glass`, `file`, `document`, `info`)
 - `views.<name>.columns[].link.openInNewTab`: Optional boolean for link target behavior
+- `views.<name>.links[].icon`: Optional icon-only rendering for related links using the same icon names
 
 UI config route:
 
