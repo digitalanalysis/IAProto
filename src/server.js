@@ -291,6 +291,23 @@ function collectLinkLocalColumns(view) {
       columns.add(templateColumn);
     }
   }
+  for (const column of view.columns || []) {
+    const link = column?.link;
+    if (!link) {
+      continue;
+    }
+    for (const mapping of extractLinkKeyMappings(link)) {
+      if (mapping.localColumn) {
+        columns.add(mapping.localColumn);
+      }
+    }
+    for (const templateColumn of extractTemplateKeys(link?.label)) {
+      columns.add(templateColumn);
+    }
+    for (const templateColumn of extractTemplateKeys(link?.urlTemplate)) {
+      columns.add(templateColumn);
+    }
+  }
   return columns;
 }
 
@@ -890,6 +907,23 @@ function renderLinkAnchor(link, label, url) {
   }
   const targetAttr = shouldOpenLinkInNewTab(link, url) ? ` target="_blank" rel="noopener noreferrer"` : "";
   return `<a href="${escapeHtml(url)}"${targetAttr}>${escapeHtml(label)}</a>`;
+}
+
+function renderGridCellContent(column, row, formattedValue, nextBreadcrumbsToken, sourceName) {
+  const link = column?.link;
+  const displayValue = formattedValue === undefined || formattedValue === null || formattedValue === "" ? "-" : formattedValue;
+  if (!link) {
+    return escapeHtml(displayValue);
+  }
+
+  const url = buildLinkUrl(link, row, nextBreadcrumbsToken, sourceName);
+  if (!url) {
+    return escapeHtml(displayValue);
+  }
+
+  const labelTemplate = link.label === undefined || link.label === null || link.label === "" ? displayValue : link.label;
+  const renderedLabel = renderLinkLabel(labelTemplate, row) || displayValue;
+  return renderLinkAnchor(link, renderedLabel, url);
 }
 
 function collectSearchFilters(view, query) {
@@ -2613,7 +2647,8 @@ function renderTable(sourceName, viewName, view, rows, context) {
         .map((column) => {
           const value = formatCellValue(getRowValue(row, column.name, rowKeyIndex), column);
           const align = normalizeColumnAlign(column.align);
-          return `<td style="text-align:${align}">${escapeHtml(value)}</td>`;
+          const content = renderGridCellContent(column, row, value, nextBreadcrumbsToken, activeSourceName);
+          return `<td style="text-align:${align}">${content}</td>`;
         })
         .join("");
       for (const column of view.columns) {

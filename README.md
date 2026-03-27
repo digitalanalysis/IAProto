@@ -136,6 +136,7 @@ Views config format:
 - `views.<name>.columns[].hideOnGrid`: Optional boolean to hide a column from the main table grid (still available in row details and links)
 - `views.<name>.columns[].align`: Optional text alignment (`left`, `center`, `right`) for grid and row-panel values
 - `views.<name>.columns[].format`: Optional cell formatter (`date`, `datetime`, `time`, `number`)
+- `views.<name>.columns[].link`: Optional cell link definition using the same shape as `views.<name>.links`
 - `views.<name>.columns[].dateFormat`: Optional date format, either:
   - string pattern (for example `DD/MM/YYYY`)
   - `Intl.DateTimeFormat` options object
@@ -154,6 +155,14 @@ Views config format:
   - array form (multi-column): `[{ "column": "ColA", "direction": "ASC" }, { "column": "ColB", "direction": "DESC" }]`
 - `views.<name>.searchFields`: Fields rendered on the front-page search screen
 - `views.<name>.links`: Related view links
+
+Column links:
+
+- `views.<name>.columns[].link.targetView`: Link the cell to another configured view
+- `views.<name>.columns[].link.urlTemplate`: Or render the cell as an external/internal URL template
+- `views.<name>.columns[].link.keys`: Optional key mappings, same shape as `views.<name>.links[].keys`
+- `views.<name>.columns[].link.label`: Optional label template; defaults to the formatted cell value
+- `views.<name>.columns[].link.openInNewTab`: Optional boolean for link target behavior
 
 UI config route:
 
