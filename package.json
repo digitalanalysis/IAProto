@@ -2,15 +2,46 @@
   "name": "sql-configurable-table-viewer",
   "version": "1.0.0",
   "description": "Config-driven Node.js web app for viewing SQL Server tables and related links",
-  "main": "src/server.js",
+  "main": "electron/main.js",
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "generate:views-config": "node src/generate-views-config-from-ddl.js"
+    "generate:views-config": "node src/generate-views-config-from-ddl.js",
+    "electron": "electron .",
+    "build:electron": "electron-builder --win portable"
   },
   "dependencies": {
     "express": "^4.21.2",
     "mssql": "^11.0.1"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.local.sqlconfigurabletableviewer",
+    "productName": "Configurable Data Viewer",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "config/**/*",
+      "files/**/*",
+      "package.json"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
   }
 }

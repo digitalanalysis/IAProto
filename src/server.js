@@ -5,11 +5,19 @@ const sql = require("mssql");
 const { buildViewsConfigFromSchemaTables } = require("./utils/buildViewsConfigFromSchema");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const DEFAULT_PORT = process.env.PORT || 3000;
 
-const appConfigPath = path.join(__dirname, "..", "config", "app.config.json");
-const legacyViewsConfigPath = path.join(__dirname, "..", "config", "views.config.json");
-const servedFilesPath = path.join(__dirname, "..", "files");
+const projectRoot = path.join(__dirname, "..");
+const runtimeRoot = process.env.APP_RUNTIME_DIR ? path.resolve(process.env.APP_RUNTIME_DIR) : projectRoot;
+const appConfigPath = process.env.APP_CONFIG_PATH
+  ? path.resolve(process.env.APP_CONFIG_PATH)
+  : path.join(runtimeRoot, "config", "app.config.json");
+const legacyViewsConfigPath = process.env.LEGACY_VIEWS_CONFIG_PATH
+  ? path.resolve(process.env.LEGACY_VIEWS_CONFIG_PATH)
+  : path.join(runtimeRoot, "config", "views.config.json");
+const servedFilesPath = process.env.SERVED_FILES_PATH
+  ? path.resolve(process.env.SERVED_FILES_PATH)
+  : path.join(runtimeRoot, "files");
 
 let appConfig;
 let viewsConfigsBySource = new Map();
@@ -194,7 +202,7 @@ function getViewsConfigPath(sourceName) {
   const connection = resolveDatabaseConnection(sourceName);
   const configuredPath = String(connection.config.viewsConfigPath || "").trim();
   if (configuredPath) {
-    return path.isAbsolute(configuredPath) ? configuredPath : path.join(__dirname, "..", configuredPath);
+    return path.isAbsolute(configuredPath) ? configuredPath : path.join(runtimeRoot, configuredPath);
   }
   if (connection.name === "default" && !connection.config.viewsConfigPath) {
     return legacyViewsConfigPath;
@@ -3832,6 +3840,41 @@ loadConfigs();
 fs.mkdirSync(servedFilesPath, { recursive: true });
 app.use("/files", express.static(servedFilesPath));
 
-app.listen(PORT, () => {
-  console.log(`App running at http://localhost:${PORT}`);
-});
+function startServer(options = {}) {
+  const port = options.port ?? DEFAULT_PORT;
+  const host = options.host || "127.0.0.1";
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, host, () => {
+      const address = server.address();
+      const resolvedPort = typeof address === "object" && address ? address.port : port;
+      resolve({
+        app,
+        server,
+        host,
+        port: resolvedPort,
+        url: `http://${host}:${resolvedPort}`
+      });
+    });
+    server.on("error", reject);
+  });
+}
+
+module.exports = {
+  app,
+  startServer,
+  runtimeRoot,
+  appConfigPath,
+  legacyViewsConfigPath,
+  servedFilesPath
+};
+
+if (require.main === module) {
+  startServer()
+    .then(({ url }) => {
+      console.log(`App running at ${url}`);
+    })
+    .catch((error) => {
+      console.error(`Failed to start app: ${error.message}`);
+      process.exitCode = 1;
+    });
+}

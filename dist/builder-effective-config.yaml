@@ -1,0 +1,19 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.local.sqlconfigurabletableviewer
+productName: Configurable Data Viewer
+files:
+  - filter:
+      - electron/**/*
+      - src/**/*
+      - config/**/*
+      - files/**/*
+      - package.json
+win:
+  signAndEditExecutable: false
+  target:
+    - target: portable
+      arch:
+        - x64
+electronVersion: 37.10.3

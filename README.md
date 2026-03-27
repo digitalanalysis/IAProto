@@ -41,6 +41,25 @@ npm start
 
 Open `http://localhost:3000`
 
+## Electron Build
+
+To build a portable Windows Electron executable:
+
+```bat
+build-electron.bat
+```
+
+Equivalent manual commands:
+
+```bash
+npm install
+npm run build:electron
+```
+
+The packaged output is written to `dist/`.
+
+The Electron app copies `config/` and `files/` into a writable user data folder on first launch, so users can edit settings, view configs, column order, and visibility without modifying the packaged application files.
+
 Static files:
 
 - Put files under `files/`
