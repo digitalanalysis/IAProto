@@ -27,10 +27,18 @@ function ensureRuntimeFiles(runtimeRoot) {
   const appRoot = app.getAppPath();
   copyDirectoryIfMissing(path.join(appRoot, "config"), path.join(runtimeRoot, "config"));
   copyDirectoryIfMissing(path.join(appRoot, "files"), path.join(runtimeRoot, "files"));
+  copyDirectoryIfMissing(path.join(runtimeRoot, "Files"), path.join(runtimeRoot, "files"));
+}
+
+function getRuntimeRoot() {
+  if (app.isPackaged) {
+    return path.dirname(process.execPath);
+  }
+  return path.join(app.getAppPath(), ".electron-runtime");
 }
 
 async function createMainWindow() {
-  const runtimeRoot = path.join(app.getPath("userData"), "runtime");
+  const runtimeRoot = getRuntimeRoot();
   ensureRuntimeFiles(runtimeRoot);
 
   process.env.APP_RUNTIME_DIR = runtimeRoot;

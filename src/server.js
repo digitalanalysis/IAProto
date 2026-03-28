@@ -3839,6 +3839,7 @@ app.get("/debug/:viewName/keys", async (req, res) => {
 loadConfigs();
 fs.mkdirSync(servedFilesPath, { recursive: true });
 app.use("/files", express.static(servedFilesPath));
+app.use("/Files", express.static(servedFilesPath));
 
 function startServer(options = {}) {
   const port = options.port ?? DEFAULT_PORT;

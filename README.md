@@ -58,12 +58,13 @@ npm run build:electron
 
 The packaged output is written to `dist/`.
 
-The Electron app copies `config/` and `files/` into a writable user data folder on first launch, so users can edit settings, view configs, column order, and visibility without modifying the packaged application files.
+In the packaged Electron build, the app uses `config/` and `files/` in the same directory as the executable. On first launch it copies the packaged defaults there if they do not already exist, and if a sibling legacy `Files/` folder is present it is copied into lowercase `files/`. In development mode, Electron uses `.electron-runtime/` in the project root instead.
 
 Static files:
 
 - Put files under `files/`
 - Access them at `http://localhost:3000/files/<path>`
+- Legacy attachment URLs under `http://localhost:3000/Files/<path>` also resolve to the same folder
 
 On table pages, use **Download CSV** to export the current query result.
 
