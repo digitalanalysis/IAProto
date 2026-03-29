@@ -67,12 +67,16 @@ function escapeHtml(value) {
 }
 
 function toInlineJson(value) {
-  return JSON.stringify(value)
+  return JSON.stringify(value, (_key, item) => (typeof item === "bigint" ? item.toString() : item))
     .replaceAll("<", "\\u003c")
     .replaceAll(">", "\\u003e")
     .replaceAll("&", "\\u0026")
     .replaceAll("\u2028", "\\u2028")
     .replaceAll("\u2029", "\\u2029");
+}
+
+function toPrettyConfigJson(value, fallback = {}) {
+  return JSON.stringify(value === undefined ? fallback : value, null, 2);
 }
 
 function encodeBreadcrumbs(crumbs) {
@@ -216,6 +220,13 @@ function getViewsConfig(sourceName) {
     viewsConfigsBySource.set(connection.name, readViewsConfigFromPath(getViewsConfigPath(connection.name)));
   }
   return viewsConfigsBySource.get(connection.name) || { views: {} };
+}
+
+function reloadViewsConfig(sourceName) {
+  const connection = resolveDatabaseConnection(sourceName);
+  const refreshedConfig = readViewsConfigFromPath(getViewsConfigPath(connection.name));
+  viewsConfigsBySource.set(connection.name, refreshedConfig);
+  return refreshedConfig;
 }
 
 function setViewsConfig(sourceName, config) {
@@ -2068,9 +2079,19 @@ function renderLayout(title, content, options = {}) {
         display: grid;
         gap: 10px;
       }
+      .config-subsection {
+        margin-top: 18px;
+      }
+      .config-subsection h3 {
+        margin: 0 0 8px;
+        font-size: var(--font-size-md);
+      }
       .config-column-row {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+          "toggle meta actions"
+          "json json json";
         gap: 10px;
         align-items: start;
         padding: 10px 12px;
@@ -2079,19 +2100,49 @@ function renderLayout(title, content, options = {}) {
         background: #fff;
       }
       .config-column-row input[type="checkbox"] {
+        grid-area: toggle;
         margin-top: 2px;
       }
       .config-column-meta {
+        grid-area: meta;
         display: grid;
         gap: 4px;
       }
       .config-column-title {
         font-weight: 600;
       }
+      .config-json-field {
+        grid-area: json;
+        display: grid;
+        gap: 6px;
+      }
+      .config-json-field textarea {
+        width: 100%;
+        min-height: 140px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+        resize: vertical;
+      }
+      .config-sorts {
+        display: grid;
+        gap: 10px;
+      }
+      .config-sort-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 180px minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: end;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+      }
       .config-order-controls {
+        grid-area: actions;
         display: inline-flex;
         gap: 6px;
         align-items: center;
+        justify-self: end;
       }
       .config-order-button {
         border: 1px solid var(--border);
@@ -2274,6 +2325,18 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
   const tableLabel = view.schema && connection.type !== "duckdb" ? `${view.schema}.${view.table}` : view.table;
   const saveError = String(options.error || "").trim();
   const saveMessage = String(options.message || "").trim();
+  const defaultSorts = Array.isArray(options.defaultSorts) ? options.defaultSorts : normalizeDefaultSorts(view.defaultSort);
+  const viewFields = options.viewFields || {
+    title: view.title || "",
+    schema: view.schema || "",
+    table: view.table || "",
+    database: view.database || "",
+    keyColumn: view.keyColumn || "",
+    limit: view.limit === undefined || view.limit === null ? "" : String(view.limit),
+    hideOnHome: Boolean(view.hideOnHome)
+  };
+  const searchFieldsJson = options.searchFieldsJson ?? toPrettyConfigJson(view.searchFields || [], []);
+  const linksJson = options.linksJson ?? toPrettyConfigJson(view.links || [], []);
   const selectedColumns = new Set(
     (options.selectedColumns || getGridColumns(view).map((column) => column.name))
       .map((column) => String(column || "").trim())
@@ -2290,6 +2353,10 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
     .map((column, index) => {
       const checked = selectedColumns.has(column.name) ? " checked" : "";
       const label = column.label || column.name;
+      const columnJson =
+        Array.isArray(options.columnJsonValues) && options.columnJsonValues[index] !== undefined
+          ? String(options.columnJsonValues[index] || "")
+          : toPrettyConfigJson(column, {});
       const meta = [];
       meta.push(`Column: <code>${escapeHtml(column.name)}</code>`);
       if (column.align) {
@@ -2306,9 +2373,53 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
           <span class="muted">${meta.join(" | ")}</span>
           <span class="muted">Order: ${index + 1} in configured column list</span>
         </span>
+        <label class="config-json-field">Column JSON
+          <textarea name="columnJson" rows="10" spellcheck="false">${escapeHtml(columnJson)}</textarea>
+        </label>
         <span class="config-order-controls">
           <button type="button" class="config-order-button" data-move="up" aria-label="Move ${escapeHtml(label)} up">Up</button>
           <button type="button" class="config-order-button" data-move="down" aria-label="Move ${escapeHtml(label)} down">Down</button>
+        </span>
+      </div>`;
+    })
+    .join("");
+  const sortColumnOptions = (view.columns || [])
+    .map((column) => {
+      const label = column.label || column.name;
+      return `<option value="${escapeHtml(column.name)}">${escapeHtml(label)}</option>`;
+    })
+    .join("");
+  const sortItems = (defaultSorts.length ? defaultSorts : [{ column: "", direction: "ASC" }])
+    .map((sort, index) => {
+      const selectedColumn = String(sort?.column || "").trim();
+      const selectedDirection = normalizeSortDirection(sort?.direction, "ASC");
+      return `<div class="config-sort-row" data-sort-column="${escapeHtml(selectedColumn)}">
+        <label>Column
+          <select name="sortColumns">
+            <option value="">None</option>
+            ${(view.columns || [])
+              .map((column) => {
+                const label = column.label || column.name;
+                return `<option value="${escapeHtml(column.name)}"${
+                  column.name === selectedColumn ? " selected" : ""
+                }>${escapeHtml(label)}</option>`;
+              })
+              .join("")}
+          </select>
+        </label>
+        <label>Direction
+          <select name="sortDirections">
+            <option value="ASC"${selectedDirection === "ASC" ? " selected" : ""}>Ascending</option>
+            <option value="DESC"${selectedDirection === "DESC" ? " selected" : ""}>Descending</option>
+          </select>
+        </label>
+        <span class="config-column-meta">
+          <span class="muted">Priority: ${index + 1}</span>
+        </span>
+        <span class="config-order-controls">
+          <button type="button" class="config-order-button" data-sort-move="up">Up</button>
+          <button type="button" class="config-order-button" data-sort-move="down">Down</button>
+          <button type="button" class="config-order-button" data-sort-remove="true">Remove</button>
         </span>
       </div>`;
     })
@@ -2324,38 +2435,112 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
       </div>
      ${noticeHtml}
      <div class="config-layout">
-       <section class="config-panel">
-         <h2>View Summary</h2>
-         <div class="config-summary">
-            <div>View key: <code>${escapeHtml(viewName)}</code></div>
-            <div>Database: <code>${escapeHtml(connection.name)}</code> <span class="badge">${escapeHtml(connection.type)}</span></div>
-            <div>Source: <code>${escapeHtml(tableLabel)}</code></div>
-           <div>Configured columns: ${view.columns.length}</div>
-           <div>Shown in grid: ${visibleCount}</div>
-           <div>Hidden from grid: ${hiddenCount}</div>
-         </div>
-       </section>
-       <section class="config-panel">
-          <h2>Grid Columns</h2>
-         <p class="muted">Select which configured columns appear in the main table. Use Up and Down to change column order. Unselected columns stay available in the row details panel and CSV export.</p>
-         <form method="post" action="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">
-           <div class="config-columns" id="config-columns">${columnItems}</div>
-           <div class="config-actions">
-              <button type="submit">Save view config</button>
-              <a href="${buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName)}">Cancel</a>
+        <section class="config-panel">
+          <h2>View Summary</h2>
+          <div class="config-summary">
+             <div>View key: <code>${escapeHtml(viewName)}</code></div>
+             <div>Database: <code>${escapeHtml(connection.name)}</code> <span class="badge">${escapeHtml(connection.type)}</span></div>
+             <div>Source: <code>${escapeHtml(tableLabel)}</code></div>
+            <div>Configured columns: ${view.columns.length}</div>
+            <div>Shown in grid: ${visibleCount}</div>
+            <div>Hidden from grid: ${hiddenCount}</div>
+          </div>
+        </section>
+         <section class="config-panel">
+            <h2>Grid Columns</h2>
+          <p class="muted">Select which configured columns appear in the main table. Use Up and Down to change column order. Unselected columns stay available in the row details panel and CSV export.</p>
+          <form method="post" action="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">
+            <div class="config-subsection">
+              <h3>View Options</h3>
+              <div class="form-grid">
+                <label>Title
+                  <input type="text" name="title" value="${escapeHtml(viewFields.title)}" />
+                </label>
+                <label>Schema
+                  <input type="text" name="schema" value="${escapeHtml(viewFields.schema)}" />
+                </label>
+                <label>Table
+                  <input type="text" name="table" value="${escapeHtml(viewFields.table)}" required />
+                </label>
+                <label>Database
+                  <input type="text" name="database" value="${escapeHtml(viewFields.database)}" />
+                </label>
+                <label>Key Column
+                  <input type="text" name="keyColumn" value="${escapeHtml(viewFields.keyColumn)}" />
+                </label>
+                <label>Row Limit
+                  <input type="number" name="limit" min="1" value="${escapeHtml(viewFields.limit)}" />
+                </label>
+              </div>
+              <div class="settings-actions">
+                <label><input type="checkbox" name="hideOnHome"${viewFields.hideOnHome ? " checked" : ""} /> Hide on home page</label>
+              </div>
             </div>
-          </form>
-       </section>
-     </div>
-     <script>
-       (() => {
-         const root = document.getElementById("config-columns");
-         if (!root) {
-           return;
-         }
+            <div class="config-columns" id="config-columns">${columnItems}</div>
+            <div class="config-subsection">
+              <h3>Default Sort</h3>
+              <p class="muted">Choose the default ordering used when the table is first opened. Sort levels are applied from top to bottom.</p>
+              <div class="config-sorts" id="config-sorts">${sortItems}</div>
+              <div class="config-actions">
+                <button type="button" id="add-sort-button">Add sort level</button>
+              </div>
+            </div>
+            <div class="config-subsection">
+              <h3>Search Fields JSON</h3>
+              <p class="muted">Edit the full <code>searchFields</code> array.</p>
+              <label class="config-json-field">
+                <textarea name="searchFieldsJson" rows="12" spellcheck="false">${escapeHtml(searchFieldsJson)}</textarea>
+              </label>
+            </div>
+            <div class="config-subsection">
+              <h3>Links JSON</h3>
+              <p class="muted">Edit the full <code>links</code> array, including target view, URL templates, icons, and key mappings.</p>
+              <label class="config-json-field">
+                <textarea name="linksJson" rows="12" spellcheck="false">${escapeHtml(linksJson)}</textarea>
+              </label>
+            </div>
+            <div class="config-actions">
+               <button type="submit">Save view config</button>
+               <a href="${buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName)}">Cancel</a>
+             </div>
+            </form>
+        </section>
+      </div>
+      <script>
+        (() => {
+          const root = document.getElementById("config-columns");
+          const sortRoot = document.getElementById("config-sorts");
+          const addSortButton = document.getElementById("add-sort-button");
+          if (!root || !sortRoot || !addSortButton) {
+            return;
+          }
+          const sortRowTemplate = ${toInlineJson(
+            `<div class="config-sort-row" data-sort-column="">
+              <label>Column
+                <select name="sortColumns">
+                  <option value="">None</option>
+                  ${sortColumnOptions}
+                </select>
+              </label>
+              <label>Direction
+                <select name="sortDirections">
+                  <option value="ASC">Ascending</option>
+                  <option value="DESC">Descending</option>
+                </select>
+              </label>
+              <span class="config-column-meta">
+                <span class="muted">Priority: 1</span>
+              </span>
+              <span class="config-order-controls">
+                <button type="button" class="config-order-button" data-sort-move="up">Up</button>
+                <button type="button" class="config-order-button" data-sort-move="down">Down</button>
+                <button type="button" class="config-order-button" data-sort-remove="true">Remove</button>
+              </span>
+            </div>`
+          )};
 
-         function refreshOrderUi() {
-           const rows = Array.from(root.querySelectorAll(".config-column-row"));
+          function refreshOrderUi() {
+            const rows = Array.from(root.querySelectorAll(".config-column-row"));
            rows.forEach((row, index) => {
              const meta = row.querySelector(".config-column-meta .muted:last-child");
              if (meta) {
@@ -2368,11 +2553,29 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
              }
              if (downButton) {
                downButton.disabled = index === rows.length - 1;
-             }
-           });
-         }
+              }
+            });
+          }
 
-         root.addEventListener("click", (event) => {
+          function refreshSortUi() {
+            const rows = Array.from(sortRoot.querySelectorAll(".config-sort-row"));
+            rows.forEach((row, index) => {
+              const meta = row.querySelector(".config-column-meta .muted");
+              if (meta) {
+                meta.textContent = "Priority: " + (index + 1);
+              }
+              const upButton = row.querySelector('[data-sort-move="up"]');
+              const downButton = row.querySelector('[data-sort-move="down"]');
+              if (upButton) {
+                upButton.disabled = index === 0;
+              }
+              if (downButton) {
+                downButton.disabled = index === rows.length - 1;
+              }
+            });
+          }
+
+          root.addEventListener("click", (event) => {
            const button = event.target.closest(".config-order-button");
            if (!button) {
              return;
@@ -2392,13 +2595,46 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
              if (next) {
                root.insertBefore(next, row);
              }
-           }
-           refreshOrderUi();
-         });
+            }
+            refreshOrderUi();
+          });
 
-         refreshOrderUi();
-       })();
-     </script>`,
+          sortRoot.addEventListener("click", (event) => {
+            const button = event.target.closest(".config-order-button");
+            if (!button) {
+              return;
+            }
+            const row = button.closest(".config-sort-row");
+            if (!row) {
+              return;
+            }
+            if (button.dataset.sortMove === "up") {
+              const previous = row.previousElementSibling;
+              if (previous) {
+                sortRoot.insertBefore(row, previous);
+              }
+            }
+            if (button.dataset.sortMove === "down") {
+              const next = row.nextElementSibling;
+              if (next) {
+                sortRoot.insertBefore(next, row);
+              }
+            }
+            if (button.dataset.sortRemove === "true") {
+              row.remove();
+            }
+            refreshSortUi();
+          });
+
+          addSortButton.addEventListener("click", () => {
+            sortRoot.insertAdjacentHTML("beforeend", sortRowTemplate);
+            refreshSortUi();
+          });
+
+          refreshOrderUi();
+          refreshSortUi();
+        })();
+      </script>`,
     { activeSourceName }
   );
 }
@@ -3166,23 +3402,77 @@ async function createSqlServerPool(connectionConfig) {
   return pool.connect();
 }
 
-function createDuckDbConnection(connectionConfig) {
-  // Lazy load so SQL Server-only installs do not require duckdb dependency.
-  const duckdb = require("duckdb");
-  const dbPath = connectionConfig.duckdb?.path || ":memory:";
-  const db = new duckdb.Database(dbPath);
-  return db.connect();
+function loadDuckDbModule() {
+  try {
+    return require("duckdb");
+  } catch (error) {
+    if (error?.code === "MODULE_NOT_FOUND" && String(error.message || "").includes("'duckdb'")) {
+      throw new Error(
+        "DuckDB support is not installed. Run `npm install duckdb` and rebuild the Electron package before scanning DuckDB sources."
+      );
+    }
+    throw error;
+  }
 }
 
-function runDuckDbQuery(connection, query, params) {
+function createDuckDbConnection(connectionConfig, options = {}) {
+  // Lazy load so SQL Server-only installs do not require duckdb dependency.
+  const duckdb = loadDuckDbModule();
+  const dbPath = connectionConfig.duckdb?.path || ":memory:";
+  const accessMode = options.readOnly ? duckdb.OPEN_READONLY : duckdb.OPEN_READWRITE;
   return new Promise((resolve, reject) => {
-    connection.all(query, params, (err, rows) => {
+    const db = new duckdb.Database(dbPath, accessMode, (error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      try {
+        resolve({ db, connection: db.connect() });
+      } catch (connectError) {
+        reject(connectError);
+      }
+    });
+  });
+}
+
+function closeDuckDbHandle(handle) {
+  return new Promise((resolve) => {
+    try {
+      if (handle?.connection?.close) {
+        handle.connection.close(() => {
+          if (handle?.db?.close) {
+            handle.db.close(() => resolve());
+            return;
+          }
+          resolve();
+        });
+        return;
+      }
+      if (handle?.db?.close) {
+        handle.db.close(() => resolve());
+        return;
+      }
+    } catch {
+      // Ignore close failures for cached DuckDB connections.
+    }
+    resolve();
+  });
+}
+
+function runDuckDbQuery(handle, query, params) {
+  return new Promise((resolve, reject) => {
+    const callback = (err, rows) => {
       if (err) {
         reject(err);
         return;
       }
       resolve(rows || []);
-    });
+    };
+    if (Array.isArray(params) && params.length) {
+      handle.connection.all(query, ...params, callback);
+      return;
+    }
+    handle.connection.all(query, callback);
   });
 }
 
@@ -3218,9 +3508,8 @@ async function resetDatabaseClients() {
 
   for (const connection of duckDbConnections.values()) {
     try {
-      if (connection?.close) {
-        connection.close();
-      }
+      const handle = await connection;
+      await closeDuckDbHandle(handle);
     } catch {
       // Ignore close failures for cached DuckDB connections.
     }
@@ -3277,39 +3566,43 @@ async function scanSqlServerSchema(connection) {
 }
 
 async function scanDuckDbSchema(connection) {
-  const db = getDuckDbConnection(connection);
-  const tableRows = await runDuckDbQuery(
-    db,
-    `SELECT table_schema, table_name
-     FROM information_schema.tables
-     WHERE table_schema NOT IN ('information_schema', 'pg_catalog')
-       AND table_type IN ('BASE TABLE', 'VIEW')
-     ORDER BY table_schema, table_name`,
-    []
-  );
-  const tables = [];
-
-  for (const row of tableRows) {
-    const schema = String(row.table_schema || "").trim();
-    const table = String(row.table_name || "").trim();
-    const targetName = (schema ? `${schema}.` : "") + table;
-    const pragmaRows = await runDuckDbQuery(
+  const db = await createDuckDbConnection(connection.config, { readOnly: true });
+  try {
+    const tableRows = await runDuckDbQuery(
       db,
-      `SELECT * FROM pragma_table_info('${targetName.replaceAll("'", "''")}')`,
+      `SELECT table_schema, table_name
+       FROM information_schema.tables
+       WHERE table_schema NOT IN ('information_schema', 'pg_catalog')
+         AND table_type IN ('BASE TABLE', 'VIEW')
+       ORDER BY table_schema, table_name`,
       []
     );
-    tables.push({
-      schema,
-      table,
-      columns: pragmaRows.map((column) => ({
-        name: column.name,
-        sqlType: column.type,
-        isPrimaryKey: Boolean(column.pk)
-      }))
-    });
-  }
+    const tables = [];
 
-  return tables;
+    for (const row of tableRows) {
+      const schema = String(row.table_schema || "").trim();
+      const table = String(row.table_name || "").trim();
+      const targetName = (schema ? `${schema}.` : "") + table;
+      const pragmaRows = await runDuckDbQuery(
+        db,
+        `SELECT * FROM pragma_table_info('${targetName.replaceAll("'", "''")}')`,
+        []
+      );
+      tables.push({
+        schema,
+        table,
+        columns: pragmaRows.map((column) => ({
+          name: column.name,
+          sqlType: column.type,
+          isPrimaryKey: Boolean(column.pk)
+        }))
+      });
+    }
+
+    return tables;
+  } finally {
+    await closeDuckDbHandle(db);
+  }
 }
 
 async function scanDatabaseSchema(connection) {
@@ -3335,7 +3628,7 @@ async function fetchViewRows(view, query, sourceName = "") {
   let totalCount = 0;
 
   if (dbType === "duckdb") {
-    const duckDbConnection = getDuckDbConnection(connection);
+    const duckDbConnection = await getDuckDbConnection(connection);
     const countRows = await runDuckDbQuery(duckDbConnection, countBuilt.query, countBuilt.queryParams);
     const countRow = countRows[0] || {};
     totalCount = Number(countRow.totalCount ?? Object.values(countRow)[0] ?? 0) || 0;
@@ -3361,7 +3654,7 @@ async function fetchViewRows(view, query, sourceName = "") {
   let rows;
 
   if (dbType === "duckdb") {
-    const duckDbConnection = getDuckDbConnection(connection);
+    const duckDbConnection = await getDuckDbConnection(connection);
     rows = await runDuckDbQuery(duckDbConnection, built.query, built.queryParams);
   } else {
     const pool = await getSqlServerPool(connection);
@@ -3583,6 +3876,7 @@ app.post("/settings/scan", async (req, res) => {
 
   try {
     const connection = resolveDatabaseConnection(connectionName);
+    await resetDatabaseClients();
     const tables = await scanDatabaseSchema(connection);
     const generatedConfig = buildViewsConfigFromSchemaTables(tables, {
       limit,
@@ -3631,6 +3925,7 @@ app.post("/settings/scan", async (req, res) => {
 
 app.get("/config/:viewName", (req, res) => {
   const activeSourceName = getActiveSourceName(req.query?.source);
+  reloadViewsConfig(activeSourceName);
   const view = getView(req.params.viewName, activeSourceName);
 
   if (!view) {
@@ -3652,6 +3947,7 @@ app.get("/config/:viewName", (req, res) => {
 app.post("/config/:viewName", (req, res) => {
   const activeSourceName = getActiveSourceName(req.query?.source || req.body?.source);
   const viewName = req.params.viewName;
+  reloadViewsConfig(activeSourceName);
   const view = getView(viewName, activeSourceName);
 
   if (!view) {
@@ -3663,56 +3959,185 @@ app.post("/config/:viewName", (req, res) => {
           `<h1>View not found</h1><p>No config exists for <code>${escapeHtml(viewName)}</code>.</p>`
         )
       );
-    return;
+     return;
   }
 
-  const selectedColumns = new Set(
+  const submittedViewFields = {
+    title: String(req.body?.title || "").trim(),
+    schema: String(req.body?.schema || "").trim(),
+    table: String(req.body?.table || "").trim(),
+    database: String(req.body?.database || "").trim(),
+    keyColumn: String(req.body?.keyColumn || "").trim(),
+    limit: String(req.body?.limit || "").trim(),
+    hideOnHome: req.body?.hideOnHome === "on"
+  };
+  const submittedColumnKeys = asArray(req.body?.columnOrder).map((value) => String(value || "").trim());
+  const submittedColumnJsonValues = asArray(req.body?.columnJson).map((value) => String(value || ""));
+  const submittedSearchFieldsJson = String(req.body?.searchFieldsJson || "").trim();
+  const submittedLinksJson = String(req.body?.linksJson || "").trim();
+  const selectedColumnKeys = new Set(
     asArray(req.body?.visibleColumns)
       .map((column) => String(column || "").trim())
       .filter(Boolean)
   );
-  const existingColumns = view.columns || [];
-  const validColumns = new Set(existingColumns.map((column) => column.name).filter(Boolean));
-  const requestedOrder = asArray(req.body?.columnOrder)
-    .map((column) => String(column || "").trim())
-    .filter((column) => column && validColumns.has(column));
-  const normalizedOrder = [];
-  const seenOrderedColumns = new Set();
-  for (const columnName of requestedOrder) {
-    if (!seenOrderedColumns.has(columnName)) {
-      seenOrderedColumns.add(columnName);
-      normalizedOrder.push(columnName);
-    }
-  }
-  for (const column of existingColumns) {
-    if (column?.name && !seenOrderedColumns.has(column.name)) {
-      seenOrderedColumns.add(column.name);
-      normalizedOrder.push(column.name);
-    }
-  }
-  const normalizedSelectedColumns = Array.from(selectedColumns).filter((column) => validColumns.has(column));
 
-  if (!normalizedSelectedColumns.length) {
-    res
-      .status(400)
-      .send(
-        renderViewConfig(activeSourceName, viewName, view, {
-          error: "Select at least one column to show in the grid.",
-          selectedColumns: []
-        })
-      );
+  const renderError = (message, defaultSorts = []) => {
+    res.status(400).send(
+      renderViewConfig(activeSourceName, viewName, view, {
+        error: message,
+        selectedColumns: submittedColumnKeys.filter((key) => selectedColumnKeys.has(key)),
+        defaultSorts,
+        viewFields: submittedViewFields,
+        columnJsonValues: submittedColumnJsonValues,
+        searchFieldsJson: submittedSearchFieldsJson,
+        linksJson: submittedLinksJson
+      })
+    );
+  };
+
+  if (!submittedViewFields.table) {
+    renderError("Table is required.");
     return;
   }
 
-  const columnByName = new Map(existingColumns.map((column) => [column.name, column]));
-  view.columns = normalizedOrder.map((columnName) => columnByName.get(columnName)).filter(Boolean);
+  const parsedColumns = [];
+  const rowKeyToColumnName = new Map();
+  const seenParsedColumnNames = new Set();
+  for (let index = 0; index < submittedColumnJsonValues.length; index += 1) {
+    const rawColumnJson = submittedColumnJsonValues[index];
+    const rowKey = submittedColumnKeys[index] || `column_${index}`;
+    let parsedColumn;
+    try {
+      parsedColumn = JSON.parse(rawColumnJson);
+    } catch (error) {
+      renderError(`Column ${index + 1} JSON is invalid: ${error.message}`);
+      return;
+    }
+    if (!parsedColumn || typeof parsedColumn !== "object" || Array.isArray(parsedColumn)) {
+      renderError(`Column ${index + 1} JSON must be an object.`);
+      return;
+    }
+    const columnName = String(parsedColumn.name || "").trim();
+    if (!columnName) {
+      renderError(`Column ${index + 1} must include a non-empty name.`);
+      return;
+    }
+    if (seenParsedColumnNames.has(columnName)) {
+      renderError(`Column names must be unique. Duplicate: ${columnName}`);
+      return;
+    }
+    seenParsedColumnNames.add(columnName);
+    parsedColumn.name = columnName;
+    parsedColumns.push(parsedColumn);
+    rowKeyToColumnName.set(rowKey, columnName);
+  }
+
+  const normalizedSelectedColumns = submittedColumnKeys
+    .filter((key) => selectedColumnKeys.has(key))
+    .map((key) => rowKeyToColumnName.get(key))
+    .filter(Boolean);
+
+  const requestedSortColumns = asArray(req.body?.sortColumns)
+    .map((column) => String(column || "").trim())
+    .map((column) => rowKeyToColumnName.get(column) || column);
+  const requestedSortDirections = asArray(req.body?.sortDirections).map((direction) =>
+    normalizeSortDirection(direction, "ASC")
+  );
+  const validColumns = new Set(parsedColumns.map((column) => column.name));
+  const normalizedSorts = [];
+  const seenSortColumns = new Set();
+  for (let index = 0; index < requestedSortColumns.length; index += 1) {
+    const column = requestedSortColumns[index];
+    if (!column || !validColumns.has(column) || seenSortColumns.has(column)) {
+      continue;
+    }
+    seenSortColumns.add(column);
+    normalizedSorts.push({
+      column,
+      direction: requestedSortDirections[index] || "ASC"
+    });
+  }
+
+  if (!normalizedSelectedColumns.length) {
+    renderError("Select at least one column to show in the grid.", normalizedSorts);
+    return;
+  }
+
+  let parsedSearchFields;
+  try {
+    parsedSearchFields = submittedSearchFieldsJson ? JSON.parse(submittedSearchFieldsJson) : [];
+  } catch (error) {
+    renderError(`Search Fields JSON is invalid: ${error.message}`, normalizedSorts);
+    return;
+  }
+  if (!Array.isArray(parsedSearchFields)) {
+    renderError("Search Fields JSON must be an array.", normalizedSorts);
+    return;
+  }
+
+  let parsedLinks;
+  try {
+    parsedLinks = submittedLinksJson ? JSON.parse(submittedLinksJson) : [];
+  } catch (error) {
+    renderError(`Links JSON is invalid: ${error.message}`, normalizedSorts);
+    return;
+  }
+  if (!Array.isArray(parsedLinks)) {
+    renderError("Links JSON must be an array.", normalizedSorts);
+    return;
+  }
+
+  view.columns = parsedColumns;
 
   for (const column of view.columns || []) {
-    if (selectedColumns.has(column.name)) {
+    if (normalizedSelectedColumns.includes(column.name)) {
       delete column.hideOnGrid;
       continue;
     }
     column.hideOnGrid = true;
+  }
+
+  if (submittedViewFields.title) {
+    view.title = submittedViewFields.title;
+  } else {
+    delete view.title;
+  }
+  if (submittedViewFields.schema) {
+    view.schema = submittedViewFields.schema;
+  } else {
+    delete view.schema;
+  }
+  view.table = submittedViewFields.table;
+  if (submittedViewFields.database) {
+    view.database = submittedViewFields.database;
+  } else {
+    delete view.database;
+  }
+  if (submittedViewFields.keyColumn) {
+    view.keyColumn = submittedViewFields.keyColumn;
+  } else {
+    delete view.keyColumn;
+  }
+  const parsedLimit = parsePositiveInt(submittedViewFields.limit, null);
+  if (parsedLimit) {
+    view.limit = parsedLimit;
+  } else {
+    delete view.limit;
+  }
+  if (submittedViewFields.hideOnHome) {
+    view.hideOnHome = true;
+  } else {
+    delete view.hideOnHome;
+  }
+  view.searchFields = parsedSearchFields;
+  view.links = parsedLinks;
+
+  if (!normalizedSorts.length) {
+    delete view.defaultSort;
+  } else if (normalizedSorts.length === 1) {
+    view.defaultSort = normalizedSorts[0];
+  } else {
+    view.defaultSort = normalizedSorts;
   }
 
   saveViewsConfig(activeSourceName);

@@ -12,6 +12,7 @@
     "build:electron": "electron-builder --win portable"
   },
   "dependencies": {
+    "duckdb": "1.2.1",
     "express": "^4.21.2",
     "mssql": "^11.0.1"
   },

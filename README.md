@@ -77,6 +77,8 @@ Each view also has an **Edit view config** screen at `/config/:viewName`.
 - Saves column visibility and order changes back to the active source's views config file
 - Updates `views.<name>.columns[].hideOnGrid`
 - Updates the order of `views.<name>.columns`
+- Updates `views.<name>.defaultSort`
+- Allows editing full JSON for each column plus the view's `searchFields` and `links` arrays
 - Keeps hidden grid columns available in the row details panel and CSV export
 
 ## Generate Config From SQL Server DDL
@@ -188,7 +190,7 @@ Column links:
 
 UI config route:
 
-- `/config/:viewName`: Per-view config screen for choosing which configured columns appear in the main table grid and in what order
+- `/config/:viewName`: Per-view config screen for choosing which configured columns appear in the main table grid, their order, the default table sort, and advanced JSON for column/search/link options
 - `/settings`: Settings screen for database connections and live schema scanning
 - Source switching: use the top toolbar to switch between data sources and their separate views config files
 
