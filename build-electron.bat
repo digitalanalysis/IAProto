@@ -4,6 +4,13 @@ setlocal
 cd /d "%~dp0"
 
 set CSC_IDENTITY_AUTO_DISCOVERY=false
+set PYTHON=python
+set npm_config_python=python
+
+if exist node_modules\duckdb\build (
+  echo Cleaning stale DuckDB build folder...
+  rmdir /s /q node_modules\duckdb\build
+)
 
 echo Installing dependencies...
 call npm install
