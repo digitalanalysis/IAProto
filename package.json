@@ -10,7 +10,8 @@
     "dev": "node --watch src/server.js",
     "generate:views-config": "node src/generate-views-config-from-ddl.js",
     "electron": "electron .",
-    "build:electron": "electron-builder --config.nativeRebuilder=legacy --win portable"
+    "build:electron": "electron-builder --config.nativeRebuilder=legacy --config.npmRebuild=false --win portable",
+    "rebuild:electron-native": "electron-builder install-app-deps"
   },
   "dependencies": {
     "duckdb": "1.2.1",
@@ -25,6 +26,7 @@
     "appId": "com.local.sqlconfigurabletableviewer",
     "productName": "Configurable Data Viewer",
     "nativeRebuilder": "legacy",
+    "npmRebuild": false,
     "directories": {
       "output": "dist"
     },

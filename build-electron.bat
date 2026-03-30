@@ -7,14 +7,18 @@ set CSC_IDENTITY_AUTO_DISCOVERY=false
 set PYTHON=python
 set npm_config_python=python
 
-if exist node_modules\duckdb\build (
-  echo Cleaning stale DuckDB build folder...
-  rmdir /s /q node_modules\duckdb\build
+if not exist node_modules (
+  echo Installing dependencies...
+  call npm ci
+  if errorlevel 1 goto :fail
+) else (
+  echo Reusing existing node_modules. Set FORCE_INSTALL=1 to reinstall dependencies.
+  if /I "%FORCE_INSTALL%"=="1" (
+    echo Reinstalling dependencies...
+    call npm ci
+    if errorlevel 1 goto :fail
+  )
 )
-
-echo Installing dependencies...
-call npm install
-if errorlevel 1 goto :fail
 
 echo Building Electron portable executable...
 call npm run build:electron

@@ -35,7 +35,12 @@ function readViewsConfigFromPath(filePath) {
   if (!fs.existsSync(filePath)) {
     return { views: {} };
   }
-  const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  let parsed;
+  try {
+    parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (error) {
+    throw new Error(`Views config is not valid JSON: ${filePath}`);
+  }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return { views: {} };
   }
@@ -156,6 +161,48 @@ function normalizeDatabaseName(value) {
     .replace(/[^a-zA-Z0-9_-]+/g, "_");
 }
 
+function resolveRuntimePath(inputPath = "") {
+  const normalizedPath = String(inputPath || "").trim();
+  if (!normalizedPath) {
+    return "";
+  }
+  return path.isAbsolute(normalizedPath) ? normalizedPath : path.join(runtimeRoot, normalizedPath);
+}
+
+function resolveDefaultDuckDbPath(connectionName = "") {
+  const preferredFileName = `${String(connectionName || "").trim()}.duckdb`;
+  if (preferredFileName !== ".duckdb") {
+    const preferredPath = path.join(runtimeRoot, preferredFileName);
+    if (fs.existsSync(preferredPath)) {
+      return preferredPath;
+    }
+  }
+  try {
+    const localDuckDbFiles = fs
+      .readdirSync(runtimeRoot, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && /\.duckdb$/i.test(entry.name))
+      .map((entry) => path.join(runtimeRoot, entry.name));
+    if (localDuckDbFiles.length === 1) {
+      return localDuckDbFiles[0];
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function resolveDuckDbPath(connectionConfig, connectionName = "") {
+  const configuredPath = resolveRuntimePath(connectionConfig?.duckdb?.path);
+  if (configuredPath) {
+    return configuredPath;
+  }
+  const envPath = resolveRuntimePath(process.env.DUCKDB_PATH);
+  if (envPath) {
+    return envPath;
+  }
+  return resolveDefaultDuckDbPath(connectionName);
+}
+
 function getDatabaseCatalog() {
   const databaseConfig = appConfig.database || {};
   const connections = {};
@@ -170,48 +217,32 @@ function getDatabaseCatalog() {
     }
   }
 
-  if (!Object.keys(connections).length) {
-    connections.default = {
-      type: String(process.env.DB_TYPE || databaseConfig.type || "sqlserver").toLowerCase(),
-      viewsConfigPath: legacyViewsConfigPath,
-      sqlserver: {
-        server: process.env.DB_SERVER || databaseConfig.sqlserver?.server || databaseConfig.server || "",
-        database: process.env.DB_DATABASE || databaseConfig.sqlserver?.database || databaseConfig.database || "",
-        user: process.env.DB_USER || databaseConfig.sqlserver?.user || databaseConfig.user || "",
-        password: process.env.DB_PASSWORD || databaseConfig.sqlserver?.password || databaseConfig.password || "",
-        port: Number(process.env.DB_PORT || databaseConfig.sqlserver?.port || databaseConfig.port || 1433),
-        options: {
-          encrypt: databaseConfig.sqlserver?.options?.encrypt ?? databaseConfig.options?.encrypt ?? true,
-          trustServerCertificate:
-            databaseConfig.sqlserver?.options?.trustServerCertificate ??
-            databaseConfig.options?.trustServerCertificate ??
-            true
-        }
-      },
-      duckdb: {
-        path: process.env.DUCKDB_PATH || databaseConfig.duckdb?.path || ":memory:"
-      }
-    };
-    defaultConnection = "default";
-  }
-
   if (!defaultConnection || !connections[defaultConnection]) {
-    defaultConnection = Object.keys(connections)[0] || "default";
+    defaultConnection = Object.keys(connections)[0] || "";
   }
 
   return { connections, defaultConnection };
+}
+
+function getPreferredSourceName(requestedSource = "") {
+  const catalog = getDatabaseCatalog();
+  const requestedName = normalizeDatabaseName(requestedSource);
+  if (requestedName && catalog.connections[requestedName]) {
+    return requestedName;
+  }
+  return catalog.defaultConnection || Object.keys(catalog.connections)[0] || "";
 }
 
 function getViewsConfigPath(sourceName) {
   const connection = resolveDatabaseConnection(sourceName);
   const configuredPath = String(connection.config.viewsConfigPath || "").trim();
   if (configuredPath) {
-    return path.isAbsolute(configuredPath) ? configuredPath : path.join(runtimeRoot, configuredPath);
+    return resolveRuntimePath(configuredPath);
   }
   if (connection.name === "default" && !connection.config.viewsConfigPath) {
     return legacyViewsConfigPath;
   }
-  return path.join(__dirname, "..", "config", `views.${connection.name}.config.json`);
+  return path.join(runtimeRoot, "config", `views.${connection.name}.config.json`);
 }
 
 function getViewsConfig(sourceName) {
@@ -229,13 +260,30 @@ function reloadViewsConfig(sourceName) {
   return refreshedConfig;
 }
 
+function getExternalDependentViews(connectionName, catalog = getDatabaseCatalog()) {
+  const normalizedConnectionName = normalizeDatabaseName(connectionName);
+  const dependentViews = [];
+  for (const sourceName of Object.keys(catalog.connections)) {
+    if (sourceName === normalizedConnectionName) {
+      continue;
+    }
+    const viewsConfig = getViewsConfig(sourceName);
+    for (const [viewName, view] of Object.entries(viewsConfig.views || {})) {
+      if (normalizeDatabaseName(view?.database) === normalizedConnectionName) {
+        dependentViews.push(`${sourceName}:${viewName}`);
+      }
+    }
+  }
+  return dependentViews;
+}
+
 function setViewsConfig(sourceName, config) {
   const connection = resolveDatabaseConnection(sourceName);
   viewsConfigsBySource.set(connection.name, config && typeof config === "object" ? config : { views: {} });
 }
 
 function getActiveSourceName(requestedSource = "") {
-  return resolveDatabaseConnection(requestedSource).name;
+  return getPreferredSourceName(requestedSource);
 }
 
 function resolveDatabaseConnection(databaseName = "") {
@@ -275,12 +323,39 @@ function getAllViews(sourceName = "") {
   return getViewsConfig(sourceName).views || {};
 }
 
+function getColumnId(column) {
+  return String(column?.id || column?.name || "").trim();
+}
+
+function getColumnSourceName(column) {
+  return String(column?.name || "").trim();
+}
+
+function findViewColumn(view, columnKey) {
+  const normalizedKey = String(columnKey || "").trim();
+  if (!normalizedKey) {
+    return null;
+  }
+  return (view?.columns || []).find((column) => {
+    const columnId = getColumnId(column);
+    const sourceName = getColumnSourceName(column);
+    return columnId === normalizedKey || sourceName === normalizedKey;
+  });
+}
+
+function resolveViewColumnName(view, columnKey) {
+  return getColumnSourceName(findViewColumn(view, columnKey)) || String(columnKey || "").trim();
+}
+
 function collectAllowedColumns(view) {
   const columns = new Set();
 
   if (Array.isArray(view.columns)) {
     for (const column of view.columns) {
-      columns.add(column.name);
+      const sourceName = getColumnSourceName(column);
+      if (sourceName) {
+        columns.add(sourceName);
+      }
     }
   }
 
@@ -699,12 +774,13 @@ function resolveSorts(view, options, allowedColumns) {
     const seen = new Set();
     const result = [];
     for (const item of items) {
-      if (!item?.column || !allowedColumns.has(item.column) || seen.has(item.column)) {
+      const resolvedColumn = resolveViewColumnName(view, item?.column);
+      if (!resolvedColumn || !allowedColumns.has(resolvedColumn) || seen.has(resolvedColumn)) {
         continue;
       }
-      seen.add(item.column);
+      seen.add(resolvedColumn);
       result.push({
-        column: item.column,
+        column: resolvedColumn,
         direction: normalizeSortDirection(item.direction, "ASC")
       });
     }
@@ -1074,7 +1150,8 @@ function collectSearchFilters(view, query) {
     if (!queryKey.startsWith("f_")) {
       continue;
     }
-    const filterColumn = queryKey.slice(2);
+    const filterColumnKey = queryKey.slice(2);
+    const filterColumn = resolveViewColumnName(view, filterColumnKey);
     const filterValue = firstQueryValue(queryValue);
     if (
       !filterColumn ||
@@ -1090,7 +1167,7 @@ function collectSearchFilters(view, query) {
       column: filterColumn,
       value: String(filterValue),
       operator: "exact",
-      label: filterColumn,
+      label: filterColumnKey,
       source: "exact"
     });
   }
@@ -1099,7 +1176,8 @@ function collectSearchFilters(view, query) {
     if (!queryKey.startsWith("cf_")) {
       continue;
     }
-    const filterColumn = queryKey.slice(3);
+    const filterColumnKey = queryKey.slice(3);
+    const filterColumn = resolveViewColumnName(view, filterColumnKey);
     const filterValue = firstQueryValue(queryValue);
     if (
       !filterColumn ||
@@ -1115,7 +1193,7 @@ function collectSearchFilters(view, query) {
       column: filterColumn,
       value: String(filterValue),
       operator: "contains",
-      label: `${filterColumn} contains`,
+      label: `${filterColumnKey} contains`,
       source: "column"
     });
   }
@@ -2207,6 +2285,12 @@ function renderLayout(title, content, options = {}) {
         gap: 4px;
         font-size: var(--font-size-sm);
       }
+      [data-database-form][data-current-type="sqlserver"] [data-database-section="duckdb"] {
+        display: none;
+      }
+      [data-database-form][data-current-type="duckdb"] [data-database-section="sqlserver"] {
+        display: none;
+      }
       .form-grid input[type="text"],
       .form-grid input[type="password"],
       .form-grid input[type="number"],
@@ -2280,6 +2364,16 @@ function renderLayout(title, content, options = {}) {
 
 function renderHome(sourceName) {
   const activeSourceName = getActiveSourceName(sourceName);
+  const catalog = getDatabaseCatalog();
+  if (!Object.keys(catalog.connections).length) {
+    return renderLayout(
+      "Search",
+      `<h1>Search</h1>
+       <div class="toolbar secondary"><a href="/settings">Settings</a></div>
+       <div class="notice">No database connections are configured yet. Add one in Settings to start browsing data.</div>`,
+      { activeSourceName: "" }
+    );
+  }
   const viewItems = Object.entries(getAllViews(activeSourceName))
     .filter(([, view]) => !view.hideOnHome)
     .map(([viewName, view]) => {
@@ -2338,11 +2432,11 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
   const searchFieldsJson = options.searchFieldsJson ?? toPrettyConfigJson(view.searchFields || [], []);
   const linksJson = options.linksJson ?? toPrettyConfigJson(view.links || [], []);
   const selectedColumns = new Set(
-    (options.selectedColumns || getGridColumns(view).map((column) => column.name))
+    (options.selectedColumns || getGridColumns(view).map((column) => getColumnId(column)))
       .map((column) => String(column || "").trim())
       .filter(Boolean)
   );
-  const visibleCount = (view.columns || []).filter((column) => selectedColumns.has(column.name)).length;
+  const visibleCount = (view.columns || []).filter((column) => selectedColumns.has(getColumnId(column))).length;
   const hiddenCount = Math.max(0, (view.columns || []).length - visibleCount);
   const noticeHtml = saveError
     ? `<div class="notice error-notice">${escapeHtml(saveError)}</div>`
@@ -2351,13 +2445,15 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
       : "";
   const columnItems = (view.columns || [])
     .map((column, index) => {
-      const checked = selectedColumns.has(column.name) ? " checked" : "";
+      const columnId = getColumnId(column);
+      const checked = selectedColumns.has(columnId) ? " checked" : "";
       const label = column.label || column.name;
       const columnJson =
         Array.isArray(options.columnJsonValues) && options.columnJsonValues[index] !== undefined
           ? String(options.columnJsonValues[index] || "")
           : toPrettyConfigJson(column, {});
       const meta = [];
+      meta.push(`ID: <code>${escapeHtml(columnId)}</code>`);
       meta.push(`Column: <code>${escapeHtml(column.name)}</code>`);
       if (column.align) {
         meta.push(`Align: <code>${escapeHtml(column.align)}</code>`);
@@ -2365,9 +2461,9 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
       if (column.format) {
         meta.push(`Format: <code>${escapeHtml(column.format)}</code>`);
       }
-      return `<div class="config-column-row" data-column-name="${escapeHtml(column.name)}">
-        <input type="hidden" name="columnOrder" value="${escapeHtml(column.name)}" />
-        <input type="checkbox" name="visibleColumns" value="${escapeHtml(column.name)}"${checked} />
+      return `<div class="config-column-row" data-column-name="${escapeHtml(columnId)}">
+        <input type="hidden" name="columnOrder" value="${escapeHtml(columnId)}" />
+        <input type="checkbox" name="visibleColumns" value="${escapeHtml(columnId)}"${checked} />
         <span class="config-column-meta">
           <span class="config-column-title">${escapeHtml(label)}</span>
           <span class="muted">${meta.join(" | ")}</span>
@@ -2385,8 +2481,9 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
     .join("");
   const sortColumnOptions = (view.columns || [])
     .map((column) => {
+      const columnId = getColumnId(column);
       const label = column.label || column.name;
-      return `<option value="${escapeHtml(column.name)}">${escapeHtml(label)}</option>`;
+      return `<option value="${escapeHtml(columnId)}">${escapeHtml(label)}</option>`;
     })
     .join("");
   const sortItems = (defaultSorts.length ? defaultSorts : [{ column: "", direction: "ASC" }])
@@ -2400,8 +2497,9 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
             ${(view.columns || [])
               .map((column) => {
                 const label = column.label || column.name;
-                return `<option value="${escapeHtml(column.name)}"${
-                  column.name === selectedColumn ? " selected" : ""
+                const columnId = getColumnId(column);
+                return `<option value="${escapeHtml(columnId)}"${
+                  columnId === selectedColumn ? " selected" : ""
                 }>${escapeHtml(label)}</option>`;
               })
               .join("")}
@@ -2645,6 +2743,7 @@ function renderSettings(options = {}) {
   const noticeError = String(options.error || "").trim();
   const catalog = getDatabaseCatalog();
   const connectionOptions = Object.entries(catalog.connections);
+  const hasConnections = connectionOptions.length > 0;
   const selectedScanConnection =
     normalizeDatabaseName(options.scanConnectionName) || options.lastSavedConnectionName || catalog.defaultConnection;
   const noticeHtml = noticeError
@@ -2666,7 +2765,7 @@ function renderSettings(options = {}) {
           <span class="badge">${escapeHtml(type)}</span>
           ${isDefault ? '<span class="badge">default</span>' : ""}
         </div>
-        <form method="post" action="${buildSourceAwarePath("/settings/database/save", activeSourceName)}" data-database-form>
+        <form method="post" action="${buildSourceAwarePath("/settings/database/save", activeSourceName)}" data-database-form data-current-type="${escapeHtml(type)}">
           <input type="hidden" name="originalName" value="${escapeHtml(name)}" />
           <div class="form-grid">
             <label>Name
@@ -2681,29 +2780,29 @@ function renderSettings(options = {}) {
             <label>Views Config Path
               <input type="text" name="viewsConfigPath" value="${escapeHtml(connection.viewsConfigPath || "")}" />
             </label>
-            <label data-sqlserver-field>Server
+            <label data-database-section="sqlserver">Server
               <input type="text" name="server" value="${escapeHtml(sqlServerConfig.server || "")}" />
             </label>
-            <label data-sqlserver-field>Port
+            <label data-database-section="sqlserver">Port
               <input type="number" name="port" min="1" value="${escapeHtml(
                 sqlServerConfig.port === undefined || sqlServerConfig.port === null ? "" : String(sqlServerConfig.port)
               )}" />
             </label>
-            <label data-sqlserver-field>Database
+            <label data-database-section="sqlserver">Database
               <input type="text" name="database" value="${escapeHtml(sqlServerConfig.database || "")}" />
             </label>
-            <label data-sqlserver-field>User
+            <label data-database-section="sqlserver">User
               <input type="text" name="user" value="${escapeHtml(sqlServerConfig.user || "")}" />
             </label>
-            <label data-sqlserver-field>Password
+            <label data-database-section="sqlserver">Password
               <input type="password" name="password" value="${escapeHtml(sqlServerConfig.password || "")}" />
             </label>
-            <label data-duckdb-field>DuckDB Path
+            <label data-database-section="duckdb">DuckDB Path
               <input type="text" name="path" value="${escapeHtml(duckdbConfig.path || "")}" />
             </label>
           </div>
           <div class="settings-actions">
-            <span class="inline-checks" data-sqlserver-field>
+            <span class="inline-checks" data-database-section="sqlserver">
               <label><input type="checkbox" name="encrypt"${sqlServerOptions.encrypt ? " checked" : ""} /> Encrypt</label>
               <label><input type="checkbox" name="trustServerCertificate"${
                 sqlServerOptions.trustServerCertificate ? " checked" : ""
@@ -2715,21 +2814,17 @@ function renderSettings(options = {}) {
             <button type="submit">Save connection</button>
           </div>
         </form>
-        ${
-          connectionOptions.length > 1
-            ? `<form method="post" action="${buildSourceAwarePath(
-                "/settings/database/delete",
-                activeSourceName
-              )}" onsubmit="return confirm('Delete connection ${escapeHtml(
-                name
-              )}?');">
-                <input type="hidden" name="name" value="${escapeHtml(name)}" />
-                <div class="settings-actions">
-                  <button type="submit">Delete connection</button>
-                </div>
-              </form>`
-            : ""
-        }
+        <form method="post" action="${buildSourceAwarePath(
+          "/settings/database/delete",
+          activeSourceName
+        )}" onsubmit="return confirm('Delete connection ${escapeHtml(
+          name
+        )}?');">
+          <input type="hidden" name="name" value="${escapeHtml(name)}" />
+          <div class="settings-actions">
+            <button type="submit">Delete connection</button>
+          </div>
+        </form>
       </div>`;
     })
     .join("");
@@ -2746,19 +2841,19 @@ function renderSettings(options = {}) {
   return renderLayout(
     "Settings",
     `<h1>Settings</h1>
-     <div class="toolbar secondary">
-       <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
+      <div class="toolbar secondary">
+        <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
      </div>
      ${noticeHtml}
      <div class="settings-grid">
-       <section class="settings-card">
-         <h2>Database Connections</h2>
-         <p class="muted">Views can point at a named database connection. The default connection is used when a view does not specify one.</p>
-         ${connectionCards}
-       </section>
-       <section class="settings-card">
+        <section class="settings-card">
+          <h2>Database Connections</h2>
+          <p class="muted">Views can point at a named database connection. The default connection is used when a view does not specify one.</p>
+          ${connectionCards || '<p class="muted">No database connections configured.</p>'}
+        </section>
+        <section class="settings-card">
          <h2>Add Database</h2>
-         <form method="post" action="${buildSourceAwarePath("/settings/database/save", activeSourceName)}" data-database-form>
+         <form method="post" action="${buildSourceAwarePath("/settings/database/save", activeSourceName)}" data-database-form data-current-type="sqlserver">
            <div class="form-grid">
              <label>Name
                <input type="text" name="name" value="" required />
@@ -2772,27 +2867,27 @@ function renderSettings(options = {}) {
               <label>Views Config Path
                 <input type="text" name="viewsConfigPath" value="" placeholder="config/views.my_source.config.json" />
               </label>
-             <label data-sqlserver-field>Server
+             <label data-database-section="sqlserver">Server
                <input type="text" name="server" value="" />
              </label>
-             <label data-sqlserver-field>Port
+              <label data-database-section="sqlserver">Port
                <input type="number" name="port" min="1" value="1433" />
              </label>
-             <label data-sqlserver-field>Database
+              <label data-database-section="sqlserver">Database
                <input type="text" name="database" value="" />
              </label>
-             <label data-sqlserver-field>User
+              <label data-database-section="sqlserver">User
                <input type="text" name="user" value="" />
              </label>
-             <label data-sqlserver-field>Password
+              <label data-database-section="sqlserver">Password
                <input type="password" name="password" value="" />
              </label>
-             <label data-duckdb-field>DuckDB Path
+              <label data-database-section="duckdb">DuckDB Path
                <input type="text" name="path" value="" />
              </label>
            </div>
            <div class="settings-actions">
-             <span class="inline-checks" data-sqlserver-field>
+              <span class="inline-checks" data-database-section="sqlserver">
                <label><input type="checkbox" name="encrypt" checked /> Encrypt</label>
                <label><input type="checkbox" name="trustServerCertificate" checked /> Trust server certificate</label>
              </span>
@@ -2803,49 +2898,53 @@ function renderSettings(options = {}) {
            </div>
          </form>
        </section>
-        <section class="settings-card">
-          <h2>Scan Database Into Views Config</h2>
-          <p class="muted">This reads live table metadata from the selected database and replaces that source's configured views config file.</p>
-         <form method="post" action="${buildSourceAwarePath("/settings/scan", activeSourceName)}">
-           <div class="form-grid">
-             <label>Connection
-               <select name="connectionName">${scanOptionsHtml}</select>
-             </label>
-             <label>Default row limit
-               <input type="number" name="limit" min="1" value="${escapeHtml(String(options.limit || 200))}" />
-             </label>
-             <label>Max search fields
-               <input type="number" name="maxSearchFields" min="1" value="${escapeHtml(
-                 String(options.maxSearchFields || 3)
-               )}" />
-             </label>
-           </div>
-           <div class="settings-actions">
-             <button type="submit">Scan and rebuild views config</button>
-           </div>
-         </form>
-       </section>
-     </div>
-     <script>
-       (() => {
-         const forms = Array.from(document.querySelectorAll("[data-database-form]"));
-         function syncForm(form) {
-           const typeSelect = form.querySelector("[data-database-type]");
-           const currentType = typeSelect ? String(typeSelect.value || "sqlserver").toLowerCase() : "sqlserver";
-           form.querySelectorAll("[data-sqlserver-field]").forEach((field) => {
-             field.style.display = currentType === "sqlserver" ? "" : "none";
-           });
-           form.querySelectorAll("[data-duckdb-field]").forEach((field) => {
-             field.style.display = currentType === "duckdb" ? "" : "none";
-           });
-         }
-         forms.forEach((form) => {
+         <section class="settings-card">
+           <h2>Scan Database Into Views Config</h2>
+           <p class="muted">This reads live table metadata from the selected database and replaces that source's configured views config file.</p>
+          ${
+            hasConnections
+              ? ""
+              : '<p class="muted">Add a connection first to enable scanning.</p>'
+          }
+          ${
+            hasConnections
+              ? `<form method="post" action="${buildSourceAwarePath("/settings/scan", activeSourceName)}">
+            <div class="form-grid">
+              <label>Connection
+                <select name="connectionName">${scanOptionsHtml}</select>
+              </label>
+              <label>Default row limit
+                <input type="number" name="limit" min="1" value="${escapeHtml(String(options.limit || 200))}" />
+              </label>
+              <label>Max search fields
+                <input type="number" name="maxSearchFields" min="1" value="${escapeHtml(
+                  String(options.maxSearchFields || 3)
+                )}" />
+              </label>
+            </div>
+            <div class="settings-actions">
+              <button type="submit">Scan and rebuild views config</button>
+            </div>
+          </form>`
+              : ""
+          }
+        </section>
+      </div>
+      <script>
+        (() => {
+          const forms = Array.from(document.querySelectorAll("[data-database-form]"));
+          function syncForm(form) {
+            const typeSelect = form.querySelector("[data-database-type]");
+            form.dataset.currentType = typeSelect ? String(typeSelect.value || "sqlserver").toLowerCase() : "sqlserver";
+          }
+          forms.forEach((form) => {
            syncForm(form);
-           const typeSelect = form.querySelector("[data-database-type]");
-           if (typeSelect) {
-             typeSelect.addEventListener("change", () => syncForm(form));
-           }
-         });
+            const typeSelect = form.querySelector("[data-database-type]");
+            if (typeSelect) {
+              typeSelect.addEventListener("change", () => syncForm(form));
+              typeSelect.addEventListener("input", () => syncForm(form));
+            }
+          });
        })();
       </script>`,
     { activeSourceName }
@@ -2864,10 +2963,11 @@ function renderTable(sourceName, viewName, view, rows, context) {
     .map((column) => {
       const align = normalizeColumnAlign(column.align);
       const label = column.label || column.name;
-      const paramName = `cf_${column.name}`;
+      const columnId = getColumnId(column);
+      const paramName = `cf_${columnId}`;
       const filterValue = firstQueryValue(currentQuery[paramName]);
       const hasFilterValue = filterValue !== undefined && filterValue !== null && String(filterValue).trim() !== "";
-      const filterId = `filter_${String(column.name).replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+      const filterId = `filter_${String(columnId).replace(/[^a-zA-Z0-9_-]/g, "_")}`;
       const clearParams = new URLSearchParams();
       for (const [key, value] of Object.entries(currentQuery || {})) {
         if (key === "page" || key === paramName) {
@@ -2998,7 +3098,10 @@ function renderTable(sourceName, viewName, view, rows, context) {
   const chips = [
     `Rows: ${rows.length}`,
     `Sort: ${(context.sorts || [{ column: context.sortColumn, direction: context.direction }])
-      .map((item) => `${item.column} ${item.direction}`)
+      .map((item) => {
+        const resolvedColumn = findViewColumn(view, item.column);
+        return `${resolvedColumn ? getColumnId(resolvedColumn) : item.column} ${item.direction}`;
+      })
       .join(", ")}`,
     context.filters.length
       ? `Filters: ${context.filters
@@ -3418,7 +3521,12 @@ function loadDuckDbModule() {
 function createDuckDbConnection(connectionConfig, options = {}) {
   // Lazy load so SQL Server-only installs do not require duckdb dependency.
   const duckdb = loadDuckDbModule();
-  const dbPath = connectionConfig.duckdb?.path || ":memory:";
+  const dbPath = resolveDuckDbPath(connectionConfig, options.connectionName);
+  if (!dbPath) {
+    throw new Error(
+      "DuckDB path is not configured, and no .duckdb file was found in the application folder."
+    );
+  }
   const accessMode = options.readOnly ? duckdb.OPEN_READONLY : duckdb.OPEN_READWRITE;
   return new Promise((resolve, reject) => {
     const db = new duckdb.Database(dbPath, accessMode, (error) => {
@@ -3488,7 +3596,7 @@ async function getSqlServerPool(connection) {
 
 function getDuckDbConnection(connection) {
   if (!duckDbConnections.has(connection.name)) {
-    duckDbConnections.set(connection.name, createDuckDbConnection(connection.config));
+    duckDbConnections.set(connection.name, createDuckDbConnection(connection.config, { connectionName: connection.name }));
   }
   return duckDbConnections.get(connection.name);
 }
@@ -3566,7 +3674,7 @@ async function scanSqlServerSchema(connection) {
 }
 
 async function scanDuckDbSchema(connection) {
-  const db = await createDuckDbConnection(connection.config, { readOnly: true });
+  const db = await createDuckDbConnection(connection.config, { readOnly: true, connectionName: connection.name });
   try {
     const tableRows = await runDuckDbQuery(
       db,
@@ -3760,7 +3868,7 @@ app.post("/settings/database/save", async (req, res) => {
     return;
   }
 
-  const nextConnection =
+  let nextConnection =
     type === "duckdb"
       ? {
           type: "duckdb",
@@ -3785,10 +3893,35 @@ app.post("/settings/database/save", async (req, res) => {
           }
         };
 
+  if (type === "duckdb") {
+    const configuredViewsPath = String(nextConnection.viewsConfigPath || "").trim();
+    const configuredDuckDbPath = String(nextConnection.duckdb?.path || "").trim();
+    if (
+      (!configuredDuckDbPath || configuredDuckDbPath === ":memory:") &&
+      configuredViewsPath &&
+      /\.duckdb$/i.test(configuredViewsPath)
+    ) {
+      nextConnection = {
+        ...nextConnection,
+        viewsConfigPath: "",
+        duckdb: {
+          path: configuredViewsPath
+        }
+      };
+    }
+  }
+
   if (type === "sqlserver" && (!nextConnection.sqlserver.server || !nextConnection.sqlserver.database)) {
     res
       .status(400)
       .send(renderSettings({ error: "SQL Server connections require both server and database values.", activeSourceName }));
+    return;
+  }
+
+  if (String(nextConnection.viewsConfigPath || "").trim() && !/\.json$/i.test(String(nextConnection.viewsConfigPath || "").trim())) {
+    res
+      .status(400)
+      .send(renderSettings({ error: "Views Config Path must point to a JSON file.", activeSourceName }));
     return;
   }
 
@@ -3834,12 +3967,8 @@ app.post("/settings/database/delete", async (req, res) => {
     res.status(400).send(renderSettings({ error: "Database connection not found.", activeSourceName }));
     return;
   }
-  if (Object.keys(connections).length <= 1) {
-    res.status(400).send(renderSettings({ error: "At least one database connection must remain configured.", activeSourceName }));
-    return;
-  }
 
-  const dependentViews = Object.keys(getViewsConfig(name).views || {});
+  const dependentViews = getExternalDependentViews(name, catalog);
 
   if (dependentViews.length) {
     res
@@ -3853,11 +3982,12 @@ app.post("/settings/database/delete", async (req, res) => {
     return;
   }
 
+  viewsConfigsBySource.delete(name);
   delete connections[name];
   appConfig.database = {
     ...(appConfig.database || {}),
     defaultConnection:
-      catalog.defaultConnection === name ? Object.keys(connections)[0] : appConfig.database?.defaultConnection,
+      catalog.defaultConnection === name ? Object.keys(connections)[0] || "" : appConfig.database?.defaultConnection,
     connections
   };
 
@@ -3865,7 +3995,7 @@ app.post("/settings/database/delete", async (req, res) => {
   loadConfigs();
   await resetDatabaseClients();
   const nextSourceName =
-    catalog.defaultConnection === name || activeSourceName === name ? Object.keys(connections)[0] : activeSourceName;
+    catalog.defaultConnection === name || activeSourceName === name ? Object.keys(connections)[0] || "" : activeSourceName;
   res.redirect(buildSourceAwarePath("/settings", nextSourceName, { message: `Deleted database connection ${name}.` }));
 });
 
@@ -4001,8 +4131,8 @@ app.post("/config/:viewName", (req, res) => {
   }
 
   const parsedColumns = [];
-  const rowKeyToColumnName = new Map();
-  const seenParsedColumnNames = new Set();
+  const rowKeyToColumnId = new Map();
+  const seenParsedColumnIds = new Set();
   for (let index = 0; index < submittedColumnJsonValues.length; index += 1) {
     const rawColumnJson = submittedColumnJsonValues[index];
     const rowKey = submittedColumnKeys[index] || `column_${index}`;
@@ -4018,32 +4148,42 @@ app.post("/config/:viewName", (req, res) => {
       return;
     }
     const columnName = String(parsedColumn.name || "").trim();
+    const columnId = String(parsedColumn.id || parsedColumn.name || "").trim();
     if (!columnName) {
       renderError(`Column ${index + 1} must include a non-empty name.`);
       return;
     }
-    if (seenParsedColumnNames.has(columnName)) {
-      renderError(`Column names must be unique. Duplicate: ${columnName}`);
+    if (!columnId) {
+      renderError(`Column ${index + 1} must include a non-empty id or name.`);
       return;
     }
-    seenParsedColumnNames.add(columnName);
+    if (seenParsedColumnIds.has(columnId)) {
+      renderError(`Column ids must be unique. Duplicate: ${columnId}`);
+      return;
+    }
+    seenParsedColumnIds.add(columnId);
     parsedColumn.name = columnName;
+    if (columnId !== columnName) {
+      parsedColumn.id = columnId;
+    } else {
+      delete parsedColumn.id;
+    }
     parsedColumns.push(parsedColumn);
-    rowKeyToColumnName.set(rowKey, columnName);
+    rowKeyToColumnId.set(rowKey, columnId);
   }
 
   const normalizedSelectedColumns = submittedColumnKeys
     .filter((key) => selectedColumnKeys.has(key))
-    .map((key) => rowKeyToColumnName.get(key))
+    .map((key) => rowKeyToColumnId.get(key))
     .filter(Boolean);
 
   const requestedSortColumns = asArray(req.body?.sortColumns)
     .map((column) => String(column || "").trim())
-    .map((column) => rowKeyToColumnName.get(column) || column);
+    .map((column) => rowKeyToColumnId.get(column) || column);
   const requestedSortDirections = asArray(req.body?.sortDirections).map((direction) =>
     normalizeSortDirection(direction, "ASC")
   );
-  const validColumns = new Set(parsedColumns.map((column) => column.name));
+  const validColumns = new Set(parsedColumns.map((column) => getColumnId(column)));
   const normalizedSorts = [];
   const seenSortColumns = new Set();
   for (let index = 0; index < requestedSortColumns.length; index += 1) {
@@ -4090,7 +4230,7 @@ app.post("/config/:viewName", (req, res) => {
   view.columns = parsedColumns;
 
   for (const column of view.columns || []) {
-    if (normalizedSelectedColumns.includes(column.name)) {
+    if (normalizedSelectedColumns.includes(getColumnId(column))) {
       delete column.hideOnGrid;
       continue;
     }

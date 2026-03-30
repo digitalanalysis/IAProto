@@ -25,6 +25,11 @@ function copyDirectoryIfMissing(sourceDir, targetDir) {
 
 function ensureRuntimeFiles(runtimeRoot) {
   const appRoot = app.getAppPath();
+  const packagedAppConfigPath = path.join(appRoot, "config", "app.config.json");
+  const runtimeAppConfigPath = path.join(runtimeRoot, "app.config.json");
+  if (fs.existsSync(packagedAppConfigPath) && !fs.existsSync(runtimeAppConfigPath)) {
+    fs.copyFileSync(packagedAppConfigPath, runtimeAppConfigPath);
+  }
   copyDirectoryIfMissing(path.join(appRoot, "config"), path.join(runtimeRoot, "config"));
   copyDirectoryIfMissing(path.join(appRoot, "files"), path.join(runtimeRoot, "files"));
   copyDirectoryIfMissing(path.join(runtimeRoot, "Files"), path.join(runtimeRoot, "files"));
@@ -32,7 +37,7 @@ function ensureRuntimeFiles(runtimeRoot) {
 
 function getRuntimeRoot() {
   if (app.isPackaged) {
-    return path.dirname(process.execPath);
+    return process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath);
   }
   return path.join(app.getAppPath(), ".electron-runtime");
 }
@@ -42,7 +47,7 @@ async function createMainWindow() {
   ensureRuntimeFiles(runtimeRoot);
 
   process.env.APP_RUNTIME_DIR = runtimeRoot;
-  process.env.APP_CONFIG_PATH = path.join(runtimeRoot, "config", "app.config.json");
+  process.env.APP_CONFIG_PATH = path.join(runtimeRoot, "app.config.json");
   process.env.LEGACY_VIEWS_CONFIG_PATH = path.join(runtimeRoot, "config", "views.config.json");
   process.env.SERVED_FILES_PATH = path.join(runtimeRoot, "files");
 

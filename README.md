@@ -130,6 +130,7 @@ Views config files:
 
 - Each data source can have its own views config JSON file
 - If `viewsConfigPath` is omitted, the app uses `config/views.<source>.config.json`
+- In the packaged Electron app, relative `viewsConfigPath` and DuckDB `path` values are resolved relative to the executable folder
 - Legacy single-source setups still use `config/views.config.json`
 - The top toolbar lets users switch between sources and their corresponding view sets
 
@@ -155,6 +156,8 @@ Views config format:
 - `views.<name>.database`: Optional database connection name from `app.config.json`
 - `views.<name>.hideOnHome`: Optional boolean to hide a view from the front-page search list
 - `views.<name>.columns`: Columns shown in the table
+- `views.<name>.columns[].id`: Optional stable config/UI identifier. If omitted, `name` is used. Use this when the config key should differ from the underlying database column name.
+- `views.<name>.columns[].name`: Database column name used for querying and row lookups
 - `views.<name>.columns[].hideOnGrid`: Optional boolean to hide a column from the main table grid (still available in row details and links)
 - `views.<name>.columns[].align`: Optional text alignment (`left`, `center`, `right`) for grid and row-panel values
 - `views.<name>.columns[].format`: Optional cell formatter (`date`, `datetime`, `time`, `number`)
@@ -173,8 +176,8 @@ Views config format:
 - `views.<name>.columns[].locale`: Optional locale (for date/time formatting)
 - `views.<name>.columns[].timeZone`: Optional time zone (for date/time formatting)
 - `views.<name>.defaultSort`: Default ordering. Supports either:
-  - object form: `{ "column": "MyColumn", "direction": "ASC" }`
-  - array form (multi-column): `[{ "column": "ColA", "direction": "ASC" }, { "column": "ColB", "direction": "DESC" }]`
+  - object form: `{ "column": "MyColumnId", "direction": "ASC" }`
+  - array form (multi-column): `[{ "column": "ColAId", "direction": "ASC" }, { "column": "ColBId", "direction": "DESC" }]`
 - `views.<name>.searchFields`: Fields rendered on the front-page search screen
 - `views.<name>.links`: Related view links
 
@@ -210,7 +213,7 @@ Table paging UI includes `First`, `Previous`, `Next`, `Last`, and a direct page-
 
 Column filter query parameters on `/table/:viewName`:
 
-- `cf_<ColumnName>`: contains-match filter for a grid column (for example `?cf_Name=bike`)
+- `cf_<ColumnId>`: contains-match filter for a grid column (for example `?cf_customer_name=bike`). If `id` is omitted, the column `name` is used.
 
 Debug endpoint for column/key mapping issues:
 
