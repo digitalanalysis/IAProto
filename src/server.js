@@ -3039,8 +3039,6 @@ function renderTable(sourceName, viewName, view, rows, context) {
   const nextBreadcrumbsToken = context.nextBreadcrumbsToken || "";
   const linkLocalColumns = Array.from(collectLinkLocalColumns(view));
 
-  const relatedHeader = Array.isArray(view.links) && view.links.length ? "<th>Related</th>" : "";
-
   const makePageUrl = (targetPage) => {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(currentQuery || {})) {
@@ -3103,23 +3101,7 @@ function renderTable(sourceName, viewName, view, rows, context) {
       }
       rowRawDetails.push(rawDetail);
 
-      const related =
-        Array.isArray(view.links) && view.links.length
-          ? `<td>${view.links
-              .map((link) => {
-                 const url = buildLinkUrl(link, row, nextBreadcrumbsToken, activeSourceName);
-                if (!url) {
-                  return "";
-                }
-                const defaultLabel = link.targetView || link.urlTemplate || "Link";
-                const label = renderLinkLabel(link.label || defaultLabel, row);
-                return renderLinkAnchor(link, label, url);
-              })
-              .filter(Boolean)
-              .join(" | ")}</td>`
-          : "";
-
-      return `<tr class="data-row" data-row-index="${index}">${cells}${related}</tr>`;
+      return `<tr class="data-row" data-row-index="${index}">${cells}</tr>`;
     })
     .join("\n");
 
@@ -3214,12 +3196,12 @@ function renderTable(sourceName, viewName, view, rows, context) {
        <div class="table-page">
         <div class="table-grid${columnLayoutMode === "fit" ? " fit-columns" : ""}">
          <div class="chips">${chips}</div>
-         <div class="table-main">
-           <table>
-            <thead><tr>${headers}${relatedHeader}</tr></thead>
-            <tbody>${body}</tbody>
-           </table>
-         </div>
+          <div class="table-main">
+            <table>
+             <thead><tr>${headers}</tr></thead>
+             <tbody>${body}</tbody>
+            </table>
+          </div>
          <div class="table-scrollbar" id="table-scrollbar">
            <div class="table-scrollbar-inner" id="table-scrollbar-inner"></div>
          </div>
