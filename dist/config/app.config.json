@@ -1,0 +1,15 @@
+{
+  "ui": {
+    "fontFamily": "\"Segoe UI\", Tahoma, sans-serif",
+    "fontSize": 14,
+    "dateFormat": "MM-DD-YYYY",
+    "banner": {
+      "title": "CIDS Data Explorer",
+      "subtitle": "Prototype Data Explorer for InfoArchive Data"
+    }
+  },
+  "database": {
+    "defaultConnection": "",
+    "connections": {}
+  }
+}

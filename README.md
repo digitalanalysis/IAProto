@@ -78,6 +78,7 @@ Each view also has an **Edit view config** screen at `/config/:viewName`.
 - Updates `views.<name>.columns[].hideOnGrid`
 - Updates the order of `views.<name>.columns`
 - Updates `views.<name>.defaultSort`
+- Updates `views.<name>.columnLayout` (`scroll` or `fit`)
 - Allows editing full JSON for each column plus the view's `searchFields` and `links` arrays
 - Keeps hidden grid columns available in the row details panel and CSV export
 
@@ -155,6 +156,7 @@ Views config format:
 - `views.<name>.table`: SQL table name
 - `views.<name>.database`: Optional database connection name from `app.config.json`
 - `views.<name>.hideOnHome`: Optional boolean to hide a view from the front-page search list
+- `views.<name>.columnLayout`: Optional table layout mode. Use `scroll` for the current horizontal-scroll grid or `fit` to keep all visible grid columns within the current screen width.
 - `views.<name>.columns`: Columns shown in the table
 - `views.<name>.columns[].id`: Optional stable config/UI identifier. If omitted, `name` is used. Use this when the config key should differ from the underlying database column name.
 - `views.<name>.columns[].name`: Database column name used for querying and row lookups

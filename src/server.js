@@ -1529,6 +1529,10 @@ function normalizeColumnAlign(value) {
   return "left";
 }
 
+function normalizeColumnLayoutMode(value) {
+  return String(value || "").trim().toLowerCase() === "fit" ? "fit" : "scroll";
+}
+
 function renderSearchFieldControl(field) {
   const column = field.column;
   const label = escapeHtml(field.label || column || "");
@@ -2057,6 +2061,19 @@ function renderLayout(title, content, options = {}) {
         min-width: 100%;
         table-layout: auto;
       }
+      .table-grid.fit-columns .table-main {
+        overflow-x: visible;
+      }
+      .table-grid.fit-columns .table-main table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+      }
+      .table-grid.fit-columns th,
+      .table-grid.fit-columns td {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
       .table-scrollbar {
         margin: 8px 0 0;
         overflow-x: auto;
@@ -2068,6 +2085,9 @@ function renderLayout(title, content, options = {}) {
         border: 1px solid var(--border);
         border-radius: 999px;
         z-index: 5;
+      }
+      .table-grid.fit-columns .table-scrollbar {
+        display: none;
       }
       .table-scrollbar-inner {
         height: 1px;
@@ -2427,7 +2447,8 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
     database: view.database || "",
     keyColumn: view.keyColumn || "",
     limit: view.limit === undefined || view.limit === null ? "" : String(view.limit),
-    hideOnHome: Boolean(view.hideOnHome)
+    hideOnHome: Boolean(view.hideOnHome),
+    columnLayout: normalizeColumnLayoutMode(view.columnLayout)
   };
   const searchFieldsJson = options.searchFieldsJson ?? toPrettyConfigJson(view.searchFields || [], []);
   const linksJson = options.linksJson ?? toPrettyConfigJson(view.links || [], []);
@@ -2568,6 +2589,12 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
                 </label>
                 <label>Row Limit
                   <input type="number" name="limit" min="1" value="${escapeHtml(viewFields.limit)}" />
+                </label>
+                <label>Column Layout
+                  <select name="columnLayout">
+                    <option value="scroll"${viewFields.columnLayout === "scroll" ? " selected" : ""}>Scrollable columns</option>
+                    <option value="fit"${viewFields.columnLayout === "fit" ? " selected" : ""}>Fit columns to screen</option>
+                  </select>
                 </label>
               </div>
               <div class="settings-actions">
@@ -2954,6 +2981,7 @@ function renderSettings(options = {}) {
 function renderTable(sourceName, viewName, view, rows, context) {
   const activeSourceName = getActiveSourceName(sourceName);
   const gridColumns = getGridColumns(view);
+  const columnLayoutMode = normalizeColumnLayoutMode(view.columnLayout);
   const currentQuery = context.currentQuery || {};
   const currentPage = parsePositiveInt(context.page, 1);
   const totalPages = parsePositiveInt(context.totalPages, 1);
@@ -3183,8 +3211,8 @@ function renderTable(sourceName, viewName, view, rows, context) {
          <a href="${downloadUrl}">Download CSV</a>
        </div>
        ${pager}
-      <div class="table-page">
-       <div class="table-grid">
+       <div class="table-page">
+        <div class="table-grid${columnLayoutMode === "fit" ? " fit-columns" : ""}">
          <div class="chips">${chips}</div>
          <div class="table-main">
            <table>
@@ -4099,7 +4127,8 @@ app.post("/config/:viewName", (req, res) => {
     database: String(req.body?.database || "").trim(),
     keyColumn: String(req.body?.keyColumn || "").trim(),
     limit: String(req.body?.limit || "").trim(),
-    hideOnHome: req.body?.hideOnHome === "on"
+    hideOnHome: req.body?.hideOnHome === "on",
+    columnLayout: normalizeColumnLayoutMode(req.body?.columnLayout)
   };
   const submittedColumnKeys = asArray(req.body?.columnOrder).map((value) => String(value || "").trim());
   const submittedColumnJsonValues = asArray(req.body?.columnJson).map((value) => String(value || ""));
@@ -4268,6 +4297,11 @@ app.post("/config/:viewName", (req, res) => {
     view.hideOnHome = true;
   } else {
     delete view.hideOnHome;
+  }
+  if (submittedViewFields.columnLayout === "fit") {
+    view.columnLayout = "fit";
+  } else {
+    delete view.columnLayout;
   }
   view.searchFields = parsedSearchFields;
   view.links = parsedLinks;
