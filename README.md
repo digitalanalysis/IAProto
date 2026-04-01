@@ -237,11 +237,13 @@ Example search field object:
 
 Supported search field types:
 
-- `text` (default): free text input, uses `operator`
+- `text` (default): free text input with operator selector
 - `select`: dropdown, uses exact match
 - `multiSelect`: dropdown-style checkbox list, uses `IN (...)`
-- `date`: date picker, uses exact match
-- `dateRange`: from/to date pickers, uses `>=` and `<=`
+- `date`: date picker with `exact`, `before`, `after`, or `between`
+- `dateRange`: same as `date`, but defaults the operator to `between`
+- `number`: numeric input with `exact`, `before`, `after`, or `between`
+- `numberRange`: same as `number`, but defaults the operator to `between`
 
 Example `select` field:
 
@@ -289,10 +291,21 @@ Supported operators:
 - `contains`
 - `startsWith`
 - `endsWith`
+- `before`
+- `after`
+- `between`
 - `gt`
 - `gte`
 - `lt`
 - `lte`
+
+Notes:
+
+- Text search fields expose `contains`, `startsWith`, `endsWith`, and `exact`
+- Date and number search fields expose `before`, `after`, `between`, and `exact`
+- `before` maps to `<=`
+- `after` maps to `>=`
+- legacy `dateRange` query params using `_from` and `_to` still work
 
 Example date column formats:
 
@@ -421,3 +434,13 @@ Link behavior summary:
 - Internal link: use `targetView` + key mapping (`keys`, or `localColumn`/`targetColumn`)
 - External link: use `urlTemplate`
 - Optional `openInNewTab` controls new-tab behavior (defaults to `true` for `http(s)` URLs)
+Example number range field:
+
+```json
+{
+  "column": "Balance",
+  "label": "Balance",
+  "type": "numberRange",
+  "step": "0.01"
+}
+```

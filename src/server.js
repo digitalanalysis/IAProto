@@ -834,8 +834,15 @@ function normalizeSearchFieldType(type) {
       return "multiSelect";
     case "date":
       return "date";
+    case "number":
+    case "numeric":
+      return "number";
     case "daterange":
     case "date_range":
+      return "dateRange";
+    case "numberrange":
+    case "number_range":
+      return "numberRange";
     case "range":
       return "dateRange";
     default:
@@ -848,6 +855,41 @@ function getSearchFieldType(field) {
     return normalizeSearchFieldType(field.type);
   }
   return normalizeSearchFieldType(field?.operator);
+}
+
+function renderSearchOperatorOptions(options, selectedValue = "") {
+  const normalizedSelected = String(selectedValue || "").trim();
+  return options
+    .map((option) => {
+      const value = String(option.value || "").trim();
+      const label = String(option.label || value).trim();
+      return `<option value="${escapeHtml(value)}"${value === normalizedSelected ? " selected" : ""}>${escapeHtml(label)}</option>`;
+    })
+    .join("");
+}
+
+function renderOperatorSearchField(field, config) {
+  const column = String(field.column || "").trim();
+  const label = escapeHtml(field.label || column);
+  const operatorName = `s_${escapeHtml(column)}_op`;
+  const primaryName = `s_${escapeHtml(column)}`;
+  const secondaryName = `s_${escapeHtml(column)}_to`;
+  const placeholder = escapeHtml(field.placeholder || "");
+  const secondPlaceholder = escapeHtml(field.secondPlaceholder || "");
+  return `<label class="search-operator-field" data-search-kind="${escapeHtml(config.kind)}">
+    <span>${label}</span>
+    <div class="search-operator-controls">
+      <select name="${operatorName}" data-search-operator>
+        ${renderSearchOperatorOptions(config.operators, config.defaultOperator)}
+      </select>
+      <input type="${escapeHtml(config.inputType)}" name="${primaryName}" placeholder="${placeholder}" ${
+        config.step ? `step="${escapeHtml(config.step)}"` : ""
+      } />
+      <input type="${escapeHtml(config.inputType)}" name="${secondaryName}" placeholder="${secondPlaceholder}" data-search-secondary ${
+        config.step ? `step="${escapeHtml(config.step)}"` : ""
+      } />
+    </div>
+  </label>`;
 }
 
 function extractLinkKeyMappings(link) {
@@ -1079,35 +1121,6 @@ function collectSearchFilters(view, query) {
     }
     const fieldType = getSearchFieldType(field);
 
-    if (fieldType === "dateRange") {
-      const fromParam = `s_${column}_from`;
-      const toParam = `s_${column}_to`;
-      const fromValue = firstQueryValue(query[fromParam]);
-      const toValue = firstQueryValue(query[toParam]);
-
-      if (fromValue !== undefined && fromValue !== null && String(fromValue).trim() !== "") {
-        addedColumns.add(column);
-        filters.push({
-          column,
-          value: String(fromValue),
-          operator: "gte",
-          label: `${field.label || column} from`,
-          source: "search"
-        });
-      }
-      if (toValue !== undefined && toValue !== null && String(toValue).trim() !== "") {
-        addedColumns.add(column);
-        filters.push({
-          column,
-          value: String(toValue),
-          operator: "lte",
-          label: `${field.label || column} to`,
-          source: "search"
-        });
-      }
-      continue;
-    }
-
     if (fieldType === "multiSelect") {
       const paramName = `s_${column}`;
       const values = asArray(query[paramName])
@@ -1127,7 +1140,93 @@ function collectSearchFilters(view, query) {
       continue;
     }
 
+    if (fieldType === "date" || fieldType === "dateRange" || fieldType === "number" || fieldType === "numberRange") {
+      const operatorParam = `s_${column}_op`;
+      const valueParam = `s_${column}`;
+      const toValueParam = `s_${column}_to`;
+      const legacyFromParam = `s_${column}_from`;
+      const requestedOperator = String(firstQueryValue(query[operatorParam]) || "").trim().toLowerCase();
+      const value = firstQueryValue(query[valueParam]);
+      const toValue = firstQueryValue(query[toValueParam]);
+      const legacyFromValue = firstQueryValue(query[legacyFromParam]);
+      const legacyToValue = firstQueryValue(query[toValueParam]);
+
+      if ((legacyFromValue !== undefined && legacyFromValue !== null && String(legacyFromValue).trim() !== "") || (legacyToValue !== undefined && legacyToValue !== null && String(legacyToValue).trim() !== "")) {
+        if (legacyFromValue !== undefined && legacyFromValue !== null && String(legacyFromValue).trim() !== "") {
+          addedColumns.add(column);
+          filters.push({
+            column,
+            value: String(legacyFromValue),
+            operator: "gte",
+            label: `${field.label || column} from`,
+            source: "search"
+          });
+        }
+        if (legacyToValue !== undefined && legacyToValue !== null && String(legacyToValue).trim() !== "") {
+          addedColumns.add(column);
+          filters.push({
+            column,
+            value: String(legacyToValue),
+            operator: "lte",
+            label: `${field.label || column} to`,
+            source: "search"
+          });
+        }
+        continue;
+      }
+
+      const normalizedOperator =
+        requestedOperator === "before"
+          ? "lte"
+          : requestedOperator === "after"
+            ? "gte"
+            : requestedOperator === "between"
+              ? "between"
+              : "exact";
+
+      if (normalizedOperator === "between") {
+        const hasStart = value !== undefined && value !== null && String(value).trim() !== "";
+        const hasEnd = toValue !== undefined && toValue !== null && String(toValue).trim() !== "";
+        if (hasStart) {
+          addedColumns.add(column);
+          filters.push({
+            column,
+            value: String(value),
+            operator: "gte",
+            label: `${field.label || column} from`,
+            source: "search"
+          });
+        }
+        if (hasEnd) {
+          addedColumns.add(column);
+          filters.push({
+            column,
+            value: String(toValue),
+            operator: "lte",
+            label: `${field.label || column} to`,
+            source: "search"
+          });
+        }
+        continue;
+      }
+
+      if (value === undefined || value === null || String(value).trim() === "") {
+        continue;
+      }
+
+      addedColumns.add(column);
+      filters.push({
+        column,
+        value: String(value),
+        operator: normalizedOperator,
+        label: field.label || column,
+        source: "search"
+      });
+      continue;
+    }
+
     const paramName = `s_${column}`;
+    const operatorParam = `s_${column}_op`;
     const value = firstQueryValue(query[paramName]);
     if (value === undefined || value === null || String(value).trim() === "") {
       continue;
@@ -1138,9 +1237,9 @@ function collectSearchFilters(view, query) {
       column,
       value: String(value),
       operator:
-        fieldType === "select" || fieldType === "date"
+        fieldType === "select"
           ? "exact"
-          : normalizeSearchOperator(field.operator),
+          : normalizeSearchOperator(firstQueryValue(query[operatorParam]) || field.operator),
       label: field.label || column,
       source: "search"
     });
@@ -1589,15 +1688,74 @@ function renderSearchFieldControl(field) {
   }
 
   if (fieldType === "date") {
-    return `<label>${label}<input type="date" name="s_${escapeHtml(column)}" /></label>`;
+    return renderOperatorSearchField(field, {
+      kind: "date",
+      inputType: "date",
+      defaultOperator: String(field.operator || "exact").trim().toLowerCase(),
+      operators: [
+        { value: "exact", label: "Exact" },
+        { value: "before", label: "Before" },
+        { value: "after", label: "After" },
+        { value: "between", label: "Between" }
+      ]
+    });
   }
 
   if (fieldType === "dateRange") {
-    return `<label>${label} From<input type="date" name="s_${escapeHtml(column)}_from" /></label>
-    <label>${label} To<input type="date" name="s_${escapeHtml(column)}_to" /></label>`;
+    return renderOperatorSearchField(field, {
+      kind: "date",
+      inputType: "date",
+      defaultOperator: "between",
+      operators: [
+        { value: "exact", label: "Exact" },
+        { value: "before", label: "Before" },
+        { value: "after", label: "After" },
+        { value: "between", label: "Between" }
+      ]
+    });
   }
 
-  return `<label>${label}<input type="text" name="s_${escapeHtml(column)}" placeholder="${escapeHtml(field.placeholder || "")}" /></label>`;
+  if (fieldType === "number") {
+    return renderOperatorSearchField(field, {
+      kind: "number",
+      inputType: "number",
+      step: String(field.step || "any"),
+      defaultOperator: String(field.operator || "exact").trim().toLowerCase(),
+      operators: [
+        { value: "exact", label: "Exact" },
+        { value: "before", label: "Before" },
+        { value: "after", label: "After" },
+        { value: "between", label: "Between" }
+      ]
+    });
+  }
+
+  if (fieldType === "numberRange") {
+    return renderOperatorSearchField(field, {
+      kind: "number",
+      inputType: "number",
+      step: String(field.step || "any"),
+      defaultOperator: "between",
+      operators: [
+        { value: "exact", label: "Exact" },
+        { value: "before", label: "Before" },
+        { value: "after", label: "After" },
+        { value: "between", label: "Between" }
+      ]
+    });
+  }
+
+  return renderOperatorSearchField(field, {
+    kind: "text",
+    inputType: "text",
+    defaultOperator: String(field.operator || "contains").trim().toLowerCase(),
+    operators: [
+      { value: "contains", label: "Contains" },
+      { value: "startswith", label: "Starts with" },
+      { value: "endswith", label: "Ends with" },
+      { value: "exact", label: "Exact" }
+    ]
+  });
 }
 
 function renderHiddenQueryInputs(query, excludedPrefixes = [], excludedKeys = []) {
@@ -1977,6 +2135,17 @@ function renderLayout(title, content, options = {}) {
         font-size: var(--font-size-sm);
         position: relative;
         overflow: visible;
+      }
+      .search-operator-field {
+        display: grid;
+        gap: 4px;
+      }
+      .search-operator-controls {
+        display: grid;
+        gap: 6px;
+      }
+      .search-operator-controls[data-show-secondary="false"] [data-search-secondary] {
+        display: none;
       }
       .multi-select {
         border: 1px solid var(--border);
@@ -2423,12 +2592,33 @@ function renderHome(sourceName) {
       </li>`;
     })
     .join("\n");
+  const searchScript = `<script>
+    (() => {
+      function syncOperatorField(root) {
+        const select = root.querySelector("[data-search-operator]");
+        const controls = root.querySelector(".search-operator-controls");
+        if (!select || !controls) {
+          return;
+        }
+        controls.dataset.showSecondary = String(select.value === "between");
+      }
+      document.querySelectorAll(".search-operator-field").forEach((root) => {
+        syncOperatorField(root);
+        const select = root.querySelector("[data-search-operator]");
+        if (select) {
+          select.addEventListener("change", () => syncOperatorField(root));
+          select.addEventListener("input", () => syncOperatorField(root));
+        }
+      });
+    })();
+  </script>`;
 
   return renderLayout(
     "Search",
     `<h1>Search</h1>
-     <div class="toolbar secondary"><a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a></div>
-     <ul class="view-list">${viewItems}</ul>`,
+      <div class="toolbar secondary"><a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a></div>
+      <ul class="view-list">${viewItems}</ul>
+      ${searchScript}`,
     { activeSourceName }
   );
 }
