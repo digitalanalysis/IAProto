@@ -1,9 +1,18 @@
 const fs = require("fs");
 const path = require("path");
-const { app, BrowserWindow, dialog } = require("electron");
+const { app, BrowserWindow, dialog, shell } = require("electron");
 
 let mainWindow = null;
 let serverHandle = null;
+
+function isLocalAppUrl(url) {
+  try {
+    const parsed = new URL(String(url || ""));
+    return parsed.protocol === "http:" && parsed.hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
 
 function copyDirectoryIfMissing(sourceDir, targetDir) {
   if (!fs.existsSync(sourceDir)) {
@@ -69,6 +78,25 @@ async function createMainWindow() {
 
   mainWindow.on("closed", () => {
     mainWindow = null;
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (isLocalAppUrl(url)) {
+      mainWindow.loadURL(url);
+    } else if (url) {
+      shell.openExternal(url);
+    }
+    return { action: "deny" };
+  });
+
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    if (isLocalAppUrl(url)) {
+      return;
+    }
+    event.preventDefault();
+    if (url) {
+      shell.openExternal(url);
+    }
   });
 
   await mainWindow.loadURL(serverHandle.url);
