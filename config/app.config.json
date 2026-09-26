@@ -4,7 +4,7 @@
     "fontSize": 14,
     "dateFormat": "MM-DD-YYYY",
     "banner": {
-      "title": "CIDS Data Explorer",
+      "title": "DCOM Data Explorer",
       "subtitle": "Prototype Data Explorer for InfoArchive Data"
     }
   },

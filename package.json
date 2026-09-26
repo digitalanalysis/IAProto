@@ -4,7 +4,7 @@
   "description": "Config-driven Node.js web app for viewing SQL Server tables and related links",
   "main": "electron/main.js",
   "type": "commonjs",
-  "author":"John Sewell",
+  "author": "John Sewell",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
@@ -16,7 +16,8 @@
   "dependencies": {
     "duckdb": "1.2.1",
     "express": "^4.21.2",
-    "mssql": "^11.0.1"
+    "mssql": "^11.0.1",
+    "selfsigned": "^5.5.0"
   },
   "devDependencies": {
     "electron": "22.3.27",

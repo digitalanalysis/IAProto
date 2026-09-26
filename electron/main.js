@@ -61,7 +61,7 @@ async function createMainWindow() {
   process.env.SERVED_FILES_PATH = path.join(runtimeRoot, "files");
 
   const { startServer } = require("../src/server");
-  serverHandle = await startServer({ port: 0, host: "127.0.0.1" });
+  serverHandle = await startServer({ port: 0, host: "127.0.0.1", https: false });
 
   mainWindow = new BrowserWindow({
     width: 1400,

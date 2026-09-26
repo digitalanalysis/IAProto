@@ -1,7 +1,13 @@
 const fs = require("fs");
+const net = require("net");
+const http = require("http");
+const https = require("https");
 const path = require("path");
+const { AsyncLocalStorage } = require("async_hooks");
 const express = require("express");
 const sql = require("mssql");
+const auth = require("./auth");
+const { loadTlsCredentials } = require("./tls-cert");
 const { buildViewsConfigFromSchemaTables } = require("./utils/buildViewsConfigFromSchema");
 
 const app = express();
@@ -61,6 +67,200 @@ function saveAppConfig() {
 }
 
 app.use(express.urlencoded({ extended: false }));
+
+const requestContext = new AsyncLocalStorage();
+
+function getCurrentUsername() {
+  return requestContext.getStore()?.username || "";
+}
+
+function getAuthUsers() {
+  const users = appConfig.auth?.users;
+  return Array.isArray(users) ? users : [];
+}
+
+function findAuthUser(username) {
+  const normalized = auth.normalizeUsername(username);
+  return getAuthUsers().find((user) => auth.normalizeUsername(user.username) === normalized) || null;
+}
+
+// Users without a role predate permissions and keep full (administrator) access.
+function isAdminUser(user) {
+  return Boolean(user) && user.role !== "user";
+}
+
+function getCurrentUser() {
+  return findAuthUser(getCurrentUsername());
+}
+
+function isCurrentUserAdmin() {
+  return isAdminUser(getCurrentUser());
+}
+
+// access: { "<connection>": "*" (all views) | ["viewName", ...] }
+function getUserAccessRule(user, sourceName) {
+  const access = user?.access && typeof user.access === "object" ? user.access : {};
+  return Object.prototype.hasOwnProperty.call(access, sourceName) ? access[sourceName] : null;
+}
+
+function canAccessSource(sourceName, user = getCurrentUser()) {
+  if (!user || !sourceName) {
+    return false;
+  }
+  if (isAdminUser(user)) {
+    return true;
+  }
+  const rule = getUserAccessRule(user, sourceName);
+  return rule === "*" || (Array.isArray(rule) && rule.length > 0);
+}
+
+function canAccessView(sourceName, viewName, user = getCurrentUser()) {
+  if (!user || !sourceName) {
+    return false;
+  }
+  if (isAdminUser(user)) {
+    return true;
+  }
+  const rule = getUserAccessRule(user, sourceName);
+  return rule === "*" || (Array.isArray(rule) && rule.includes(viewName));
+}
+
+function describeUserAccess(user) {
+  if (isAdminUser(user)) {
+    return "Administrator: full access";
+  }
+  const parts = Object.keys(getDatabaseCatalog().connections)
+    .map((sourceName) => {
+      const rule = getUserAccessRule(user, sourceName);
+      if (rule === "*") {
+        return `${sourceName}: all views`;
+      }
+      if (Array.isArray(rule) && rule.length) {
+        return `${sourceName}: ${rule.length} view${rule.length === 1 ? "" : "s"}`;
+      }
+      return "";
+    })
+    .filter(Boolean);
+  return parts.length ? `Standard user. ${parts.join("; ")}` : "Standard user with no data access yet";
+}
+
+function setAuthUsers(users) {
+  appConfig.auth = { ...(appConfig.auth || {}), users };
+  saveAppConfig();
+}
+
+function validateNewCredentials(username, password, confirmPassword) {
+  if (!/^[a-z0-9._@-]{1,64}$/.test(username)) {
+    return "Username may only contain letters, numbers, and . _ @ - characters.";
+  }
+  if (String(password || "").length < 8) {
+    return "Password must be at least 8 characters.";
+  }
+  if (password !== confirmPassword) {
+    return "Passwords do not match.";
+  }
+  return "";
+}
+
+function redirectToLogin(req, res) {
+  const next = req.method === "GET" ? req.originalUrl : "/";
+  res.redirect(`/login?next=${encodeURIComponent(next)}`);
+}
+
+app.get("/setup", (req, res) => {
+  if (getAuthUsers().length) {
+    res.redirect("/login");
+    return;
+  }
+  res.send(renderLogin({ mode: "setup" }));
+});
+
+app.post("/setup", (req, res) => {
+  if (getAuthUsers().length) {
+    res.redirect("/login");
+    return;
+  }
+  const username = auth.normalizeUsername(req.body?.username);
+  const password = String(req.body?.password || "");
+  const error = validateNewCredentials(username, password, String(req.body?.confirmPassword || ""));
+  if (error) {
+    res.status(400).send(renderLogin({ mode: "setup", username, error }));
+    return;
+  }
+  setAuthUsers([{ username, passwordHash: auth.hashPassword(password), role: "admin" }]);
+  auth.setSessionCookie(req, res, auth.createSession(username));
+  res.redirect("/");
+});
+
+app.get("/login", (req, res) => {
+  if (!getAuthUsers().length) {
+    res.redirect("/setup");
+    return;
+  }
+  const next = auth.sanitizeNextPath(firstQueryValue(req.query.next));
+  if (findAuthUser(auth.getSessionUsername(req))) {
+    res.redirect(next);
+    return;
+  }
+  res.send(renderLogin({ next, message: firstQueryValue(req.query.message) }));
+});
+
+app.post("/login", (req, res) => {
+  const username = auth.normalizeUsername(req.body?.username);
+  const password = String(req.body?.password || "");
+  const next = auth.sanitizeNextPath(req.body?.next);
+  if (auth.isLoginLocked(req, username)) {
+    res.status(429).send(
+      renderLogin({ next, username, error: "Too many failed attempts. Wait a minute and try again." })
+    );
+    return;
+  }
+  const user = findAuthUser(username);
+  if (!user || !auth.verifyPassword(password, user.passwordHash)) {
+    auth.recordLoginFailure(req, username);
+    res.status(401).send(renderLogin({ next, username, error: "Invalid username or password." }));
+    return;
+  }
+  auth.clearLoginFailures(req, username);
+  auth.setSessionCookie(req, res, auth.createSession(auth.normalizeUsername(user.username)));
+  res.redirect(next);
+});
+
+app.post("/logout", (req, res) => {
+  auth.destroySession(req);
+  auth.clearSessionCookie(req, res);
+  res.redirect("/login?message=" + encodeURIComponent("You have been signed out."));
+});
+
+// Everything registered after this point requires a signed-in user.
+app.use((req, res, next) => {
+  if (!getAuthUsers().length) {
+    res.redirect("/setup");
+    return;
+  }
+  const username = auth.getSessionUsername(req);
+  if (!findAuthUser(username)) {
+    redirectToLogin(req, res);
+    return;
+  }
+  requestContext.run({ username }, next);
+});
+
+// Settings and view configuration are for administrators only.
+app.use(["/settings", "/config"], (req, res, next) => {
+  if (isCurrentUserAdmin()) {
+    next();
+    return;
+  }
+  res
+    .status(403)
+    .send(
+      renderLayout(
+        "Access denied",
+        `<h1>Access denied</h1><p>Only administrators can change settings and view configuration.</p><p><a href="/">Back to search</a></p>`
+      )
+    );
+});
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -283,7 +483,11 @@ function setViewsConfig(sourceName, config) {
 }
 
 function getActiveSourceName(requestedSource = "") {
-  return getPreferredSourceName(requestedSource);
+  const preferred = getPreferredSourceName(requestedSource);
+  if (!getCurrentUsername() || canAccessSource(preferred)) {
+    return preferred;
+  }
+  return Object.keys(getDatabaseCatalog().connections).find((sourceName) => canAccessSource(sourceName)) || "";
 }
 
 function resolveDatabaseConnection(databaseName = "") {
@@ -1017,6 +1221,9 @@ function buildLinkUrl(link, row, nextBreadcrumbsToken = "", sourceName = "") {
   if (!linkFilters.length || !link.targetView) {
     return null;
   }
+  if (!canAccessView(sourceName || getActiveSourceName(), link.targetView)) {
+    return null;
+  }
 
   const linkParams = new URLSearchParams();
   for (const filter of linkFilters) {
@@ -1037,6 +1244,8 @@ function shouldOpenLinkInNewTab(link, url) {
   }
   return isHttpUrl(url);
 }
+
+const LINK_ICON_NAMES = ["link", "external", "open", "arrow-right", "search", "magnifying-glass", "file", "document", "info"];
 
 function resolveLinkIconName(value) {
   const normalized = String(value || "").trim().toLowerCase();
@@ -1843,7 +2052,14 @@ function renderLayout(title, content, options = {}) {
   const fontFamily = resolveUiFontFamily(appConfig.ui?.fontFamily);
   const baseFontSizePx = resolveUiFontSize(appConfig.ui?.fontSize);
   const activeSourceName = getActiveSourceName(options.activeSourceName);
-  const sourceTabs = Object.entries(getDatabaseCatalog().connections)
+  const currentUsername = options.hideNav ? "" : getCurrentUsername();
+  const userMenu = currentUsername
+    ? `<form class="banner-user" method="post" action="/logout"><span>Signed in as <strong>${escapeHtml(
+        currentUsername
+      )}</strong></span><button type="submit">Sign out</button></form>`
+    : "";
+  const sourceTabs = options.hideNav ? "" : Object.entries(getDatabaseCatalog().connections)
+    .filter(([sourceName]) => canAccessSource(sourceName))
     .map(([sourceName, connection]) => {
       const activeClass = sourceName === activeSourceName ? " active" : "";
       return `<a class="source-tab${activeClass}" href="${escapeHtml(buildSourceHomeUrl(sourceName))}">${escapeHtml(
@@ -1897,6 +2113,46 @@ function renderLayout(title, content, options = {}) {
         margin-top: 4px;
         font-size: var(--font-size-sm);
         opacity: 0.92;
+      }
+      .site-banner-head {
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .banner-user {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: var(--font-size-sm);
+        margin: 0;
+      }
+      .banner-user button {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+      .container.login-container {
+        max-width: 420px;
+        margin: 48px auto;
+      }
+      .login-form {
+        display: grid;
+        gap: 12px;
+      }
+      .login-form label {
+        display: grid;
+        gap: 4px;
+        font-size: var(--font-size-sm);
+      }
+      .login-form input {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px;
+        font: inherit;
+        color: inherit;
+        background: #fff;
+        box-sizing: border-box;
+        width: 100%;
       }
       .source-toolbar {
         display: flex;
@@ -2390,6 +2646,95 @@ function renderLayout(title, content, options = {}) {
         font-size: 12px;
         resize: vertical;
       }
+      [hidden] {
+        display: none !important;
+      }
+      .ce-list {
+        display: grid;
+        gap: 10px;
+      }
+      .ce-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+        padding: 10px 12px;
+        display: grid;
+        gap: 10px;
+      }
+      .ce-card.ce-nested {
+        background: #fafcff;
+      }
+      .ce-card-head {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .ce-body {
+        display: grid;
+        gap: 10px;
+      }
+      .ce-field {
+        display: grid;
+        gap: 4px;
+        font-size: var(--font-size-sm);
+        align-content: start;
+      }
+      .ce-field-label {
+        font-weight: 600;
+        font-size: var(--font-size-sm);
+      }
+      .ce-body input[type="text"],
+      .ce-body select {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 8px;
+        font: inherit;
+        color: inherit;
+        background: #fff;
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+      }
+      .ce-inline {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 150px;
+        gap: 6px;
+      }
+      .ce-keys {
+        display: grid;
+        gap: 6px;
+      }
+      .ce-key-row,
+      .ce-option-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+      }
+      .ce-option-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+      }
+      .ce-arrow {
+        color: #60708f;
+        font-size: var(--font-size-sm);
+      }
+      .ce-check {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .ce-column-details {
+        grid-column: 1 / -1;
+      }
+      .ce-column-details summary {
+        cursor: pointer;
+        color: var(--accent);
+        font-size: var(--font-size-sm);
+      }
+      .ce-column-details[open] summary {
+        margin-bottom: 10px;
+      }
       .config-sorts {
         display: grid;
         gap: 10px;
@@ -2511,6 +2856,60 @@ function renderLayout(title, content, options = {}) {
         gap: 6px;
         align-items: center;
       }
+      .home-view-toolbar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .home-view-toolbar input[type="search"] {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 8px;
+        font: inherit;
+        min-width: 220px;
+      }
+      .home-view-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 6px 16px;
+        max-height: 420px;
+        overflow-y: auto;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+      }
+      .home-view-item {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        padding: 4px;
+        cursor: pointer;
+      }
+      .home-view-text {
+        display: grid;
+      }
+      .access-connection {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+        padding: 12px 14px;
+        margin: 0 0 12px;
+        display: grid;
+        gap: 10px;
+      }
+      .access-connection legend {
+        padding: 0 6px;
+      }
+      .access-connection:not([data-mode="selected"]) .access-views,
+      #user-access-form:not([data-role="admin"]) .access-admin-note {
+        display: none;
+      }
+      #user-access-form[data-role="admin"] .access-connection {
+        opacity: 0.6;
+      }
       .database-card {
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -2540,15 +2939,60 @@ function renderLayout(title, content, options = {}) {
   </head>
   <body>
     <header class="site-banner">
-      <div class="site-banner-title">${escapeHtml(bannerTitle)}</div>
-      <div class="site-banner-subtitle">${escapeHtml(bannerSubtitle)}</div>
-      <nav class="source-toolbar">${sourceTabs}</nav>
+      <div class="site-banner-head">
+        <div>
+          <div class="site-banner-title">${escapeHtml(bannerTitle)}</div>
+          <div class="site-banner-subtitle">${escapeHtml(bannerSubtitle)}</div>
+        </div>
+        ${userMenu}
+      </div>
+      ${sourceTabs ? `<nav class="source-toolbar">${sourceTabs}</nav>` : ""}
     </header>
-    <div class="container">
+    <div class="container${options.containerClass ? ` ${options.containerClass}` : ""}">
       ${content}
     </div>
   </body>
 </html>`;
+}
+
+function renderLogin(options = {}) {
+  const isSetup = options.mode === "setup";
+  const error = String(options.error || "").trim();
+  const message = String(options.message || "").trim();
+  const noticeHtml = error
+    ? `<div class="notice error-notice">${escapeHtml(error)}</div>`
+    : message
+      ? `<div class="notice">${escapeHtml(message)}</div>`
+      : "";
+  const title = isSetup ? "Create administrator account" : "Sign in";
+  return renderLayout(
+    title,
+    `<h1>${title}</h1>
+      ${
+        isSetup
+          ? '<p class="muted">No user accounts exist yet. Create the first account to secure this application.</p>'
+          : ""
+      }
+      ${noticeHtml}
+      <form class="login-form" method="post" action="${isSetup ? "/setup" : "/login"}">
+        ${isSetup ? "" : `<input type="hidden" name="next" value="${escapeHtml(options.next || "/")}" />`}
+        <label>Username
+          <input type="text" name="username" value="${escapeHtml(options.username || "")}" autocomplete="username" autofocus required />
+        </label>
+        <label>Password
+          <input type="password" name="password" autocomplete="${isSetup ? "new-password" : "current-password"}" required />
+        </label>
+        ${
+          isSetup
+            ? `<label>Confirm password
+          <input type="password" name="confirmPassword" autocomplete="new-password" required />
+        </label>`
+            : ""
+        }
+        <div><button type="submit">${isSetup ? "Create account" : "Sign in"}</button></div>
+      </form>`,
+    { hideNav: true, containerClass: "login-container" }
+  );
 }
 
 function renderHome(sourceName) {
@@ -2558,13 +3002,22 @@ function renderHome(sourceName) {
     return renderLayout(
       "Search",
       `<h1>Search</h1>
-       <div class="toolbar secondary"><a href="/settings">Settings</a></div>
+       ${isCurrentUserAdmin() ? '<div class="toolbar secondary"><a href="/settings">Settings</a></div>' : ""}
        <div class="notice">No database connections are configured yet. Add one in Settings to start browsing data.</div>`,
       { activeSourceName: "" }
     );
   }
+  if (!activeSourceName) {
+    return renderLayout(
+      "Search",
+      `<h1>Search</h1>
+       <div class="notice">You have not been given access to any data yet. Ask an administrator to grant access.</div>`,
+      { activeSourceName: "" }
+    );
+  }
+  const isAdmin = isCurrentUserAdmin();
   const viewItems = Object.entries(getAllViews(activeSourceName))
-    .filter(([, view]) => !view.hideOnHome)
+    .filter(([viewName, view]) => !view.hideOnHome && canAccessView(activeSourceName, viewName))
     .map(([viewName, view]) => {
       const connection = getViewDatabaseConnection(view, activeSourceName);
       const dbType = connection.type;
@@ -2586,7 +3039,11 @@ function renderHome(sourceName) {
         <div class="view-actions"><span class="badge">${escapeHtml(connection.name)}</span></div>
         <div class="view-actions">
           <a href="${buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName)}">Open table</a>
-          <a href="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">Edit view config</a>
+          ${
+            isAdmin
+              ? `<a href="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">Edit view config</a>`
+              : ""
+          }
         </div>
         ${searchForm}
       </li>`;
@@ -2616,8 +3073,12 @@ function renderHome(sourceName) {
   return renderLayout(
     "Search",
     `<h1>Search</h1>
-      <div class="toolbar secondary"><a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a></div>
-      <ul class="view-list">${viewItems}</ul>
+      ${
+        isAdmin
+          ? `<div class="toolbar secondary"><a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a></div>`
+          : ""
+      }
+      <ul class="view-list">${viewItems || '<li class="muted">No views are available to you for this data source.</li>'}</ul>
       ${searchScript}`,
     { activeSourceName }
   );
@@ -2690,6 +3151,25 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
       </div>`;
     })
     .join("");
+  const toEditorColumn = (column) => ({
+    name: getColumnSourceName(column),
+    label: String(column.label || column.name || ""),
+    format: column.format || "",
+    pk: Boolean(column.pk || column.isPrimaryKey)
+  });
+  const editorData = {
+    localColumns: (view.columns || []).map(toEditorColumn).filter((column) => column.name),
+    views: Object.entries(getAllViews(activeSourceName))
+      .map(([name, candidate]) => ({
+        name,
+        title: String(candidate?.title || name),
+        keyColumn: String(candidate?.keyColumn || ""),
+        columns: (candidate?.columns || []).map(toEditorColumn).filter((column) => column.name)
+      }))
+      .sort((a, b) => a.title.localeCompare(b.title)),
+    icons: LINK_ICON_NAMES,
+    defaultDateFormat: typeof appConfig.ui?.dateFormat === "string" ? appConfig.ui.dateFormat.trim() : ""
+  };
   const sortColumnOptions = (view.columns || [])
     .map((column) => {
       const columnId = getColumnId(column);
@@ -2758,7 +3238,7 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
          <section class="config-panel">
             <h2>Grid Columns</h2>
           <p class="muted">Select which configured columns appear in the main table. Use Up and Down to change column order. Unselected columns stay available in the row details panel and CSV export.</p>
-          <form method="post" action="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">
+          <form id="view-config-form" method="post" action="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">
             <div class="config-subsection">
               <h3>View Options</h3>
               <div class="form-grid">
@@ -2801,15 +3281,17 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
               </div>
             </div>
             <div class="config-subsection">
-              <h3>Search Fields JSON</h3>
-              <p class="muted">Edit the full <code>searchFields</code> array.</p>
+              <h3>Search Fields</h3>
+              <p class="muted">Inputs shown for this view on the home page search screen.</p>
+              <div class="ce-list" id="search-fields-editor"></div>
               <label class="config-json-field">
                 <textarea name="searchFieldsJson" rows="12" spellcheck="false">${escapeHtml(searchFieldsJson)}</textarea>
               </label>
             </div>
             <div class="config-subsection">
-              <h3>Links JSON</h3>
-              <p class="muted">Edit the full <code>links</code> array, including target view, URL templates, icons, and key mappings.</p>
+              <h3>Related Links</h3>
+              <p class="muted">Links shown in the row details panel, to other views or to web addresses.</p>
+              <div class="ce-list" id="links-editor"></div>
               <label class="config-json-field">
                 <textarea name="linksJson" rows="12" spellcheck="false">${escapeHtml(linksJson)}</textarea>
               </label>
@@ -2821,6 +3303,8 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
             </form>
         </section>
       </div>
+      <script type="application/json" id="config-editor-data">${toInlineJson(editorData)}</script>
+      <script src="/assets/view-config-editor.js"></script>
       <script>
         (() => {
           const root = document.getElementById("config-columns");
@@ -3046,6 +3530,72 @@ function renderSettings(options = {}) {
     })
     .join("");
 
+  const homeViewEntries = hasConnections
+    ? Object.entries(getAllViews(activeSourceName)).sort(([nameA, viewA], [nameB, viewB]) =>
+        String(viewA.title || nameA).localeCompare(String(viewB.title || nameB))
+      )
+    : [];
+  const homeViewShownCount = homeViewEntries.filter(([, view]) => !view.hideOnHome).length;
+  const homeViewItems = homeViewEntries
+    .map(([viewName, view]) => {
+      const title = view.title || viewName;
+      const searchCount = Array.isArray(view.searchFields) ? view.searchFields.length : 0;
+      return `<label class="home-view-item" data-home-view data-search-count="${searchCount}" data-filter-text="${escapeHtml(
+        `${title} ${viewName} ${view.table || ""}`.toLowerCase()
+      )}">
+          <input type="checkbox" name="visibleViews" value="${escapeHtml(viewName)}"${view.hideOnHome ? "" : " checked"} />
+          <span class="home-view-text">
+            <span>${escapeHtml(title)}</span>
+            <span class="muted">${searchCount ? `${searchCount} search field${searchCount === 1 ? "" : "s"}` : "No search fields"}</span>
+          </span>
+        </label>`;
+    })
+    .join("");
+
+  const currentUsername = getCurrentUsername();
+  const userRows = getAuthUsers()
+    .map((user) => {
+      const username = auth.normalizeUsername(user.username);
+      const isSelf = username === currentUsername;
+      return `<div class="database-card">
+        <div class="database-card-title">
+          <strong>${escapeHtml(username)}</strong>
+          <span class="badge">${isAdminUser(user) ? "administrator" : "standard user"}</span>
+          ${isSelf ? '<span class="badge">you</span>' : ""}
+        </div>
+        <p class="muted">${escapeHtml(describeUserAccess(user))}
+          · <a href="${buildSourceAwarePath("/settings/users/access", activeSourceName, { username })}">Edit role and access</a></p>
+        <form method="post" action="${buildSourceAwarePath("/settings/users/password", activeSourceName)}">
+          <input type="hidden" name="username" value="${escapeHtml(username)}" />
+          <div class="form-grid">
+            <label>New password
+              <input type="password" name="password" autocomplete="new-password" required />
+            </label>
+            <label>Confirm password
+              <input type="password" name="confirmPassword" autocomplete="new-password" required />
+            </label>
+          </div>
+          <div class="settings-actions">
+            <button type="submit">Change password</button>
+          </div>
+        </form>
+        ${
+          isSelf
+            ? ""
+            : `<form method="post" action="${buildSourceAwarePath(
+                "/settings/users/delete",
+                activeSourceName
+              )}" onsubmit="return confirm('Delete user ${escapeHtml(username)}?');">
+          <input type="hidden" name="username" value="${escapeHtml(username)}" />
+          <div class="settings-actions">
+            <button type="submit">Delete user</button>
+          </div>
+        </form>`
+        }
+      </div>`;
+    })
+    .join("");
+
   const scanOptionsHtml = connectionOptions
     .map(
       ([name, connection]) =>
@@ -3115,6 +3665,57 @@ function renderSettings(options = {}) {
            </div>
          </form>
        </section>
+        <section class="settings-card">
+          <h2>Home Page Searches</h2>
+          ${
+            homeViewEntries.length
+              ? `<p class="muted">Choose which views appear with their search form on the home page for <strong>${escapeHtml(
+                  activeSourceName
+                )}</strong>. Use the source tabs at the top to switch data source. Hidden views can still be opened from links.</p>
+          <form method="post" action="${buildSourceAwarePath("/settings/home-views", activeSourceName)}" id="home-views-form">
+            <div class="home-view-toolbar">
+              <input type="search" placeholder="Filter views..." aria-label="Filter views" data-home-view-filter />
+              <button type="button" class="config-order-button" data-home-view-action="all">Show all</button>
+              <button type="button" class="config-order-button" data-home-view-action="none">Hide all</button>
+              <button type="button" class="config-order-button" data-home-view-action="with-search">Only views with search fields</button>
+              <span class="muted" data-home-view-count>${homeViewShownCount} of ${homeViewEntries.length} shown</span>
+            </div>
+            <div class="home-view-grid">${homeViewItems}</div>
+            <div class="settings-actions">
+              <button type="submit">Save home page searches</button>
+            </div>
+          </form>`
+              : '<p class="muted">No views are configured for this data source yet. Scan a database below to create them.</p>'
+          }
+        </section>
+        <section class="settings-card">
+          <h2>Users</h2>
+          <p class="muted">Accounts that can sign in to this application.</p>
+          ${userRows}
+          <form method="post" action="${buildSourceAwarePath("/settings/users/add", activeSourceName)}">
+            <h3>Add user</h3>
+            <div class="form-grid">
+              <label>Username
+                <input type="text" name="username" value="" autocomplete="off" required />
+              </label>
+              <label>Password
+                <input type="password" name="password" autocomplete="new-password" required />
+              </label>
+              <label>Confirm password
+                <input type="password" name="confirmPassword" autocomplete="new-password" required />
+              </label>
+              <label>Role
+                <select name="role">
+                  <option value="user" selected>Standard user (only the data you grant)</option>
+                  <option value="admin">Administrator (full access)</option>
+                </select>
+              </label>
+            </div>
+            <div class="settings-actions">
+              <button type="submit">Add user</button>
+            </div>
+          </form>
+        </section>
          <section class="settings-card">
            <h2>Scan Database Into Views Config</h2>
            <p class="muted">This reads live table metadata from the selected database and replaces that source's configured views config file.</p>
@@ -3149,6 +3750,35 @@ function renderSettings(options = {}) {
       </div>
       <script>
         (() => {
+          const homeViewsForm = document.getElementById("home-views-form");
+          if (homeViewsForm) {
+            const items = Array.from(homeViewsForm.querySelectorAll("[data-home-view]"));
+            const countLabel = homeViewsForm.querySelector("[data-home-view-count]");
+            const filterInput = homeViewsForm.querySelector("[data-home-view-filter]");
+            const updateCount = () => {
+              const shown = items.filter((item) => item.querySelector("input").checked).length;
+              countLabel.textContent = shown + " of " + items.length + " shown";
+            };
+            const visibleItems = () => items.filter((item) => !item.hidden);
+            filterInput.addEventListener("input", () => {
+              const term = filterInput.value.trim().toLowerCase();
+              items.forEach((item) => {
+                item.hidden = Boolean(term) && !item.dataset.filterText.includes(term);
+              });
+            });
+            homeViewsForm.addEventListener("change", updateCount);
+            homeViewsForm.querySelectorAll("[data-home-view-action]").forEach((button) => {
+              button.addEventListener("click", () => {
+                const action = button.dataset.homeViewAction;
+                // Bulk actions apply to the views matching the current filter.
+                visibleItems().forEach((item) => {
+                  item.querySelector("input").checked =
+                    action === "all" || (action === "with-search" && Number(item.dataset.searchCount) > 0);
+                });
+                updateCount();
+              });
+            });
+          }
           const forms = Array.from(document.querySelectorAll("[data-database-form]"));
           function syncForm(form) {
             const typeSelect = form.querySelector("[data-database-type]");
@@ -3354,7 +3984,10 @@ function renderTable(sourceName, viewName, view, rows, context) {
       openInNewTab: typeof link.openInNewTab === "boolean" ? link.openInNewTab : null,
       icon: resolveLinkIconName(link.icon)
     }))
-    .filter((link) => (link.targetView && link.keys.length) || link.urlTemplate);
+    .filter(
+      (link) =>
+        (link.targetView && link.keys.length && canAccessView(activeSourceName, link.targetView)) || link.urlTemplate
+    );
   const detailsJson = toInlineJson(rowDetails);
   const rawDetailsJson = toInlineJson(rowRawDetails);
   const detailColumnsJson = toInlineJson(detailColumns);
@@ -3378,8 +4011,12 @@ function renderTable(sourceName, viewName, view, rows, context) {
       <nav class="breadcrumbs">${breadcrumbsHtml}</nav>
        <div class="toolbar">
          <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
-         <a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a>
-         <a href="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">Edit view config</a>
+         ${
+           isCurrentUserAdmin()
+             ? `<a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a>
+         <a href="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">Edit view config</a>`
+             : ""
+         }
          <a href="${downloadUrl}">Download CSV</a>
        </div>
        ${pager}
@@ -3710,8 +4347,11 @@ function loadDuckDbModule() {
     return require("duckdb");
   } catch (error) {
     if (error?.code === "MODULE_NOT_FOUND" && String(error.message || "").includes("'duckdb'")) {
+      const isElectronRuntime = Boolean(process.versions?.electron);
       throw new Error(
-        "DuckDB support is not installed. Run `npm install duckdb` and rebuild the Electron package before scanning DuckDB sources."
+        isElectronRuntime
+          ? "DuckDB support is not installed. Run `npm install duckdb` and rebuild the Electron package."
+          : "DuckDB support is not installed. Run `npm install duckdb` before using DuckDB sources in web mode."
       );
     }
     throw error;
@@ -4045,6 +4685,294 @@ app.get("/settings", (req, res) => {
       activeSourceName
     })
   );
+});
+
+function redirectToSettings(req, res, notice) {
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  res.redirect(buildSourceAwarePath("/settings", activeSourceName, notice));
+}
+
+app.post("/settings/home-views", (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  if (!activeSourceName) {
+    redirectToSettings(req, res, { error: "Choose a data source first." });
+    return;
+  }
+  reloadViewsConfig(activeSourceName);
+  const visibleViews = new Set(asArray(req.body?.visibleViews).map((value) => String(value || "").trim()));
+  const views = Object.entries(getAllViews(activeSourceName));
+  for (const [viewName, view] of views) {
+    if (visibleViews.has(viewName)) {
+      delete view.hideOnHome;
+    } else {
+      view.hideOnHome = true;
+    }
+  }
+  saveViewsConfig(activeSourceName);
+  loadConfigs();
+  const shownCount = views.filter(([viewName]) => visibleViews.has(viewName)).length;
+  redirectToSettings(req, res, {
+    message: `Home page now shows ${shownCount} of ${views.length} views for ${activeSourceName}.`
+  });
+});
+
+app.post("/settings/users/add", (req, res) => {
+  const username = auth.normalizeUsername(req.body?.username);
+  const password = String(req.body?.password || "");
+  const error =
+    validateNewCredentials(username, password, String(req.body?.confirmPassword || "")) ||
+    (findAuthUser(username) ? `User ${username} already exists.` : "");
+  if (error) {
+    redirectToSettings(req, res, { error });
+    return;
+  }
+  const role = req.body?.role === "admin" ? "admin" : "user";
+  setAuthUsers([...getAuthUsers(), { username, passwordHash: auth.hashPassword(password), role, access: {} }]);
+  if (role === "admin") {
+    redirectToSettings(req, res, { message: `Added administrator ${username}.` });
+    return;
+  }
+  res.redirect(
+    buildSourceAwarePath("/settings/users/access", getActiveSourceName(req.query?.source), {
+      username,
+      message: `Added user ${username}. Choose which data they can see.`
+    })
+  );
+});
+
+app.post("/settings/users/password", (req, res) => {
+  const username = auth.normalizeUsername(req.body?.username);
+  const password = String(req.body?.password || "");
+  const error = findAuthUser(username)
+    ? validateNewCredentials(username, password, String(req.body?.confirmPassword || ""))
+    : `User ${username} does not exist.`;
+  if (error) {
+    redirectToSettings(req, res, { error });
+    return;
+  }
+  setAuthUsers(
+    getAuthUsers().map((user) =>
+      auth.normalizeUsername(user.username) === username ? { ...user, passwordHash: auth.hashPassword(password) } : user
+    )
+  );
+  redirectToSettings(req, res, { message: `Changed password for ${username}.` });
+});
+
+function renderUserAccess(user, options = {}) {
+  const activeSourceName = getActiveSourceName(options.activeSourceName);
+  const username = auth.normalizeUsername(user.username);
+  const isSelf = username === getCurrentUsername();
+  const role = isAdminUser(user) ? "admin" : "user";
+  const noticeError = String(options.error || "").trim();
+  const noticeMessage = String(options.message || "").trim();
+  const noticeHtml = noticeError
+    ? `<div class="notice error-notice">${escapeHtml(noticeError)}</div>`
+    : noticeMessage
+      ? `<div class="notice">${escapeHtml(noticeMessage)}</div>`
+      : "";
+
+  const connectionSections = Object.entries(getDatabaseCatalog().connections)
+    .map(([sourceName, connection], index) => {
+      const rule = getUserAccessRule(user, sourceName);
+      const selectedViews = new Set(Array.isArray(rule) ? rule : []);
+      const mode = rule === "*" ? "all" : selectedViews.size ? "selected" : "none";
+      const viewEntries = Object.entries(getAllViews(sourceName)).sort(([nameA, viewA], [nameB, viewB]) =>
+        String(viewA.title || nameA).localeCompare(String(viewB.title || nameB))
+      );
+      const viewItems = viewEntries
+        .map(([viewName, view]) => {
+          const title = view.title || viewName;
+          return `<label class="home-view-item" data-access-view data-filter-text="${escapeHtml(
+            `${title} ${viewName} ${view.table || ""}`.toLowerCase()
+          )}">
+            <input type="checkbox" name="views_${index}" value="${escapeHtml(viewName)}"${
+              selectedViews.has(viewName) ? " checked" : ""
+            } />
+            <span class="home-view-text"><span>${escapeHtml(title)}</span><span class="muted">${escapeHtml(viewName)}</span></span>
+          </label>`;
+        })
+        .join("");
+      const radio = (value, label) =>
+        `<label><input type="radio" name="mode_${index}" value="${value}"${mode === value ? " checked" : ""} data-access-mode /> ${label}</label>`;
+      return `<fieldset class="access-connection" data-access-connection data-mode="${mode}">
+          <legend><strong>${escapeHtml(sourceName)}</strong> <span class="badge">${escapeHtml(
+            String(connection.type || "sqlserver")
+          )}</span></legend>
+          <input type="hidden" name="connection_${index}" value="${escapeHtml(sourceName)}" />
+          <div class="inline-checks">
+            ${radio("none", "No access")}
+            ${radio("all", `All views (${viewEntries.length}), including views added later`)}
+            ${radio("selected", "Only selected views")}
+          </div>
+          <div class="access-views">
+            ${
+              viewEntries.length
+                ? `<div class="home-view-toolbar">
+              <input type="search" placeholder="Filter views..." aria-label="Filter views" data-access-filter />
+              <button type="button" class="config-order-button" data-access-action="all">Select all</button>
+              <button type="button" class="config-order-button" data-access-action="none">Clear</button>
+              <span class="muted" data-access-count></span>
+            </div>
+            <div class="home-view-grid">${viewItems}</div>`
+                : '<p class="muted">This connection has no configured views yet.</p>'
+            }
+          </div>
+        </fieldset>`;
+    })
+    .join("");
+
+  return renderLayout(
+    `Access for ${username}`,
+    `<h1>Role and access: ${escapeHtml(username)}</h1>
+      <div class="toolbar secondary">
+        <a href="${buildSourceAwarePath("/settings", activeSourceName)}">Back to settings</a>
+      </div>
+      ${noticeHtml}
+      <form method="post" action="${buildSourceAwarePath("/settings/users/access", activeSourceName)}" id="user-access-form" data-role="${role}">
+        <input type="hidden" name="username" value="${escapeHtml(username)}" />
+        <section class="settings-card">
+          <h2>Role</h2>
+          <div class="form-grid">
+            <label>Role
+              <select name="role" data-access-role${isSelf ? " disabled" : ""}>
+                <option value="user"${role === "user" ? " selected" : ""}>Standard user</option>
+                <option value="admin"${role === "admin" ? " selected" : ""}>Administrator</option>
+              </select>
+            </label>
+          </div>
+          ${isSelf ? `<input type="hidden" name="role" value="${role}" /><p class="muted">You cannot change your own role.</p>` : ""}
+          <p class="muted">Administrators can see all data and manage settings, view configuration and users. Standard users can only browse and search the data granted below.</p>
+        </section>
+        <section class="settings-card access-grants">
+          <h2>Data access</h2>
+          <p class="muted access-admin-note">Administrators have access to everything. These choices apply if the user is changed to a standard user.</p>
+          ${connectionSections || '<p class="muted">No database connections are configured yet.</p>'}
+        </section>
+        <div class="settings-actions">
+          <button type="submit">Save role and access</button>
+          <a href="${buildSourceAwarePath("/settings", activeSourceName)}">Cancel</a>
+        </div>
+      </form>
+      <script>
+        (() => {
+          const form = document.getElementById("user-access-form");
+          const roleSelect = form.querySelector("[data-access-role]");
+          if (roleSelect) {
+            roleSelect.addEventListener("change", () => {
+              form.dataset.role = roleSelect.value;
+            });
+          }
+          form.querySelectorAll("[data-access-connection]").forEach((section) => {
+            const items = Array.from(section.querySelectorAll("[data-access-view]"));
+            const count = section.querySelector("[data-access-count]");
+            const filter = section.querySelector("[data-access-filter]");
+            const updateCount = () => {
+              if (count) {
+                count.textContent = items.filter((item) => item.querySelector("input").checked).length + " of " + items.length + " selected";
+              }
+            };
+            section.addEventListener("change", (event) => {
+              if (event.target.matches("[data-access-mode]")) {
+                section.dataset.mode = event.target.value;
+              }
+              updateCount();
+            });
+            if (filter) {
+              filter.addEventListener("input", () => {
+                const term = filter.value.trim().toLowerCase();
+                items.forEach((item) => {
+                  item.hidden = Boolean(term) && !item.dataset.filterText.includes(term);
+                });
+              });
+            }
+            section.querySelectorAll("[data-access-action]").forEach((button) => {
+              button.addEventListener("click", () => {
+                items
+                  .filter((item) => !item.hidden)
+                  .forEach((item) => {
+                    item.querySelector("input").checked = button.dataset.accessAction === "all";
+                  });
+                updateCount();
+              });
+            });
+            updateCount();
+          });
+        })();
+      </script>`,
+    { activeSourceName }
+  );
+}
+
+app.get("/settings/users/access", (req, res) => {
+  const user = findAuthUser(firstQueryValue(req.query.username));
+  if (!user) {
+    redirectToSettings(req, res, { error: "User not found." });
+    return;
+  }
+  res.send(
+    renderUserAccess(user, {
+      activeSourceName: req.query?.source,
+      message: firstQueryValue(req.query.message),
+      error: firstQueryValue(req.query.error)
+    })
+  );
+});
+
+app.post("/settings/users/access", (req, res) => {
+  const username = auth.normalizeUsername(req.body?.username);
+  const user = findAuthUser(username);
+  if (!user) {
+    redirectToSettings(req, res, { error: `User ${username} does not exist.` });
+    return;
+  }
+  const role = req.body?.role === "admin" ? "admin" : "user";
+  if (username === getCurrentUsername() && role !== "admin") {
+    redirectToSettings(req, res, { error: "You cannot remove your own administrator role." });
+    return;
+  }
+
+  const catalog = getDatabaseCatalog();
+  const access = {};
+  for (let index = 0; req.body?.[`connection_${index}`] !== undefined; index += 1) {
+    const sourceName = String(req.body[`connection_${index}`] || "");
+    if (!catalog.connections[sourceName]) {
+      continue;
+    }
+    const mode = String(req.body?.[`mode_${index}`] || "none");
+    if (mode === "all") {
+      access[sourceName] = "*";
+    } else if (mode === "selected") {
+      const knownViews = getAllViews(sourceName);
+      const views = [...new Set(asArray(req.body?.[`views_${index}`]).map((value) => String(value || "")))].filter(
+        (viewName) => Object.prototype.hasOwnProperty.call(knownViews, viewName)
+      );
+      if (views.length) {
+        access[sourceName] = views;
+      }
+    }
+  }
+
+  setAuthUsers(
+    getAuthUsers().map((candidate) =>
+      auth.normalizeUsername(candidate.username) === username ? { ...candidate, role, access } : candidate
+    )
+  );
+  redirectToSettings(req, res, { message: `Saved role and access for ${username}.` });
+});
+
+app.post("/settings/users/delete", (req, res) => {
+  const username = auth.normalizeUsername(req.body?.username);
+  if (username === getCurrentUsername()) {
+    redirectToSettings(req, res, { error: "You cannot delete the account you are signed in with." });
+    return;
+  }
+  if (!findAuthUser(username)) {
+    redirectToSettings(req, res, { error: `User ${username} does not exist.` });
+    return;
+  }
+  setAuthUsers(getAuthUsers().filter((user) => auth.normalizeUsername(user.username) !== username));
+  auth.destroySessionsForUser(username);
+  redirectToSettings(req, res, { message: `Deleted user ${username}.` });
 });
 
 app.post("/settings/database/save", async (req, res) => {
@@ -4427,6 +5355,16 @@ app.post("/config/:viewName", (req, res) => {
     renderError("Links JSON must be an array.", normalizedSorts);
     return;
   }
+  const searchFieldWithoutColumn = parsedSearchFields.findIndex((item) => !String(item?.column || "").trim());
+  if (searchFieldWithoutColumn >= 0) {
+    renderError(`Search field ${searchFieldWithoutColumn + 1} must have a field selected.`, normalizedSorts);
+    return;
+  }
+  const linkWithoutTarget = parsedLinks.findIndex((item) => !item?.targetView && !item?.urlTemplate);
+  if (linkWithoutTarget >= 0) {
+    renderError(`Link ${linkWithoutTarget + 1} needs a target view or a URL.`, normalizedSorts);
+    return;
+  }
 
   view.columns = parsedColumns;
 
@@ -4493,7 +5431,7 @@ app.post("/config/:viewName", (req, res) => {
 
 app.get("/table/:viewName/download.csv", async (req, res) => {
   const activeSourceName = getActiveSourceName(req.query?.source);
-  const view = getView(req.params.viewName, activeSourceName);
+  const view = canAccessView(activeSourceName, req.params.viewName) ? getView(req.params.viewName, activeSourceName) : null;
 
   if (!view) {
     res.status(404).send("View not found");
@@ -4525,7 +5463,7 @@ app.get("/table/:viewName/download.csv", async (req, res) => {
 
 app.get("/table/:viewName", async (req, res) => {
   const activeSourceName = getActiveSourceName(req.query?.source);
-  const view = getView(req.params.viewName, activeSourceName);
+  const view = canAccessView(activeSourceName, req.params.viewName) ? getView(req.params.viewName, activeSourceName) : null;
 
   if (!view) {
     res
@@ -4577,7 +5515,7 @@ app.get("/table/:viewName", async (req, res) => {
 
 app.get("/debug/:viewName/keys", async (req, res) => {
   const activeSourceName = getActiveSourceName(req.query?.source);
-  const view = getView(req.params.viewName, activeSourceName);
+  const view = canAccessView(activeSourceName, req.params.viewName) ? getView(req.params.viewName, activeSourceName) : null;
   if (!view) {
     res.status(404).json({ error: `View not found: ${req.params.viewName}` });
     return;
@@ -4609,25 +5547,84 @@ app.get("/debug/:viewName/keys", async (req, res) => {
 
 loadConfigs();
 fs.mkdirSync(servedFilesPath, { recursive: true });
+app.use("/assets", express.static(path.join(__dirname, "public")));
 app.use("/files", express.static(servedFilesPath));
 app.use("/Files", express.static(servedFilesPath));
 
-function startServer(options = {}) {
+async function createHttpsServer() {
+  const httpsConfig = appConfig.https || {};
+  if (httpsConfig.enabled === false) {
+    return null;
+  }
+  try {
+    const credentials = await loadTlsCredentials({
+      certDir: path.join(path.dirname(appConfigPath), "certs"),
+      certFile: httpsConfig.certFile ? resolveRuntimePath(httpsConfig.certFile) : "",
+      keyFile: httpsConfig.keyFile ? resolveRuntimePath(httpsConfig.keyFile) : ""
+    });
+    console.log(`HTTPS certificate: ${credentials.source}`);
+    return https.createServer({ key: credentials.key, cert: credentials.cert }, app);
+  } catch (error) {
+    console.warn(`HTTPS disabled, could not load a certificate: ${error.message}`);
+    return null;
+  }
+}
+
+function listNetworkUrls(port, includeHttps) {
+  const urls = [];
+  for (const addresses of Object.values(require("os").networkInterfaces())) {
+    for (const address of addresses || []) {
+      if (!address.internal && address.family === "IPv4") {
+        urls.push(`${includeHttps ? "https" : "http"}://${address.address}:${port}`);
+      }
+    }
+  }
+  return urls;
+}
+
+// Serves HTTP and HTTPS on the same port: a connection whose first byte is a
+// TLS handshake record (0x16) is handed to the HTTPS server, anything else to HTTP.
+async function startServer(options = {}) {
   const port = options.port ?? DEFAULT_PORT;
-  const host = options.host || "127.0.0.1";
+  // Listen on all network interfaces unless told otherwise; Electron passes 127.0.0.1.
+  const host = options.host || process.env.HOST || appConfig.server?.host || "0.0.0.0";
+  const httpServer = http.createServer(app);
+  const httpsServer = options.https === false ? null : await createHttpsServer();
+
+  const server = net.createServer((socket) => {
+    socket.once("error", () => socket.destroy());
+    socket.once("data", (firstChunk) => {
+      socket.pause();
+      socket.unshift(firstChunk);
+      if (firstChunk[0] === 0x16) {
+        if (!httpsServer) {
+          socket.destroy();
+          return;
+        }
+        httpsServer.emit("connection", socket);
+      } else {
+        httpServer.emit("connection", socket);
+      }
+      process.nextTick(() => socket.resume());
+    });
+  });
+
   return new Promise((resolve, reject) => {
-    const server = app.listen(port, host, () => {
+    server.once("error", reject);
+    server.listen(port, host, () => {
       const address = server.address();
       const resolvedPort = typeof address === "object" && address ? address.port : port;
+      const urlHost = host === "0.0.0.0" || host === "::" ? "localhost" : host;
       resolve({
         app,
         server,
         host,
         port: resolvedPort,
-        url: `http://${host}:${resolvedPort}`
+        url: `http://${urlHost}:${resolvedPort}`,
+        httpsUrl: httpsServer ? `https://${urlHost}:${resolvedPort}` : "",
+        networkUrls: host === "0.0.0.0" || host === "::" ? listNetworkUrls(resolvedPort, Boolean(httpsServer)) : []
       });
     });
-    server.on("error", reject);
   });
 }
 
@@ -4642,8 +5639,11 @@ module.exports = {
 
 if (require.main === module) {
   startServer()
-    .then(({ url }) => {
-      console.log(`App running at ${url}`);
+    .then(({ url, httpsUrl, networkUrls }) => {
+      console.log(`App running at ${url}${httpsUrl ? ` and ${httpsUrl}` : ""}`);
+      if (networkUrls.length) {
+        console.log(`From other machines: ${networkUrls.join(", ")}`);
+      }
     })
     .catch((error) => {
       console.error(`Failed to start app: ${error.message}`);

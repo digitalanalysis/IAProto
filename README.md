@@ -41,6 +41,48 @@ npm start
 
 Open `http://localhost:3000`
 
+## Sign-in
+
+All pages (including `/files`) require a signed-in user.
+
+- On first launch, when no users exist, the app redirects to `/setup` to create the first account
+- Afterwards, users sign in at `/login` and sign out from the banner
+- Manage users (add, change password, delete) under **Users** on `/settings`
+- Users are stored in `config/app.config.json` under `auth.users` with scrypt-hashed passwords
+- Sessions are held in memory: restarting the server signs everyone out; idle sessions expire after 8 hours
+- After 5 failed attempts, sign-in for that username is locked for 1 minute
+
+### Roles and data access
+
+- **Administrator**: full access, including Settings, view configuration and user management
+- **Standard user**: can only browse, search and export the data granted to them; Settings and view config pages return 403
+- Grant access from **Settings → Users → Edit role and access**, per connection: no access, all views (including views added later), or only selected views
+- Views a user cannot access are hidden from the home page, source tabs and links, and return 404 if opened directly
+- Stored on each user in `auth.users[]` as `role` (`"admin"` or `"user"`) and `access` (`{ "<connection>": "*" | ["viewName", ...] }`)
+- Users created before roles existed (no `role` value) are administrators
+- New users default to standard users with no access; administrators cannot remove their own administrator role
+
+To reset access if all passwords are lost, remove the `auth` section from `app.config.json` and restart; the setup screen will appear again.
+
+## HTTPS
+
+The server answers both `http://` and `https://` on the same port (for example `https://localhost:3000`). It looks at the first bytes of each connection and serves HTTPS when the browser starts a TLS handshake.
+
+- On first start a self-signed certificate is generated and saved to `config/certs/` (ignored by git). It covers `localhost`, `127.0.0.1`, the machine name and its IPv4 addresses, and is regenerated when it is close to expiry
+- Browsers will warn that the certificate is not trusted; accept it once, or import `config/certs/self-signed.crt` into the trusted root store
+- Sign-in cookies issued over HTTPS are marked `Secure`
+- To use a real certificate, set `https.certFile` and `https.keyFile` (PEM files) in `app.config.json`; set `https.enabled` to `false` to turn HTTPS off
+- The Electron app does not use HTTPS
+
+## Network Access
+
+The server listens on all network interfaces (`0.0.0.0`) so other machines can connect, e.g. `https://<machine-name>:3000`. The startup log lists the addresses.
+
+- To restrict it to this machine only, set `server.host` to `"127.0.0.1"` in `app.config.json` (or the `HOST` environment variable)
+- Change the port with the `PORT` environment variable
+- Windows Firewall must allow inbound connections to Node.js on the port
+- The Electron app always listens on `127.0.0.1` only
+
 ## Electron Build
 
 To build a portable Windows Electron executable:
@@ -79,7 +121,8 @@ Each view also has an **Edit view config** screen at `/config/:viewName`.
 - Updates the order of `views.<name>.columns`
 - Updates `views.<name>.defaultSort`
 - Updates `views.<name>.columnLayout` (`scroll` or `fit`)
-- Allows editing full JSON for each column plus the view's `searchFields` and `links` arrays
+- Edits column settings (label, alignment, date/number formatting, cell links), search fields and related links with form-based editors
+- Field pickers are filled from the configured columns of this view and, for links, of the target view; properties the editors do not show are preserved
 - Keeps hidden grid columns available in the row details panel and CSV export
 
 ## Generate Config From SQL Server DDL
@@ -125,6 +168,7 @@ Legacy single-database config is still accepted and is treated as a `default` co
 Settings UI:
 
 - `/settings`: manage database connections and trigger schema scans
+- `/settings` → **Home Page Searches**: tick or untick which views (and their search forms) appear on the home page for the selected source, with a filter and show all / hide all / only-with-search-fields shortcuts; saves `hideOnHome` on each view
 - `/settings/scan`: scans a selected database and rebuilds that source's views config file from live schema metadata
 
 Views config files:
