@@ -2053,10 +2053,20 @@ function renderLayout(title, content, options = {}) {
   const baseFontSizePx = resolveUiFontSize(appConfig.ui?.fontSize);
   const activeSourceName = getActiveSourceName(options.activeSourceName);
   const currentUsername = options.hideNav ? "" : getCurrentUsername();
+  const navLink = (key, href, label) =>
+    `<a class="banner-nav-link${options.navActive === key ? " active" : ""}" href="${escapeHtml(href)}"${
+      options.navActive === key ? ' aria-current="page"' : ""
+    }>${label}</a>`;
   const userMenu = currentUsername
-    ? `<form class="banner-user" method="post" action="/logout"><span>Signed in as <strong>${escapeHtml(
-        currentUsername
-      )}</strong></span><button type="submit">Sign out</button></form>`
+    ? `<div class="banner-right">
+        <nav class="banner-nav" aria-label="Main">
+          ${navLink("home", buildSourceHomeUrl(activeSourceName), "All Views")}
+          ${isCurrentUserAdmin() ? navLink("settings", buildSourceAwarePath("/settings", activeSourceName), "Settings") : ""}
+        </nav>
+        <form class="banner-user" method="post" action="/logout"><span>Signed in as <strong>${escapeHtml(
+          currentUsername
+        )}</strong></span><button type="submit">Sign out</button></form>
+      </div>`
     : "";
   const sourceTabs = options.hideNav ? "" : Object.entries(getDatabaseCatalog().connections)
     .filter(([sourceName]) => canAccessSource(sourceName))
@@ -2130,6 +2140,31 @@ function renderLayout(title, content, options = {}) {
       .banner-user button {
         background: rgba(255, 255, 255, 0.12);
         border-color: rgba(255, 255, 255, 0.4);
+      }
+      .banner-right {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .banner-nav {
+        display: flex;
+        gap: 6px;
+      }
+      .banner-nav-link {
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-size: var(--font-size-sm);
+      }
+      .banner-nav-link:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+      .banner-nav-link.active {
+        background: #fff;
+        color: #0a4fbc;
       }
       .container.login-container {
         max-width: 420px;
@@ -3002,9 +3037,8 @@ function renderHome(sourceName) {
     return renderLayout(
       "Search",
       `<h1>Search</h1>
-       ${isCurrentUserAdmin() ? '<div class="toolbar secondary"><a href="/settings">Settings</a></div>' : ""}
        <div class="notice">No database connections are configured yet. Add one in Settings to start browsing data.</div>`,
-      { activeSourceName: "" }
+      { activeSourceName: "", navActive: "home" }
     );
   }
   if (!activeSourceName) {
@@ -3012,7 +3046,7 @@ function renderHome(sourceName) {
       "Search",
       `<h1>Search</h1>
        <div class="notice">You have not been given access to any data yet. Ask an administrator to grant access.</div>`,
-      { activeSourceName: "" }
+      { activeSourceName: "", navActive: "home" }
     );
   }
   const isAdmin = isCurrentUserAdmin();
@@ -3073,14 +3107,9 @@ function renderHome(sourceName) {
   return renderLayout(
     "Search",
     `<h1>Search</h1>
-      ${
-        isAdmin
-          ? `<div class="toolbar secondary"><a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a></div>`
-          : ""
-      }
       <ul class="view-list">${viewItems || '<li class="muted">No views are available to you for this data source.</li>'}</ul>
       ${searchScript}`,
-    { activeSourceName }
+    { activeSourceName, navActive: "home" }
   );
 }
 
@@ -3218,9 +3247,7 @@ function renderViewConfig(sourceName, viewName, view, options = {}) {
     `${view.title || viewName} Config`,
     `<h1>${escapeHtml(view.title || viewName)} Config</h1>
      <div class="toolbar secondary">
-       <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
        <a href="${buildSourceAwarePath(`/table/${encodeURIComponent(viewName)}`, activeSourceName)}">Back to table</a>
-       <a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a>
       </div>
      ${noticeHtml}
      <div class="config-layout">
@@ -3608,9 +3635,6 @@ function renderSettings(options = {}) {
   return renderLayout(
     "Settings",
     `<h1>Settings</h1>
-      <div class="toolbar secondary">
-        <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
-     </div>
      ${noticeHtml}
      <div class="settings-grid">
         <section class="settings-card">
@@ -3794,7 +3818,7 @@ function renderSettings(options = {}) {
           });
        })();
       </script>`,
-    { activeSourceName }
+    { activeSourceName, navActive: "settings" }
   );
 }
 
@@ -4010,11 +4034,9 @@ function renderTable(sourceName, viewName, view, rows, context) {
       `<h1>${escapeHtml(view.title || viewName)}</h1>
       <nav class="breadcrumbs">${breadcrumbsHtml}</nav>
        <div class="toolbar">
-         <a href="${buildSourceHomeUrl(activeSourceName)}">All views</a>
          ${
            isCurrentUserAdmin()
-             ? `<a href="${buildSourceAwarePath("/settings", activeSourceName)}">Settings</a>
-         <a href="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">Edit view config</a>`
+             ? `<a href="${buildSourceAwarePath(`/config/${encodeURIComponent(viewName)}`, activeSourceName)}">Edit view config</a>`
              : ""
          }
          <a href="${downloadUrl}">Download CSV</a>
@@ -4899,7 +4921,7 @@ function renderUserAccess(user, options = {}) {
           });
         })();
       </script>`,
-    { activeSourceName }
+    { activeSourceName, navActive: "settings" }
   );
 }
 
