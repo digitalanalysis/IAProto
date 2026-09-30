@@ -4369,12 +4369,7 @@ function loadDuckDbModule() {
     return require("duckdb");
   } catch (error) {
     if (error?.code === "MODULE_NOT_FOUND" && String(error.message || "").includes("'duckdb'")) {
-      const isElectronRuntime = Boolean(process.versions?.electron);
-      throw new Error(
-        isElectronRuntime
-          ? "DuckDB support is not installed. Run `npm install duckdb` and rebuild the Electron package."
-          : "DuckDB support is not installed. Run `npm install duckdb` before using DuckDB sources in web mode."
-      );
+      throw new Error("DuckDB support is not installed. Run `npm install duckdb` before using DuckDB sources.");
     }
     throw error;
   }
@@ -5608,7 +5603,7 @@ function listNetworkUrls(port, includeHttps) {
 // TLS handshake record (0x16) is handed to the HTTPS server, anything else to HTTP.
 async function startServer(options = {}) {
   const port = options.port ?? DEFAULT_PORT;
-  // Listen on all network interfaces unless told otherwise; Electron passes 127.0.0.1.
+  // Listen on all network interfaces unless told otherwise.
   const host = options.host || process.env.HOST || appConfig.server?.host || "0.0.0.0";
   const httpServer = http.createServer(app);
   const httpsServer = options.https === false ? null : await createHttpsServer();

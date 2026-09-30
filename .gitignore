@@ -1,2 +1,10 @@
 # Generated TLS certificate and private key
 config/certs/
+
+# Windows service wrapper and logs (npm run service:install)
+daemon/
+
+# Native build debug output (e.g. DuckDB compile), not needed at runtime
+*.pdb
+*.ipdb
+*.iobj

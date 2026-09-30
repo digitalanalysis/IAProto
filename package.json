@@ -2,52 +2,21 @@
   "name": "sql-configurable-table-viewer",
   "version": "1.0.0",
   "description": "Config-driven Node.js web app for viewing SQL Server tables and related links",
-  "main": "electron/main.js",
+  "main": "src/server.js",
   "type": "commonjs",
   "author": "John Sewell",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "generate:views-config": "node src/generate-views-config-from-ddl.js",
-    "electron": "electron .",
-    "build:electron": "electron-builder --config.nativeRebuilder=legacy --config.npmRebuild=false --win portable",
-    "rebuild:electron-native": "electron-builder install-app-deps"
+    "service:install": "node scripts/windows-service.js install",
+    "service:uninstall": "node scripts/windows-service.js uninstall",
+    "generate:views-config": "node src/generate-views-config-from-ddl.js"
   },
   "dependencies": {
     "duckdb": "1.2.1",
     "express": "^4.21.2",
     "mssql": "^11.0.1",
+    "node-windows": "^1.0.0-beta.8",
     "selfsigned": "^5.5.0"
-  },
-  "devDependencies": {
-    "electron": "22.3.27",
-    "electron-builder": "26.8.1"
-  },
-  "build": {
-    "appId": "com.local.sqlconfigurabletableviewer",
-    "productName": "Configurable Data Viewer",
-    "nativeRebuilder": "legacy",
-    "npmRebuild": false,
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "electron/**/*",
-      "src/**/*",
-      "config/**/*",
-      "files/**/*",
-      "package.json"
-    ],
-    "win": {
-      "signAndEditExecutable": false,
-      "target": [
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    }
   }
 }

@@ -72,7 +72,6 @@ The server answers both `http://` and `https://` on the same port (for example `
 - Browsers will warn that the certificate is not trusted; accept it once, or import `config/certs/self-signed.crt` into the trusted root store
 - Sign-in cookies issued over HTTPS are marked `Secure`
 - To use a real certificate, set `https.certFile` and `https.keyFile` (PEM files) in `app.config.json`; set `https.enabled` to `false` to turn HTTPS off
-- The Electron app does not use HTTPS
 
 ## Network Access
 
@@ -81,26 +80,22 @@ The server listens on all network interfaces (`0.0.0.0`) so other machines can c
 - To restrict it to this machine only, set `server.host` to `"127.0.0.1"` in `app.config.json` (or the `HOST` environment variable)
 - Change the port with the `PORT` environment variable
 - Windows Firewall must allow inbound connections to Node.js on the port
-- The Electron app always listens on `127.0.0.1` only
 
-## Electron Build
+## Run as a Windows Service
 
-To build a portable Windows Electron executable:
+The app can be installed as a Windows service (starts with Windows, restarts if it crashes) using the bundled `node-windows` package. From an **administrator** prompt in the project folder:
 
-```bat
-build-electron.bat
+```powershell
+npm run service:install      # installs and starts "DCOM Data Explorer" on port 3000
+npm run service:uninstall    # stops and removes it
 ```
 
-Equivalent manual commands:
-
-```bash
-npm install
-npm run build:electron
-```
-
-The packaged output is written to `dist/`.
-
-In the packaged Electron build, the app uses `config/` and `files/` in the same directory as the executable. On first launch it copies the packaged defaults there if they do not already exist, and if a sibling legacy `Files/` folder is present it is copied into lowercase `files/`. In development mode, Electron uses `.electron-runtime/` in the project root instead.
+- To use another port, set it before installing: `$env:PORT = "8443"; npm run service:install`. `HOST` can be set the same way
+- The service wrapper and its logs (including the app's output) are written to `daemon/` in the project folder (ignored by git)
+- It runs as the Local System account by default. Any other account needs modify rights on the project folder, because the app writes `config/`
+- Open the port in Windows Firewall once: `New-NetFirewallRule -DisplayName "DCOM Data Explorer" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow`
+- To update: `Stop-Service -DisplayName "DCOM Data Explorer"`, update the files, then `Start-Service -DisplayName "DCOM Data Explorer"` (or use the Services app). Restarting signs everyone out
+- If node-windows reports the service as already installed or incomplete, run `npm run service:uninstall` and install again
 
 Static files:
 
@@ -175,7 +170,6 @@ Views config files:
 
 - Each data source can have its own views config JSON file
 - If `viewsConfigPath` is omitted, the app uses `config/views.<source>.config.json`
-- In the packaged Electron app, relative `viewsConfigPath` and DuckDB `path` values are resolved relative to the executable folder
 - Legacy single-source setups still use `config/views.config.json`
 - The top toolbar lets users switch between sources and their corresponding view sets
 
