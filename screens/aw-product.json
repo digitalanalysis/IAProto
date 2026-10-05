@@ -1,0 +1,426 @@
+{
+  "title": "Product Inquiry",
+  "description": "AdventureWorks demo: a product drawn as a DOS inquiry screen, with recent order lines that open the sales order screen.",
+  "source": "",
+  "view": "production_product",
+  "keys": [
+    "ProductID"
+  ],
+  "sharedKeys": [],
+  "width": 80,
+  "height": 25,
+  "colors": {
+    "fg": "yellow",
+    "bg": "blue",
+    "fieldFg": "white",
+    "fieldBg": "cyan"
+  },
+  "text": [
+    "╔══════════════════════════════ PRODUCT INQUIRY ═══════════════════════════════╗",
+    "║ Product ID             Number                   [ ] Make   [ ] Finished good ║",
+    "║ Name                                                                         ║",
+    "╟───────────────────────────────────────┬──────────────────────────────────────╢",
+    "║ CLASSIFICATION                        │ PRICING AND DATES                    ║",
+    "║ Line              Class     Style     │ List price                           ║",
+    "║ <Subcategory>                         │ Standard cost                        ║",
+    "║ <Model>                               │ Sell start                           ║",
+    "║ Colour                                │ Sell end                             ║",
+    "║ Size                                  │ Discontinued                         ║",
+    "║ Weight                                │                                      ║",
+    "╟───────────────────────────────────────┴──────────────────────────────────────╢",
+    "║ INVENTORY                                                                    ║",
+    "║ Safety stock              Reorder point             Days to make             ║",
+    "╟──────────────────────────────────────────────────────────────────────────────╢",
+    "║ RECENT ORDER LINES FOR THIS PRODUCT   (click a line to open the order)       ║",
+    "║    Order│   Qty│    Unit price│     Line total                               ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║ F2=All order lines  F3=Subcategory  F4=Model  F10=Exit                       ║",
+    "╚══════════════════════════════════════════════════════════════════════════════╝"
+  ],
+  "regions": [
+    {
+      "row": 4,
+      "col": 2,
+      "width": 14,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 4,
+      "col": 42,
+      "width": 17,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 12,
+      "col": 2,
+      "width": 9,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 15,
+      "col": 1,
+      "width": 78,
+      "height": 1,
+      "fg": "lightcyan",
+      "bg": "black"
+    },
+    {
+      "row": 16,
+      "col": 2,
+      "width": 46,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 23,
+      "col": 1,
+      "width": 78,
+      "height": 1,
+      "fg": "black",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 2,
+      "width": 2,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 22,
+      "width": 2,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 38,
+      "width": 2,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 48,
+      "width": 3,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    }
+  ],
+  "fields": [
+    {
+      "column": "ProductID",
+      "row": 1,
+      "col": 14,
+      "width": 6,
+      "align": "right"
+    },
+    {
+      "column": "ProductNumber",
+      "row": 1,
+      "col": 33,
+      "width": 12
+    },
+    {
+      "column": "MakeFlag",
+      "row": 1,
+      "col": 51,
+      "width": 1,
+      "type": "checkbox",
+      "fg": "yellow",
+      "bg": "blue"
+    },
+    {
+      "column": "FinishedGoodsFlag",
+      "row": 1,
+      "col": 62,
+      "width": 1,
+      "type": "checkbox",
+      "fg": "yellow",
+      "bg": "blue"
+    },
+    {
+      "column": "Name",
+      "row": 2,
+      "col": 14,
+      "width": 50,
+      "fg": "yellow"
+    },
+    {
+      "column": "ProductLine",
+      "row": 5,
+      "col": 14,
+      "width": 3,
+      "align": "center"
+    },
+    {
+      "column": "Class",
+      "row": 5,
+      "col": 26,
+      "width": 3,
+      "align": "center"
+    },
+    {
+      "column": "Style",
+      "row": 5,
+      "col": 36,
+      "width": 3,
+      "align": "center"
+    },
+    {
+      "column": "ProductSubcategoryID",
+      "row": 6,
+      "col": 16,
+      "width": 6,
+      "align": "right"
+    },
+    {
+      "column": "ProductModelID",
+      "row": 7,
+      "col": 16,
+      "width": 6,
+      "align": "right"
+    },
+    {
+      "column": "Color",
+      "row": 8,
+      "col": 14,
+      "width": 15
+    },
+    {
+      "column": "Size",
+      "row": 9,
+      "col": 14,
+      "width": 5
+    },
+    {
+      "column": "SizeUnitMeasureCode",
+      "row": 9,
+      "col": 20,
+      "width": 3
+    },
+    {
+      "column": "Weight",
+      "row": 10,
+      "col": 14,
+      "width": 8,
+      "align": "right",
+      "format": "number",
+      "precision": 2
+    },
+    {
+      "column": "WeightUnitMeasureCode",
+      "row": 10,
+      "col": 23,
+      "width": 3
+    },
+    {
+      "column": "ListPrice",
+      "row": 5,
+      "col": 60,
+      "width": 15,
+      "format": "number",
+      "precision": 2,
+      "thousandSeparator": " ",
+      "align": "right"
+    },
+    {
+      "column": "StandardCost",
+      "row": 6,
+      "col": 60,
+      "width": 15,
+      "format": "number",
+      "precision": 2,
+      "thousandSeparator": " ",
+      "align": "right"
+    },
+    {
+      "column": "SellStartDate",
+      "row": 7,
+      "col": 60,
+      "width": 12,
+      "format": "date",
+      "dateFormat": "DD/MM/YYYY",
+      "align": "center"
+    },
+    {
+      "column": "SellEndDate",
+      "row": 8,
+      "col": 60,
+      "width": 12,
+      "format": "date",
+      "dateFormat": "DD/MM/YYYY",
+      "align": "center"
+    },
+    {
+      "column": "DiscontinuedDate",
+      "row": 9,
+      "col": 60,
+      "width": 12,
+      "format": "date",
+      "dateFormat": "DD/MM/YYYY",
+      "align": "center"
+    },
+    {
+      "column": "SafetyStockLevel",
+      "row": 13,
+      "col": 16,
+      "width": 6,
+      "align": "right"
+    },
+    {
+      "column": "ReorderPoint",
+      "row": 13,
+      "col": 43,
+      "width": 6,
+      "align": "right"
+    },
+    {
+      "column": "DaysToManufacture",
+      "row": 13,
+      "col": 68,
+      "width": 4,
+      "align": "right"
+    }
+  ],
+  "lists": [
+    {
+      "view": "sales_salesorderdetail",
+      "row": 17,
+      "col": 2,
+      "width": 46,
+      "height": 6,
+      "keys": [
+        {
+          "localColumn": "ProductID",
+          "targetColumn": "ProductID"
+        }
+      ],
+      "columns": [
+        {
+          "column": "SalesOrderID",
+          "width": 8,
+          "align": "right"
+        },
+        {
+          "column": "OrderQty",
+          "width": 6,
+          "align": "right"
+        },
+        {
+          "column": "UnitPrice",
+          "width": 14,
+          "align": "right",
+          "format": "number",
+          "precision": 2,
+          "thousandSeparator": " "
+        },
+        {
+          "column": "LineTotal",
+          "width": 15,
+          "align": "right",
+          "format": "number",
+          "precision": 2,
+          "thousandSeparator": " "
+        }
+      ],
+      "separator": "│",
+      "sort": {
+        "column": "SalesOrderID",
+        "direction": "DESC"
+      },
+      "limit": 50,
+      "fg": "black",
+      "bg": "lightgray",
+      "rowLink": {
+        "targetTemplate": "aw-sales-order",
+        "keys": [
+          {
+            "localColumn": "SalesOrderID",
+            "targetColumn": "SalesOrderID"
+          }
+        ]
+      }
+    }
+  ],
+  "links": [
+    {
+      "row": 6,
+      "col": 2,
+      "width": 13,
+      "label": "Product subcategory",
+      "keys": [
+        {
+          "localColumn": "ProductSubcategoryID",
+          "targetColumn": "ProductSubcategoryID"
+        }
+      ],
+      "targetView": "production_productsubcategory"
+    },
+    {
+      "row": 7,
+      "col": 2,
+      "width": 7,
+      "label": "Product model",
+      "keys": [
+        {
+          "localColumn": "ProductModelID",
+          "targetColumn": "ProductModelID"
+        }
+      ],
+      "targetView": "production_productmodel"
+    },
+    {
+      "row": 23,
+      "col": 2,
+      "width": 18,
+      "label": "F2 All order lines",
+      "keys": [
+        {
+          "localColumn": "ProductID",
+          "targetColumn": "ProductID"
+        }
+      ],
+      "targetView": "sales_salesorderdetail"
+    },
+    {
+      "row": 23,
+      "col": 22,
+      "width": 14,
+      "label": "F3 Subcategory",
+      "keys": [
+        {
+          "localColumn": "ProductSubcategoryID",
+          "targetColumn": "ProductSubcategoryID"
+        }
+      ],
+      "targetView": "production_productsubcategory"
+    },
+    {
+      "row": 23,
+      "col": 38,
+      "width": 8,
+      "label": "F4 Model",
+      "keys": [
+        {
+          "localColumn": "ProductModelID",
+          "targetColumn": "ProductModelID"
+        }
+      ],
+      "targetView": "production_productmodel"
+    }
+  ]
+}

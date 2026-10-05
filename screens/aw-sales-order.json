@@ -1,0 +1,542 @@
+{
+  "title": "Sales Order Maintenance",
+  "description": "AdventureWorks demo: a sales order drawn as a DOS order-entry screen, with its order lines and links to related records.",
+  "source": "",
+  "view": "sales_salesorderheader",
+  "keys": [
+    "SalesOrderID"
+  ],
+  "sharedKeys": [],
+  "width": 80,
+  "height": 25,
+  "colors": {
+    "fg": "yellow",
+    "bg": "blue",
+    "fieldFg": "white",
+    "fieldBg": "cyan"
+  },
+  "text": [
+    "╔══════════════════════════ SALES ORDER MAINTENANCE ═══════════════════════════╗",
+    "║ Order No.             Rev      Status     [ ] Online   P.O.                  ║",
+    "╟───────────────────────────────────────┬──────────────────────────────────────╢",
+    "║ CUSTOMER                              │ DATES                                ║",
+    "║ <Customer>                            │ Ordered                              ║",
+    "║ Account                               │ Due                                  ║",
+    "║ <Sales rep>                           │ Shipped                              ║",
+    "║ <Territory>                           │ <Ship via>                           ║",
+    "╟───────────────────────────────────────┴──────────────────────────────────────╢",
+    "║ ORDER LINES   (click a line to open the product)                             ║",
+    "║   Line│ Product│   Qty│    Unit price│ Disc.│     Line total                 ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "║                                                                              ║",
+    "╟──────────────────────────────────────────────────────────────────────────────╢",
+    "║ <Bill to>                                       Subtotal                     ║",
+    "║ <Ship to>                                       Tax                          ║",
+    "║ <Card>                Approval                  Freight                      ║",
+    "║ <Currency>                                      TOTAL DUE                    ║",
+    "║ Comment                                                                      ║",
+    "║ F2=Customer  F3=Sales rep  F4=Order lines  F5=Ship via  F10=Exit             ║",
+    "╚══════════════════════════════════════════════════════════════════════════════╝"
+  ],
+  "regions": [
+    {
+      "row": 3,
+      "col": 2,
+      "width": 8,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 3,
+      "col": 42,
+      "width": 5,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 9,
+      "col": 1,
+      "width": 78,
+      "height": 1,
+      "fg": "lightcyan",
+      "bg": "black"
+    },
+    {
+      "row": 10,
+      "col": 2,
+      "width": 60,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 21,
+      "col": 50,
+      "width": 9,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 23,
+      "col": 1,
+      "width": 78,
+      "height": 1,
+      "fg": "black",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 2,
+      "width": 2,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 15,
+      "width": 2,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 29,
+      "width": 2,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 45,
+      "width": 2,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    },
+    {
+      "row": 23,
+      "col": 58,
+      "width": 3,
+      "height": 1,
+      "fg": "red",
+      "bg": "cyan"
+    }
+  ],
+  "fields": [
+    {
+      "column": "SalesOrderNumber",
+      "row": 1,
+      "col": 12,
+      "width": 10
+    },
+    {
+      "column": "RevisionNumber",
+      "row": 1,
+      "col": 28,
+      "width": 3,
+      "align": "right"
+    },
+    {
+      "column": "Status",
+      "row": 1,
+      "col": 40,
+      "width": 2,
+      "align": "center"
+    },
+    {
+      "column": "OnlineOrderFlag",
+      "row": 1,
+      "col": 45,
+      "width": 1,
+      "type": "checkbox",
+      "fg": "yellow",
+      "bg": "blue"
+    },
+    {
+      "column": "PurchaseOrderNumber",
+      "row": 1,
+      "col": 62,
+      "width": 16
+    },
+    {
+      "column": "CustomerID",
+      "row": 4,
+      "col": 14,
+      "width": 8,
+      "align": "right"
+    },
+    {
+      "column": "AccountNumber",
+      "row": 5,
+      "col": 14,
+      "width": 16
+    },
+    {
+      "column": "SalesPersonID",
+      "row": 6,
+      "col": 14,
+      "width": 8,
+      "align": "right"
+    },
+    {
+      "column": "TerritoryID",
+      "row": 7,
+      "col": 14,
+      "width": 8,
+      "align": "right"
+    },
+    {
+      "column": "OrderDate",
+      "row": 4,
+      "col": 54,
+      "width": 12,
+      "format": "date",
+      "dateFormat": "DD/MM/YYYY",
+      "align": "center"
+    },
+    {
+      "column": "DueDate",
+      "row": 5,
+      "col": 54,
+      "width": 12,
+      "format": "date",
+      "dateFormat": "DD/MM/YYYY",
+      "align": "center"
+    },
+    {
+      "column": "ShipDate",
+      "row": 6,
+      "col": 54,
+      "width": 12,
+      "format": "date",
+      "dateFormat": "DD/MM/YYYY",
+      "align": "center"
+    },
+    {
+      "column": "ShipMethodID",
+      "row": 7,
+      "col": 54,
+      "width": 4,
+      "align": "right"
+    },
+    {
+      "column": "BillToAddressID",
+      "row": 18,
+      "col": 14,
+      "width": 8,
+      "align": "right"
+    },
+    {
+      "column": "ShipToAddressID",
+      "row": 19,
+      "col": 14,
+      "width": 8,
+      "align": "right"
+    },
+    {
+      "column": "CreditCardID",
+      "row": 20,
+      "col": 14,
+      "width": 8,
+      "align": "right"
+    },
+    {
+      "column": "CreditCardApprovalCode",
+      "row": 20,
+      "col": 33,
+      "width": 15
+    },
+    {
+      "column": "CurrencyRateID",
+      "row": 21,
+      "col": 14,
+      "width": 8,
+      "align": "right"
+    },
+    {
+      "column": "Comment",
+      "row": 22,
+      "col": 11,
+      "width": 37
+    },
+    {
+      "column": "SubTotal",
+      "row": 18,
+      "col": 62,
+      "width": 15,
+      "format": "number",
+      "precision": 2,
+      "thousandSeparator": " ",
+      "align": "right"
+    },
+    {
+      "column": "TaxAmt",
+      "row": 19,
+      "col": 62,
+      "width": 15,
+      "format": "number",
+      "precision": 2,
+      "thousandSeparator": " ",
+      "align": "right"
+    },
+    {
+      "column": "Freight",
+      "row": 20,
+      "col": 62,
+      "width": 15,
+      "format": "number",
+      "precision": 2,
+      "thousandSeparator": " ",
+      "align": "right"
+    },
+    {
+      "column": "TotalDue",
+      "row": 21,
+      "col": 62,
+      "width": 15,
+      "fg": "lightgreen",
+      "bg": "black",
+      "format": "number",
+      "precision": 2,
+      "thousandSeparator": " ",
+      "align": "right"
+    }
+  ],
+  "lists": [
+    {
+      "view": "sales_salesorderdetail",
+      "row": 11,
+      "col": 2,
+      "width": 60,
+      "height": 6,
+      "keys": [
+        {
+          "localColumn": "SalesOrderID",
+          "targetColumn": "SalesOrderID"
+        }
+      ],
+      "columns": [
+        {
+          "column": "SalesOrderDetailID",
+          "width": 6,
+          "align": "right"
+        },
+        {
+          "column": "ProductID",
+          "width": 8,
+          "align": "right"
+        },
+        {
+          "column": "OrderQty",
+          "width": 6,
+          "align": "right"
+        },
+        {
+          "column": "UnitPrice",
+          "width": 14,
+          "align": "right",
+          "format": "number",
+          "precision": 2,
+          "thousandSeparator": " "
+        },
+        {
+          "column": "UnitPriceDiscount",
+          "width": 6,
+          "align": "right",
+          "format": "number",
+          "precision": 2,
+          "thousandSeparator": " "
+        },
+        {
+          "column": "LineTotal",
+          "width": 15,
+          "align": "right",
+          "format": "number",
+          "precision": 2,
+          "thousandSeparator": " "
+        }
+      ],
+      "separator": "│",
+      "sort": {
+        "column": "SalesOrderDetailID",
+        "direction": "ASC"
+      },
+      "limit": 200,
+      "fg": "black",
+      "bg": "lightgray",
+      "rowLink": {
+        "targetTemplate": "aw-product",
+        "keys": [
+          {
+            "localColumn": "ProductID",
+            "targetColumn": "ProductID"
+          }
+        ]
+      }
+    }
+  ],
+  "links": [
+    {
+      "row": 4,
+      "col": 2,
+      "width": 10,
+      "label": "Customer",
+      "keys": [
+        {
+          "localColumn": "CustomerID",
+          "targetColumn": "CustomerID"
+        }
+      ],
+      "targetView": "sales_customer"
+    },
+    {
+      "row": 6,
+      "col": 2,
+      "width": 11,
+      "label": "Sales person",
+      "keys": [
+        {
+          "localColumn": "SalesPersonID",
+          "targetColumn": "BusinessEntityID"
+        }
+      ],
+      "targetView": "sales_salesperson"
+    },
+    {
+      "row": 7,
+      "col": 2,
+      "width": 11,
+      "label": "Sales territory",
+      "keys": [
+        {
+          "localColumn": "TerritoryID",
+          "targetColumn": "TerritoryID"
+        }
+      ],
+      "targetView": "sales_salesterritory"
+    },
+    {
+      "row": 7,
+      "col": 42,
+      "width": 10,
+      "label": "Shipping method",
+      "keys": [
+        {
+          "localColumn": "ShipMethodID",
+          "targetColumn": "ShipMethodID"
+        }
+      ],
+      "targetView": "purchasing_shipmethod"
+    },
+    {
+      "row": 18,
+      "col": 2,
+      "width": 9,
+      "label": "Billing address",
+      "keys": [
+        {
+          "localColumn": "BillToAddressID",
+          "targetColumn": "AddressID"
+        }
+      ],
+      "targetView": "person_address"
+    },
+    {
+      "row": 19,
+      "col": 2,
+      "width": 9,
+      "label": "Shipping address",
+      "keys": [
+        {
+          "localColumn": "ShipToAddressID",
+          "targetColumn": "AddressID"
+        }
+      ],
+      "targetView": "person_address"
+    },
+    {
+      "row": 20,
+      "col": 2,
+      "width": 6,
+      "label": "Credit card",
+      "keys": [
+        {
+          "localColumn": "CreditCardID",
+          "targetColumn": "CreditCardID"
+        }
+      ],
+      "targetView": "sales_creditcard"
+    },
+    {
+      "row": 21,
+      "col": 2,
+      "width": 10,
+      "label": "Currency rate",
+      "keys": [
+        {
+          "localColumn": "CurrencyRateID",
+          "targetColumn": "CurrencyRateID"
+        }
+      ],
+      "targetView": "sales_currencyrate"
+    },
+    {
+      "row": 23,
+      "col": 2,
+      "width": 11,
+      "label": "F2 Customer",
+      "keys": [
+        {
+          "localColumn": "CustomerID",
+          "targetColumn": "CustomerID"
+        }
+      ],
+      "targetView": "sales_customer"
+    },
+    {
+      "row": 23,
+      "col": 15,
+      "width": 12,
+      "label": "F3 Sales person",
+      "keys": [
+        {
+          "localColumn": "SalesPersonID",
+          "targetColumn": "BusinessEntityID"
+        }
+      ],
+      "targetView": "sales_salesperson"
+    },
+    {
+      "row": 23,
+      "col": 29,
+      "width": 14,
+      "label": "F4 Order lines",
+      "keys": [
+        {
+          "localColumn": "SalesOrderID",
+          "targetColumn": "SalesOrderID"
+        }
+      ],
+      "targetView": "sales_salesorderdetail"
+    },
+    {
+      "row": 23,
+      "col": 45,
+      "width": 11,
+      "label": "F5 Shipping method",
+      "keys": [
+        {
+          "localColumn": "ShipMethodID",
+          "targetColumn": "ShipMethodID"
+        }
+      ],
+      "targetView": "purchasing_shipmethod"
+    }
+  ]
+}

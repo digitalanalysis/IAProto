@@ -8,6 +8,7 @@ const express = require("express");
 const sql = require("mssql");
 const auth = require("./auth");
 const { loadTlsCredentials } = require("./tls-cert");
+const screens = require("./screens");
 const { buildViewsConfigFromSchemaTables } = require("./utils/buildViewsConfigFromSchema");
 
 const app = express();
@@ -24,6 +25,8 @@ const legacyViewsConfigPath = process.env.LEGACY_VIEWS_CONFIG_PATH
 const servedFilesPath = process.env.SERVED_FILES_PATH
   ? path.resolve(process.env.SERVED_FILES_PATH)
   : path.join(runtimeRoot, "files");
+// Screen templates (one JSON file per template) live in their own folder.
+const screensPath = process.env.SCREENS_PATH ? path.resolve(process.env.SCREENS_PATH) : path.join(runtimeRoot, "screens");
 
 let appConfig;
 let viewsConfigsBySource = new Map();
@@ -2970,10 +2973,14 @@ function renderLayout(title, content, options = {}) {
           max-height: none;
         }
       }
+      ${options.extraStyles || ""}
     </style>
   </head>
-  <body>
-    <header class="site-banner">
+  <body${options.bare ? ' class="bare"' : ""}>
+    ${
+      options.bare
+        ? content
+        : `<header class="site-banner">
       <div class="site-banner-head">
         <div>
           <div class="site-banner-title">${escapeHtml(bannerTitle)}</div>
@@ -2985,7 +2992,8 @@ function renderLayout(title, content, options = {}) {
     </header>
     <div class="container${options.containerClass ? ` ${options.containerClass}` : ""}">
       ${content}
-    </div>
+    </div>`
+    }
   </body>
 </html>`;
 }
@@ -3690,6 +3698,11 @@ function renderSettings(options = {}) {
          </form>
        </section>
         <section class="settings-card">
+          <h2>Screen Templates</h2>
+          <p class="muted">Layouts that reproduce legacy text-mode screens for a record. Open them from the Screen tab in a table's row panel.</p>
+          <div class="settings-actions"><a href="${escapeHtml(buildSourceAwarePath("/settings/screens", activeSourceName))}">Manage screen templates</a></div>
+        </section>
+        <section class="settings-card">
           <h2>Home Page Searches</h2>
           ${
             homeViewEntries.length
@@ -3881,7 +3894,16 @@ function renderTable(sourceName, viewName, view, rows, context) {
     })
     .join("");
   const nextBreadcrumbsToken = context.nextBreadcrumbsToken || "";
-  const linkLocalColumns = Array.from(collectLinkLocalColumns(view));
+  const screenDefinitions = getScreenTemplatesForView(activeSourceName, viewName).map((template) => ({
+    id: template.id,
+    title: template.title,
+    keys: getScreenKeyColumns(template, view),
+    width: template.width,
+    height: template.height
+  }));
+  const linkLocalColumns = Array.from(
+    new Set([...collectLinkLocalColumns(view), ...screenDefinitions.flatMap((screen) => screen.keys)])
+  );
 
   const makePageUrl = (targetPage) => {
     const params = new URLSearchParams();
@@ -4060,6 +4082,15 @@ function renderTable(sourceName, viewName, view, rows, context) {
          <div class="tabs">
            <button type="button" class="tab-button active" data-tab="fields" data-order="1">Fields</button>
            <button type="button" class="tab-button" data-tab="links" data-order="2">Links</button>
+           ${
+             screenDefinitions.length
+               ? '<button type="button" class="tab-button" data-tab="screens" data-order="3">Screen</button>'
+               : ""
+           }
+         </div>
+         <div class="tab-panel" id="tab-screens">
+           <p class="muted" id="row-screens-empty">Click a row to open it in a screen layout.</p>
+           <ul class="row-links" id="row-screens"></ul>
          </div>
          <div class="tab-panel" id="tab-links">
            <p class="muted" id="row-links-empty">Click a row to view related links.</p>
@@ -4078,6 +4109,9 @@ function renderTable(sourceName, viewName, view, rows, context) {
          const rawDetailsByRow = ${rawDetailsJson};
          const columns = ${detailColumnsJson};
          const linkDefinitions = ${linkDefinitionsJson};
+         const screenDefinitions = ${toInlineJson(screenDefinitions)};
+         const screensRoot = document.getElementById("row-screens");
+         const screensEmpty = document.getElementById("row-screens-empty");
           const nextBreadcrumbsToken = ${toInlineJson(nextBreadcrumbsToken)};
           const activeSourceName = ${toInlineJson(activeSourceName)};
          const linksRoot = document.getElementById("row-links");
@@ -4326,10 +4360,56 @@ function renderTable(sourceName, viewName, view, rows, context) {
            window.addEventListener("resize", syncHorizontalScrollbar);
          }
 
+         function renderScreens(index) {
+           const rawDetail = rawDetailsByRow[index];
+           const items = rawDetail
+             ? screenDefinitions
+                 .map((screen) => {
+                   const params = [];
+                   for (const key of screen.keys) {
+                     const value = rawDetail[key];
+                     if (value === undefined || value === null || value === "") {
+                       return "";
+                     }
+                     params.push("f_" + encodeURIComponent(key) + "=" + encodeURIComponent(String(value)));
+                   }
+                   if (activeSourceName) {
+                     params.push("source=" + encodeURIComponent(activeSourceName));
+                   }
+                   const url = "/screen/" + encodeURIComponent(screen.id) + "?" + params.join("&");
+                   return '<li><a href="' + escapeText(url) + '" data-screen-popup data-cols="' + Number(screen.width) + '" data-rows="' + Number(screen.height) + '">' + escapeText(screen.title) + "</a></li>";
+                 })
+                 .filter(Boolean)
+             : [];
+           screensRoot.innerHTML = items.join("");
+           screensEmpty.style.display = items.length ? "none" : "";
+         }
+
          function renderSidePanel(index) {
            renderLinks(index);
            renderFields(index);
+           renderScreens(index);
          }
+
+         // Screens open in a popup window sized to the template; the popup fine-tunes its size on load.
+         screensRoot.addEventListener("click", (event) => {
+           const link = event.target.closest("a[data-screen-popup]");
+           if (!link) {
+             return;
+           }
+           const cols = Number(link.dataset.cols) || 80;
+           const rows = Number(link.dataset.rows) || 25;
+           const width = Math.min(screen.availWidth, Math.round(cols * 9.7) + 60);
+           const height = Math.min(screen.availHeight, rows * 20 + 110);
+           const left = Math.max(0, Math.round((screen.availWidth - width) / 2));
+           const top = Math.max(0, Math.round((screen.availHeight - height) / 3));
+           const url = link.getAttribute("href") + "&popup=1";
+           const popup = window.open(url, "dos-screen", "popup=yes,width=" + width + ",height=" + height + ",left=" + left + ",top=" + top + ",resizable=yes,scrollbars=no");
+           if (popup) {
+             event.preventDefault();
+             popup.focus();
+           }
+         });
 
          rows.forEach((row) => {
            row.addEventListener("click", () => {
@@ -5456,7 +5536,7 @@ app.get("/table/:viewName/download.csv", async (req, res) => {
   }
 
   try {
-    const { rows } = await fetchViewRows(view, req.query, activeSourceName);
+    const { rows } = await fetchViewRows(withQueryColumns(view, filterColumnsInQuery(req.query)), req.query, activeSourceName);
     const headers = view.columns.map((column) => escapeCsv(column.label || column.name)).join(",");
     const lines = rows.map((row) => {
       const rowKeyIndex = buildRowKeyIndex(row);
@@ -5499,8 +5579,13 @@ app.get("/table/:viewName", async (req, res) => {
     const currentUrl = stripQueryParam(req.originalUrl, "crumbs");
     const currentCrumb = { label: view.title || req.params.viewName, url: currentUrl };
     const nextBreadcrumbsToken = encodeBreadcrumbs([...breadcrumbs, currentCrumb]);
+    // Also select/filter on screen key columns and any filtered column that is not configured
+    // for the view (e.g. a line of business passed from a screen link).
+    const screenKeyColumns = getScreenTemplatesForView(activeSourceName, req.params.viewName).flatMap((template) =>
+      getScreenKeyColumns(template, view)
+    );
     const { rows, built, filters, page, limit, hasNext, totalCount, totalPages } = await fetchViewRows(
-      view,
+      withQueryColumns(view, [...screenKeyColumns, ...filterColumnsInQuery(req.query)]),
       req.query,
       activeSourceName
     );
@@ -5562,8 +5647,641 @@ app.get("/debug/:viewName/keys", async (req, res) => {
   }
 });
 
+// ---------- Screen templates ----------
+
+const SCREEN_FORMAT_PROPERTIES = [
+  "format",
+  "dateFormat",
+  "formatString",
+  "precision",
+  "thousandSeparator",
+  "thousandsSeparator",
+  "decimalSeparator",
+  "numberFormat",
+  "useGrouping",
+  "locale",
+  "timeZone"
+];
+
+function getScreenTemplatesForView(sourceName, viewName) {
+  return screens
+    .listTemplates(screensPath)
+    .filter((template) => !template.invalid && template.view === viewName && (!template.source || template.source === sourceName));
+}
+
+// Columns that identify the record a screen shows: the shared keys plus the template's own keys
+// (else the view's key column).
+function getScreenKeyColumns(template, view) {
+  let keys = template.keys;
+  if (!keys.length) {
+    const firstColumn = (view?.columns || [])[0];
+    keys = view?.keyColumn ? [view.keyColumn] : firstColumn ? [getColumnSourceName(firstColumn)] : [];
+  }
+  return [...new Set([...template.sharedKeys, ...keys])];
+}
+
+// Adds the template's shared keys (same column name on both sides) to a link or list's key mappings.
+function withSharedKeys(template, keys) {
+  const result = [...(keys || [])];
+  for (const column of [...template.sharedKeys].reverse()) {
+    if (!result.some((key) => key.targetColumn === column)) {
+      result.unshift({ localColumn: column, targetColumn: column });
+    }
+  }
+  return result;
+}
+
+// Returns a copy of the view whose queries also select, and may filter on, the given columns -
+// e.g. key columns that are not in the view's configured columns. Without this, filters on
+// unconfigured columns would be ignored and a lookup could return the wrong record.
+function withQueryColumns(view, columnNames) {
+  const missing = [...new Set((columnNames || []).map((column) => String(column || "").trim()).filter(Boolean))].filter(
+    (column) => !findViewColumn(view, column)
+  );
+  if (!missing.length) {
+    return view;
+  }
+  return { ...view, columns: [...(view.columns || []), ...missing.map((name) => ({ name, hideOnGrid: true }))] };
+}
+
+function filterColumnsInQuery(query) {
+  return Object.keys(query || {})
+    .filter((key) => key.startsWith("f_"))
+    .map((key) => key.slice(2));
+}
+
+// Formats a value using the view's column settings, overridden by any formatting set on the screen item.
+function formatScreenValue(view, item, value) {
+  const column = { ...(findViewColumn(view, item.column) || { name: item.column }) };
+  for (const property of SCREEN_FORMAT_PROPERTIES) {
+    if (item[property] !== undefined && item[property] !== "") {
+      column[property] = item[property];
+    }
+  }
+  let text = String(formatCellValue(value, column) ?? "").trimEnd();
+  if (item.upper) {
+    text = text.toUpperCase();
+  }
+  return text;
+}
+
+function resolveScreenLinkUrl(template, target, row, sourceName) {
+  if (!row || !target) {
+    return null;
+  }
+  const rowKeyIndex = buildRowKeyIndex(row);
+  const query = {};
+  for (const key of withSharedKeys(template, target.keys)) {
+    const value = getRowValue(row, key.localColumn, rowKeyIndex);
+    if (value === undefined || value === null || value === "") {
+      return null;
+    }
+    query[`f_${key.targetColumn}`] = String(value);
+  }
+  if (target.targetTemplate) {
+    let linked = null;
+    try {
+      linked = screens.loadTemplate(screensPath, target.targetTemplate);
+    } catch {
+      linked = null;
+    }
+    if (
+      !linked ||
+      (linked.source && linked.source !== sourceName) ||
+      !canAccessView(sourceName, linked.view) ||
+      !getView(linked.view, sourceName)
+    ) {
+      return null;
+    }
+    return buildSourceAwarePath(`/screen/${encodeURIComponent(linked.id)}`, sourceName, query);
+  }
+  if (target.targetView && canAccessView(sourceName, target.targetView) && getView(target.targetView, sourceName)) {
+    return buildSourceAwarePath(`/table/${encodeURIComponent(target.targetView)}`, sourceName, query);
+  }
+  return null;
+}
+
+async function fetchScreenListRows(template, list, row, sourceName) {
+  if (!row) {
+    return { rows: [], urls: [] };
+  }
+  const configuredListView = canAccessView(sourceName, list.view) ? getView(list.view, sourceName) : null;
+  if (!configuredListView) {
+    return { rows: [], urls: [], error: `View ${list.view || "(none)"} is not available` };
+  }
+  const listKeys = withSharedKeys(template, list.keys);
+  const rowLinkColumns = list.rowLink ? withSharedKeys(template, list.rowLink.keys).map((key) => key.localColumn) : [];
+  const listView = withQueryColumns(configuredListView, [
+    ...listKeys.map((key) => key.targetColumn),
+    ...rowLinkColumns,
+    ...list.columns.map((column) => column.column)
+  ]);
+  const rowKeyIndex = buildRowKeyIndex(row);
+  const query = { limit: list.limit, page: 1 };
+  for (const key of listKeys) {
+    const value = getRowValue(row, key.localColumn, rowKeyIndex);
+    if (value === undefined || value === null || value === "") {
+      return { rows: [], urls: [] };
+    }
+    query[`f_${key.targetColumn}`] = String(value);
+  }
+  if (list.sort) {
+    query.sortBy = list.sort.column;
+    query.sortDir = list.sort.direction;
+  }
+  try {
+    const result = await fetchViewRows(listView, query, sourceName);
+    return {
+      rows: result.rows.map((listRow) => {
+        const listRowKeyIndex = buildRowKeyIndex(listRow);
+        return list.columns.map((column) =>
+          formatScreenValue(listView, column, getRowValue(listRow, column.column, listRowKeyIndex))
+        );
+      }),
+      urls: result.rows.map((listRow) => (list.rowLink ? resolveScreenLinkUrl(template, list.rowLink, listRow, sourceName) : null))
+    };
+  } catch (error) {
+    return { rows: [], urls: [], error: error.message };
+  }
+}
+
+function renderScreenNotFound(res, message) {
+  res
+    .status(404)
+    .send(renderLayout("Screen not found", `<h1>Screen not found</h1><p>${escapeHtml(message)}</p><p><a href="/">Back to all views</a></p>`));
+}
+
+app.get("/screen/:templateId", async (req, res) => {
+  let template = null;
+  try {
+    template = screens.loadTemplate(screensPath, req.params.templateId);
+  } catch (error) {
+    renderScreenNotFound(res, `The screen template could not be read: ${error.message}`);
+    return;
+  }
+  if (!template) {
+    renderScreenNotFound(res, `No screen template named ${req.params.templateId} exists.`);
+    return;
+  }
+  const sourceName = getActiveSourceName(template.source || req.query?.source);
+  const configuredView =
+    (!template.source || template.source === sourceName) && canAccessView(sourceName, template.view)
+      ? getView(template.view, sourceName)
+      : null;
+  if (!configuredView) {
+    renderScreenNotFound(res, `The view ${template.view || "(none)"} used by this screen is not available.`);
+    return;
+  }
+
+  const filterQuery = {};
+  for (const [key, value] of Object.entries(req.query || {})) {
+    if (key.startsWith("f_") || key.startsWith("cf_") || key.startsWith("s_")) {
+      filterQuery[key] = value;
+    }
+  }
+  // The record must be selectable and filterable by every key and every column the screen uses.
+  const view = withQueryColumns(configuredView, [
+    ...getScreenKeyColumns(template, configuredView),
+    ...filterColumnsInQuery(filterQuery),
+    ...template.fields.map((field) => field.column),
+    ...template.links.flatMap((link) => withSharedKeys(template, link.keys).map((key) => key.localColumn)),
+    ...template.lists.flatMap((list) => withSharedKeys(template, list.keys).map((key) => key.localColumn))
+  ]);
+  let row = null;
+  let totalCount = 0;
+  let recordNumber = parsePositiveInt(req.query.record, 1);
+  let loadError = "";
+  try {
+    const result = await fetchViewRows(view, { ...filterQuery, limit: 1, page: recordNumber }, sourceName);
+    row = result.rows[0] || null;
+    totalCount = result.totalCount;
+    recordNumber = result.page;
+  } catch (error) {
+    loadError = error.message;
+  }
+
+  const rowKeyIndex = row ? buildRowKeyIndex(row) : null;
+  const valueOf = (column) => (row ? getRowValue(row, column, rowKeyIndex) : undefined);
+  const listResults = await Promise.all(template.lists.map((list) => fetchScreenListRows(template, list, row, sourceName)));
+  const screenHtml = screens.renderScreen(template, {
+    escapeHtml,
+    preview: false,
+    fieldText: (field) => formatScreenValue(view, field, valueOf(field.column)),
+    fieldRaw: (field) => valueOf(field.column),
+    linkUrl: (link) => resolveScreenLinkUrl(template, link, row, sourceName),
+    listRows: (index) => listResults[index]
+  });
+
+  const recordUrl = (number) =>
+    buildSourceAwarePath(`/screen/${encodeURIComponent(template.id)}`, sourceName, { ...filterQuery, record: number });
+  const navLink = (label, number, enabled) =>
+    enabled ? `<a href="${escapeHtml(recordUrl(number))}">${label}</a>` : `<span class="muted">${label}</span>`;
+  const recordNav =
+    totalCount > 1
+      ? `${navLink("First", 1, recordNumber > 1)} ${navLink("Previous", recordNumber - 1, recordNumber > 1)}
+         <span>Record ${recordNumber} of ${totalCount}</span>
+         ${navLink("Next", recordNumber + 1, recordNumber < totalCount)} ${navLink("Last", totalCount, recordNumber < totalCount)}`
+      : "";
+  const notice = loadError
+    ? `<div class="notice error-notice">Could not load the record: ${escapeHtml(loadError)}</div>`
+    : row
+      ? ""
+      : '<div class="notice">No matching record was found.</div>';
+
+  if (firstQueryValue(req.query.popup) === "1") {
+    const popupNavLink = (label, number, enabled) =>
+      enabled
+        ? `<a href="${escapeHtml(buildSourceAwarePath(`/screen/${encodeURIComponent(template.id)}`, sourceName, { ...filterQuery, record: number, popup: 1 }))}">${label}</a>`
+        : `<span class="popup-disabled">${label}</span>`;
+    const fullPageUrl = buildSourceAwarePath(`/screen/${encodeURIComponent(template.id)}`, sourceName, {
+      ...filterQuery,
+      record: recordNumber
+    });
+    res.send(
+      renderLayout(
+        `${template.title}${totalCount > 1 ? ` (${recordNumber}/${totalCount})` : ""}`,
+        `<div class="popup-page">
+           <div class="popup-bar">
+             <strong>${escapeHtml(template.title)}</strong>
+             ${
+               totalCount > 1
+                 ? `<span class="popup-nav">${popupNavLink("|◄", 1, recordNumber > 1)} ${popupNavLink("◄", recordNumber - 1, recordNumber > 1)}
+                    <span>${recordNumber} / ${totalCount}</span>
+                    ${popupNavLink("►", recordNumber + 1, recordNumber < totalCount)} ${popupNavLink("►|", totalCount, recordNumber < totalCount)}</span>`
+                 : ""
+             }
+             <span class="popup-actions">
+               <a href="${escapeHtml(fullPageUrl)}" data-main-window>Open full page</a>
+               <a href="#" data-close>Close</a>
+             </span>
+           </div>
+           ${notice}
+           <div class="popup-screen">${screenHtml}</div>
+         </div>
+         <script>
+           (() => {
+             const BASE_FONT = 16;
+             const screenEl = document.querySelector(".dos-screen");
+             const bar = document.querySelector(".popup-bar");
+             const page = document.querySelector(".popup-page");
+
+             // Links to other screens stay in this popup; everything else goes to the main window.
+             document.querySelectorAll("a[href]").forEach((link) => {
+               const href = link.getAttribute("href");
+               if (href.startsWith("/screen/") && !link.hasAttribute("data-main-window")) {
+                 const url = new URL(href, location.origin);
+                 url.searchParams.set("popup", "1");
+                 link.setAttribute("href", url.pathname + url.search);
+               }
+             });
+             document.addEventListener("click", (event) => {
+               const link = event.target.closest("a[href]");
+               if (!link) {
+                 return;
+               }
+               if (link.hasAttribute("data-close")) {
+                 event.preventDefault();
+                 window.close();
+                 return;
+               }
+               const href = link.getAttribute("href");
+               if (href.startsWith("/screen/") && !link.hasAttribute("data-main-window")) {
+                 return;
+               }
+               event.preventDefault();
+               if (window.opener && !window.opener.closed) {
+                 window.opener.location.href = href;
+                 window.opener.focus();
+               } else {
+                 window.open(href, "_blank");
+               }
+             });
+
+             // Scale the screen to fill the window, keeping its shape.
+             let baseWidth = 0;
+             let baseHeight = 0;
+             function measureBase() {
+               screenEl.style.fontSize = BASE_FONT + "px";
+               baseWidth = screenEl.offsetWidth;
+               baseHeight = screenEl.offsetHeight;
+             }
+             function scaleToWindow() {
+               if (!screenEl || !baseWidth) {
+                 return;
+               }
+               const availableWidth = window.innerWidth - 16;
+               const availableHeight = window.innerHeight - page.offsetHeight + screenEl.offsetHeight - 16;
+               const factor = Math.min(availableWidth / baseWidth, availableHeight / baseHeight);
+               screenEl.style.fontSize = Math.max(8, Math.min(48, BASE_FONT * factor)).toFixed(2) + "px";
+             }
+             // Size the popup to the screen at its natural size (allowed for windows opened by the app).
+             function fitWindowToScreen() {
+               if (!screenEl) {
+                 return;
+               }
+               measureBase();
+               const neededWidth = baseWidth + 16 + (window.outerWidth - window.innerWidth);
+               const neededHeight = page.offsetHeight + 16 + (window.outerHeight - window.innerHeight);
+               try {
+                 window.resizeTo(Math.min(screen.availWidth, neededWidth), Math.min(screen.availHeight, neededHeight));
+               } catch {
+                 // Some browsers block resizing; scaling still fits the screen to the window.
+               }
+               scaleToWindow();
+             }
+             window.addEventListener("resize", scaleToWindow);
+             (document.fonts ? document.fonts.ready : Promise.resolve()).then(fitWindowToScreen);
+           })();
+         </script>`,
+        {
+          activeSourceName: sourceName,
+          bare: true,
+          extraStyles: `${screens.renderScreenCss()}
+            body.bare { margin: 0; background: #1b1b1f; color: #ddd; overflow: hidden; }
+            .popup-page { padding: 6px 8px 8px; }
+            .popup-bar { display: flex; gap: 14px; align-items: center; font-size: 13px; padding: 2px 2px 6px; white-space: nowrap; }
+            .popup-bar strong { color: #ffff55; }
+            .popup-bar a { color: #55ffff; }
+            .popup-nav { display: inline-flex; gap: 8px; align-items: center; }
+            .popup-disabled { color: #666; }
+            .popup-actions { margin-left: auto; display: inline-flex; gap: 12px; }
+            .popup-screen { display: flex; justify-content: center; }
+            .popup-screen .dos-screen { border-width: 4px; box-shadow: none; }
+            .popup-page .notice { margin: 0 0 6px; padding: 4px 8px; font-size: 13px; }`
+        }
+      )
+    );
+    return;
+  }
+
+  res.send(
+    renderLayout(
+      template.title,
+      `<h1>${escapeHtml(template.title)}</h1>
+       <div class="toolbar">
+         <a href="${escapeHtml(buildSourceAwarePath(`/table/${encodeURIComponent(template.view)}`, sourceName, filterQuery))}">Open as table</a>
+         ${recordNav}
+         ${
+           isCurrentUserAdmin()
+             ? `<a href="${escapeHtml(buildSourceAwarePath(`/settings/screens/${encodeURIComponent(template.id)}`, sourceName))}">Edit screen template</a>`
+             : ""
+         }
+       </div>
+       ${notice}
+       <div class="screen-wrap">${screenHtml}</div>`,
+      { activeSourceName: sourceName, extraStyles: `${screens.renderScreenCss()}\n.screen-wrap { overflow-x: auto; padding: 4px 0 12px; }` }
+    )
+  );
+});
+
+// --- Screen template administration (under /settings, so administrators only) ---
+
+function buildScreenEditorCatalog() {
+  const catalog = {};
+  for (const sourceName of Object.keys(getDatabaseCatalog().connections)) {
+    catalog[sourceName] = Object.fromEntries(
+      Object.entries(getAllViews(sourceName)).map(([viewName, view]) => [
+        viewName,
+        {
+          title: String(view.title || viewName),
+          columns: (view.columns || []).map((column) => ({ name: getColumnSourceName(column), label: String(column.label || column.name || "") }))
+        }
+      ])
+    );
+  }
+  return catalog;
+}
+
+function renderScreenList(options = {}) {
+  const activeSourceName = getActiveSourceName(options.activeSourceName);
+  const noticeHtml = options.error
+    ? `<div class="notice error-notice">${escapeHtml(options.error)}</div>`
+    : options.message
+      ? `<div class="notice">${escapeHtml(options.message)}</div>`
+      : "";
+  const templates = screens.listTemplates(screensPath);
+  const rows = templates
+    .map((template) => {
+      const editUrl = buildSourceAwarePath(`/settings/screens/${encodeURIComponent(template.id)}`, activeSourceName);
+      return `<tr>
+        <td><a href="${escapeHtml(editUrl)}">${escapeHtml(template.title)}</a>${
+          template.invalid ? ` <span class="badge">invalid: ${escapeHtml(template.error)}</span>` : ""
+        }</td>
+        <td><code>${escapeHtml(template.id)}.json</code></td>
+        <td><code>${escapeHtml(template.view || "")}</code></td>
+        <td>${escapeHtml(template.source || "Any")}</td>
+        <td>
+          <form method="post" action="${escapeHtml(
+            buildSourceAwarePath(`/settings/screens/${encodeURIComponent(template.id)}/delete`, activeSourceName)
+          )}" onsubmit="return confirm('Delete screen template ${escapeHtml(template.id)}?');">
+            <button type="submit" class="config-order-button">Delete</button>
+          </form>
+        </td>
+      </tr>`;
+    })
+    .join("");
+  const viewOptions = Object.entries(getAllViews(activeSourceName))
+    .map(([viewName, view]) => `<option value="${escapeHtml(viewName)}">${escapeHtml(view.title || viewName)}</option>`)
+    .join("");
+
+  return renderLayout(
+    "Screen Templates",
+    `<h1>Screen Templates</h1>
+     <div class="toolbar secondary"><a href="${escapeHtml(buildSourceAwarePath("/settings", activeSourceName))}">Back to settings</a></div>
+     ${noticeHtml}
+     <p class="muted">Screen templates reproduce legacy text-mode screens for a record. Each template is a file in <code>${escapeHtml(
+       screensPath
+     )}</code>, so templates can be copied between installations.</p>
+     <section class="settings-card">
+       <h2>Templates</h2>
+       ${
+         rows
+           ? `<table><thead><tr><th>Title</th><th>File</th><th>View</th><th>Data source</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+           : '<p class="muted">No screen templates yet.</p>'
+       }
+     </section>
+     <section class="settings-card">
+       <h2>New Template</h2>
+       <form method="post" action="${escapeHtml(buildSourceAwarePath("/settings/screens-create", activeSourceName))}">
+         <div class="form-grid">
+           <label>File name (letters, numbers, - and _)
+             <input type="text" name="id" pattern="[a-z0-9][a-z0-9_\\-]{0,63}" required placeholder="claim-main" />
+           </label>
+           <label>Title
+             <input type="text" name="title" required placeholder="Gestion du Dossier" />
+           </label>
+           <label>View (record shown on the screen)
+             <input type="text" name="view" list="screen-view-options" required />
+             <datalist id="screen-view-options">${viewOptions}</datalist>
+           </label>
+         </div>
+         <div class="settings-actions"><button type="submit">Create template</button></div>
+       </form>
+     </section>`,
+    { activeSourceName, navActive: "settings" }
+  );
+}
+
+app.get("/settings/screens", (req, res) => {
+  res.send(
+    renderScreenList({
+      activeSourceName: req.query?.source,
+      message: firstQueryValue(req.query.message),
+      error: firstQueryValue(req.query.error)
+    })
+  );
+});
+
+app.post("/settings/screens-create", (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  const id = String(req.body?.id || "").trim().toLowerCase();
+  const back = (notice) => res.redirect(buildSourceAwarePath("/settings/screens", activeSourceName, notice));
+  if (!screens.isValidTemplateId(id)) {
+    back({ error: "File name may only contain lowercase letters, numbers, - and _." });
+    return;
+  }
+  if (screens.loadTemplate(screensPath, id)) {
+    back({ error: `A template named ${id} already exists.` });
+    return;
+  }
+  screens.saveTemplate(screensPath, {
+    id,
+    title: String(req.body?.title || id).trim(),
+    view: String(req.body?.view || "").trim(),
+    regions: [{ row: 0, col: 0, width: 80, height: 25, border: "double", label: String(req.body?.title || id).trim() }]
+  });
+  res.redirect(buildSourceAwarePath(`/settings/screens/${encodeURIComponent(id)}`, activeSourceName, { message: "Template created." }));
+});
+
+app.get("/settings/screens/:templateId", (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  let template = null;
+  try {
+    template = screens.loadTemplate(screensPath, req.params.templateId);
+  } catch (error) {
+    res.redirect(buildSourceAwarePath("/settings/screens", activeSourceName, { error: `Could not read template: ${error.message}` }));
+    return;
+  }
+  if (!template) {
+    res.redirect(buildSourceAwarePath("/settings/screens", activeSourceName, { error: "Template not found." }));
+    return;
+  }
+  const message = firstQueryValue(req.query.message);
+  const error = firstQueryValue(req.query.error);
+  const editorData = {
+    template,
+    activeSourceName,
+    catalog: buildScreenEditorCatalog(),
+    templates: screens.listTemplates(screensPath).filter((item) => !item.invalid).map((item) => ({ id: item.id, title: item.title })),
+    colors: screens.COLOR_NAMES,
+    fieldTypes: screens.FIELD_TYPES,
+    previewUrl: "/settings/screens-preview"
+  };
+  res.send(
+    renderLayout(
+      `Edit ${template.title}`,
+      `<h1>Screen template: ${escapeHtml(template.title)}</h1>
+       <div class="toolbar secondary">
+         <a href="${escapeHtml(buildSourceAwarePath("/settings/screens", activeSourceName))}">All screen templates</a>
+         <span class="muted">File: <code>${escapeHtml(path.join(screensPath, `${template.id}.json`))}</code></span>
+       </div>
+       ${error ? `<div class="notice error-notice">${escapeHtml(error)}</div>` : message ? `<div class="notice">${escapeHtml(message)}</div>` : ""}
+       <div class="screen-editor">
+         <div class="screen-editor-preview">
+           <div class="screen-wrap" id="screen-preview"></div>
+           <p class="muted" id="screen-cursor">Click the screen to pick a position, or drag to select an area. Then use the Add buttons.</p>
+           <div class="settings-actions" id="screen-add-actions"></div>
+         </div>
+         <form id="screen-form" method="post" action="${escapeHtml(
+           buildSourceAwarePath(`/settings/screens/${encodeURIComponent(template.id)}/save`, activeSourceName)
+         )}">
+           <input type="hidden" name="templateJson" />
+           <div id="screen-editor-root"></div>
+           <div class="settings-actions">
+             <button type="submit">Save template</button>
+             <a href="${escapeHtml(buildSourceAwarePath("/settings/screens", activeSourceName))}">Cancel</a>
+           </div>
+         </form>
+       </div>
+       <script type="application/json" id="screen-editor-data">${toInlineJson(editorData)}</script>
+       <script src="/assets/screen-editor.js"></script>`,
+      {
+        activeSourceName,
+        navActive: "settings",
+        extraStyles: `${screens.renderScreenCss()}
+          .screen-wrap { overflow-x: auto; padding: 4px 0 12px; }
+          .screen-editor { display: grid; gap: 16px; }
+          .screen-editor-preview { position: sticky; top: 96px; z-index: 5; background: var(--panel); padding-bottom: 8px; }
+          #screen-preview .dos-screen { cursor: crosshair; }
+          .screen-selection { position: absolute; outline: 2px dashed #ff55ff; pointer-events: none; z-index: 3; }
+          .se-section { border: 1px solid var(--border); border-radius: 8px; background: #fafcff; padding: 10px 12px; margin-bottom: 10px; }
+          .se-section > summary { cursor: pointer; font-weight: 600; }
+          .se-items { display: grid; gap: 8px; margin-top: 10px; }
+          .se-item { border: 1px solid var(--border); border-radius: 6px; background: #fff; padding: 8px; display: grid; gap: 6px; }
+          .se-item.se-selected { outline: 2px solid #ff55ff; }
+          .se-props { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: end; }
+          .se-props label { display: grid; gap: 2px; font-size: var(--font-size-xs); }
+          .se-props input, .se-props select { border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px; font: inherit; font-size: var(--font-size-sm); }
+          .se-props input[type="number"] { width: 64px; }
+          .se-props input.se-wide { width: 220px; }
+          .se-sub { border-left: 3px solid var(--border); padding-left: 8px; display: grid; gap: 6px; }
+          .se-sub-title { font-size: var(--font-size-xs); font-weight: 600; color: #60708f; }
+          .se-warning { color: #b42318; font-size: var(--font-size-xs); }
+          .se-text { width: 100%; font-family: Consolas, "Courier New", monospace; font-size: 13px; white-space: pre; overflow-x: auto; }`
+      }
+    )
+  );
+});
+
+app.post("/settings/screens/:templateId/save", (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  const id = req.params.templateId;
+  const editorUrl = (notice) => buildSourceAwarePath(`/settings/screens/${encodeURIComponent(id)}`, activeSourceName, notice);
+  if (!screens.isValidTemplateId(id)) {
+    res.redirect(buildSourceAwarePath("/settings/screens", activeSourceName, { error: "Invalid template name." }));
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(String(req.body?.templateJson || ""));
+  } catch (error) {
+    res.redirect(editorUrl({ error: `The template could not be saved: ${error.message}` }));
+    return;
+  }
+  screens.saveTemplate(screensPath, { ...parsed, id });
+  res.redirect(editorUrl({ message: "Template saved." }));
+});
+
+app.post("/settings/screens/:templateId/delete", (req, res) => {
+  const activeSourceName = getActiveSourceName(req.query?.source);
+  const id = req.params.templateId;
+  if (screens.isValidTemplateId(id)) {
+    screens.deleteTemplate(screensPath, id);
+  }
+  res.redirect(buildSourceAwarePath("/settings/screens", activeSourceName, { message: `Deleted screen template ${id}.` }));
+});
+
+// Renders a template with placeholders instead of data, for the editor's live preview.
+app.post("/settings/screens-preview", express.json({ limit: "2mb" }), (req, res) => {
+  const template = screens.normalizeTemplate(req.body?.template || {}, "preview");
+  const sourceName = getActiveSourceName(template.source || req.query?.source);
+  const view = getView(template.view, sourceName);
+  const known = view ? new Set((view.columns || []).map((column) => getColumnSourceName(column).toLowerCase())) : null;
+  const html = screens.renderScreen(template, {
+    escapeHtml,
+    preview: true,
+    isKnownColumn: (column) => !known || known.has(String(column).toLowerCase()),
+    listRows: (index) => {
+      const list = template.lists[index];
+      return { rows: [list.columns.map((column) => column.column)], urls: [] };
+    }
+  });
+  res.json({ html, viewFound: Boolean(view) });
+});
+
 loadConfigs();
 fs.mkdirSync(servedFilesPath, { recursive: true });
+fs.mkdirSync(screensPath, { recursive: true });
 app.use("/assets", express.static(path.join(__dirname, "public")));
 app.use("/files", express.static(servedFilesPath));
 app.use("/Files", express.static(servedFilesPath));
