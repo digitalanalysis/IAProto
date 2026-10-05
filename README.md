@@ -81,6 +81,31 @@ The server listens on all network interfaces (`0.0.0.0`) so other machines can c
 - Change the port with the `PORT` environment variable
 - Windows Firewall must allow inbound connections to Node.js on the port
 
+## Screen Templates
+
+Screen templates reproduce legacy text-mode (DOS) screens for a record, e.g. the PROD claims system's *Gestion du Dossier* screen.
+
+- Each template is a JSON file in the `screens/` folder (override with the `SCREENS_PATH` environment variable), so templates can be copied between installations
+- Open a record in a template from the **Screen** tab of a table's row panel, or directly at `/screen/<template>?f_<KeyColumn>=<value>`; First / Previous / Next / Last step through matching records
+- Administrators manage templates at **Settings → Screen Templates**: a live preview where you click or drag to pick positions, and forms for fields, lists, links and colour areas
+- A template has:
+  - `view`: the view whose record is shown (`source` optionally pins it to one data source); `keys`: the columns that identify the record (default: the view's key column)
+  - `width` / `height` (default 80×25), default `colors` (DOS palette: black, blue, green, cyan, red, magenta, brown, lightgray, darkgray, lightblue, lightgreen, lightcyan, lightred, lightmagenta, yellow, white)
+  - `text`: the screen's fixed text, one string per row
+  - `regions`: coloured areas, optionally with a `single` or `double` border and a box title
+  - `fields`: a `column` placed at `row` / `col` with a `width`; `type` `text`, `checkbox` (shows `X` for true / 1 / Y / O) or `memo` (multi-line, scrolls); formatting options as for view columns (`format`, `dateFormat`, `precision`, `thousandSeparator`, `align`, `upper`)
+  - `lists`: rows from another `view` matched by `keys`, shown in a scrolling box with `columns` (column + width), optional `sort` and clickable rows (`rowLink`)
+  - `links`: a clickable area that opens another template (`targetTemplate`) or a table view (`targetView`) for the matching record, using `keys` (`localColumn` → `targetColumn`)
+- Composite keys are supported everywhere: a template's `keys` can list several columns, and every link or list can match on several `localColumn` → `targetColumn` pairs. A link only appears when all of its key values are present
+- `sharedKeys`: columns with the same name in every table (e.g. a line of business the import tags from the source folder). They do not need to be on the screen: they are added to the record key and to every link and list automatically
+- Key and filter columns do not need to be configured as view columns: screens, the Screen tab and table filters (`f_<column>`) query them directly, so a lookup never silently ignores a key and returns the wrong record
+- Fields whose column is not in the view are flagged in the editor, so templates built without the database can be checked and corrected where the views config exists
+- Views and links respect user access: links to views a user cannot open are not shown
+
+`screens/aw-sales-order.json` (Sales Order Maintenance) and `screens/aw-product.json` (Product Inquiry) are working demos on the AdventureWorks database: open a sales order or product from the Screen tab. Order lines open the product screen, and the product's recent order lines open the order screen.
+
+The `screens/claim-dossier.json` and `screens/claim-circonstances.json` templates are laid out from screenshots of the PROD claims system. A claim is identified by the claim number (`DOS_NUM`) plus the shared key `LineOfBusiness`, and every link passes `LineOfBusiness` on. The claim screen links to EVALUATI and REGLEMEN on the claim number and to REPALPC and CONTRLPC on `DOS_CLETOT`. Column and view names come from `config/views.PROD.config.json`; fields labelled "(unverified)" are matched by column name only and need checking against real data, and the Sous-Dossiers link stays hidden until a `dbo_tiers` view is configured.
+
 ## Run as a Windows Service
 
 The app can be installed as a Windows service (starts with Windows, restarts if it crashes) using the bundled `node-windows` package. From an **administrator** prompt in the project folder:
