@@ -1,0 +1,641 @@
+{
+  "title": "Gestion du Dossier",
+  "description": "Claim screen (Dossier) from the PROD claims system. Column names are mapped to the DOSSIER table in config/views.PROD.config.json. Labels marked (unverified) are the best match by name and need checking against real data.",
+  "source": "",
+  "view": "dbo_dossier",
+  "keys": [
+    "DOS_NUM"
+  ],
+  "sharedKeys": [
+    "LineOfBusiness"
+  ],
+  "width": 80,
+  "height": 25,
+  "colors": {
+    "fg": "yellow",
+    "bg": "blue",
+    "fieldFg": "white",
+    "fieldBg": "cyan"
+  },
+  "text": [
+    "┌───────── Gestion du Dossier ─────────────────┬─────────────────┬─────────────┐",
+    "│                  du             <Rsq>        │                 │[ ]  Ouvert  │",
+    "│<Clétot>         Part             <% Orig.>                                   │",
+    "│<Police>                                         [ ] Complexe                 │",
+    "│ Clé GIE         Part             Fonds:                       [ ] Connexité  │",
+    "│< Type >                                                 < Sous-Dossiers >    │",
+    "│< Lieu >                                                                      │",
+    "│  Ident.                            <Courtier>       ►Double-cliquez ici      │",
+    "│Intitulé                                         ↓                            │",
+    "│< Cause >                                        ↓                            │",
+    "│< Circonstances > < Garanties... >  Réf. Cédante ↓                            │",
+    "│< Evénement... >  < Suivi doss. >                                             │",
+    "│                  <      Divers    ><   Co&Ré...  >                           │",
+    "│                                                      < + / - >      < Voir > │",
+    "│       ...        <     Infos...    >   Réf.↕                                 │",
+    "│                                                           Unique             │",
+    "├────────────────────────────────────────┬─────────────────────────────────────┤",
+    "│Réserve   <Liste >  <Nouvelle> <Estimée>│       <   Dossiers Joints   >       │",
+    "│                                        │ [ ] Rés. 100% = 0                   │",
+    "├────────────────────────────────────────┤                                     │",
+    "│Liste Bons      │<Nouveau dossier>  ≡≡   ?  CAF Tout vérifié     XL           │",
+    "│ <B.100> <P.bur>│                  Impr.                                      │",
+    "├─────────────────── N° Dossier ───────────────────────────────────────────────┤",
+    "│<Recherche... >   ◄   ►    ◄   ►   │< Valider >  │< Annuler >  │<   Quitter  >│",
+    "└──────────────────────────────────────────────────────────────────────────────┘"
+  ],
+  "regions": [
+    {
+      "row": 1,
+      "col": 1,
+      "width": 8,
+      "height": 1,
+      "bg": "black"
+    },
+    {
+      "row": 1,
+      "col": 39,
+      "width": 7,
+      "height": 1,
+      "bg": "black"
+    },
+    {
+      "row": 1,
+      "col": 48,
+      "width": 17,
+      "height": 1,
+      "bg": "black"
+    },
+    {
+      "row": 1,
+      "col": 19,
+      "width": 2,
+      "height": 1,
+      "fg": "lightgray"
+    },
+    {
+      "row": 2,
+      "col": 17,
+      "width": 5,
+      "height": 1,
+      "fg": "lightgray",
+      "bg": "cyan"
+    },
+    {
+      "row": 4,
+      "col": 17,
+      "width": 5,
+      "height": 1,
+      "fg": "lightgray",
+      "bg": "cyan"
+    },
+    {
+      "row": 4,
+      "col": 2,
+      "width": 7,
+      "height": 1,
+      "fg": "lightgray"
+    },
+    {
+      "row": 4,
+      "col": 35,
+      "width": 6,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 7,
+      "col": 3,
+      "width": 6,
+      "height": 1,
+      "fg": "lightgray"
+    },
+    {
+      "row": 8,
+      "col": 1,
+      "width": 8,
+      "height": 1,
+      "fg": "lightgray"
+    },
+    {
+      "row": 8,
+      "col": 50,
+      "width": 1,
+      "height": 1,
+      "fg": "lightgray"
+    },
+    {
+      "row": 9,
+      "col": 50,
+      "width": 1,
+      "height": 1,
+      "fg": "lightgray"
+    },
+    {
+      "row": 10,
+      "col": 37,
+      "width": 14,
+      "height": 1,
+      "fg": "lightgray"
+    },
+    {
+      "row": 14,
+      "col": 41,
+      "width": 5,
+      "height": 1,
+      "fg": "lightgray"
+    },
+    {
+      "row": 14,
+      "col": 8,
+      "width": 3,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 7,
+      "col": 36,
+      "width": 11,
+      "height": 1,
+      "fg": "white",
+      "bg": "cyan"
+    },
+    {
+      "row": 5,
+      "col": 53,
+      "width": 26,
+      "height": 1,
+      "fg": "lightcyan",
+      "bg": "black"
+    },
+    {
+      "row": 6,
+      "col": 53,
+      "width": 26,
+      "height": 7,
+      "fg": "black",
+      "bg": "lightgray",
+      "border": "single"
+    },
+    {
+      "row": 13,
+      "col": 53,
+      "width": 26,
+      "height": 1,
+      "fg": "lightgray",
+      "bg": "cyan"
+    },
+    {
+      "row": 13,
+      "col": 36,
+      "width": 16,
+      "height": 1,
+      "bg": "cyan"
+    },
+    {
+      "row": 15,
+      "col": 36,
+      "width": 16,
+      "height": 1,
+      "bg": "cyan"
+    },
+    {
+      "row": 14,
+      "col": 56,
+      "width": 21,
+      "height": 3,
+      "border": "double"
+    },
+    {
+      "row": 17,
+      "col": 1,
+      "width": 7,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 18,
+      "col": 1,
+      "width": 28,
+      "height": 1,
+      "bg": "cyan"
+    },
+    {
+      "row": 18,
+      "col": 42,
+      "width": 18,
+      "height": 1,
+      "fg": "black",
+      "bg": "lightgray"
+    },
+    {
+      "row": 19,
+      "col": 44,
+      "width": 5,
+      "height": 3,
+      "border": "single"
+    },
+    {
+      "row": 19,
+      "col": 48,
+      "width": 14,
+      "height": 3,
+      "border": "single"
+    },
+    {
+      "row": 19,
+      "col": 62,
+      "width": 17,
+      "height": 3,
+      "border": "double"
+    },
+    {
+      "row": 19,
+      "col": 35,
+      "width": 6,
+      "height": 3,
+      "border": "single"
+    },
+    {
+      "row": 20,
+      "col": 37,
+      "width": 2,
+      "height": 1,
+      "fg": "lightgreen"
+    },
+    {
+      "row": 21,
+      "col": 36,
+      "width": 5,
+      "height": 1,
+      "fg": "cyan"
+    },
+    {
+      "row": 20,
+      "col": 1,
+      "width": 10,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 20,
+      "col": 18,
+      "width": 17,
+      "height": 1,
+      "fg": "white"
+    },
+    {
+      "row": 20,
+      "col": 18,
+      "width": 1,
+      "height": 1,
+      "bg": "magenta"
+    },
+    {
+      "row": 23,
+      "col": 1,
+      "width": 15,
+      "height": 1,
+      "fg": "white",
+      "bg": "magenta"
+    },
+    {
+      "row": 23,
+      "col": 18,
+      "width": 3,
+      "height": 1,
+      "bg": "brown"
+    },
+    {
+      "row": 23,
+      "col": 22,
+      "width": 3,
+      "height": 1,
+      "bg": "brown"
+    },
+    {
+      "row": 23,
+      "col": 27,
+      "width": 3,
+      "height": 1,
+      "bg": "brown"
+    },
+    {
+      "row": 23,
+      "col": 31,
+      "width": 3,
+      "height": 1,
+      "bg": "brown"
+    },
+    {
+      "row": 23,
+      "col": 37,
+      "width": 11,
+      "height": 1,
+      "fg": "lightred"
+    },
+    {
+      "row": 23,
+      "col": 51,
+      "width": 11,
+      "height": 1,
+      "fg": "lightred"
+    },
+    {
+      "row": 23,
+      "col": 69,
+      "width": 1,
+      "height": 1,
+      "bg": "magenta"
+    }
+  ],
+  "fields": [
+    {
+      "column": "LineOfBusiness",
+      "row": 1,
+      "col": 1,
+      "width": 8,
+      "label": "Line of business (AE) (unverified: could be DOS_INI)",
+      "align": "center",
+      "fg": "lightcyan",
+      "bg": "black"
+    },
+    {
+      "column": "DOS_NUM",
+      "row": 1,
+      "col": 9,
+      "width": 9,
+      "label": "Claim (dossier) number",
+      "align": "right"
+    },
+    {
+      "column": "DOS_DA",
+      "row": 1,
+      "col": 22,
+      "width": 10,
+      "label": "Date of loss (unverified)",
+      "align": "center"
+    },
+    {
+      "column": "DOS_RISQ",
+      "row": 1,
+      "col": 40,
+      "width": 1,
+      "label": "Risk code (L)",
+      "fg": "lightgreen",
+      "bg": "black"
+    },
+    {
+      "column": "DOS_CLETOT",
+      "row": 2,
+      "col": 10,
+      "width": 7,
+      "label": "Clétot contract key (GD358)"
+    },
+    {
+      "column": "DOS_TXPRIM",
+      "row": 2,
+      "col": 22,
+      "width": 10,
+      "label": "Share % for the Clétot (unverified)",
+      "align": "right"
+    },
+    {
+      "column": "DOS_NUMPOL",
+      "row": 3,
+      "col": 10,
+      "width": 7,
+      "label": "Policy number"
+    },
+    {
+      "column": "DOS_ASSURE",
+      "row": 3,
+      "col": 17,
+      "width": 30,
+      "label": "Insured name"
+    },
+    {
+      "column": "DOS_CLEAFA",
+      "row": 4,
+      "col": 10,
+      "width": 6,
+      "label": "GIE / AFA key"
+    },
+    {
+      "column": "DOS_TXAFA",
+      "row": 4,
+      "col": 22,
+      "width": 10,
+      "label": "GIE / AFA share",
+      "align": "right"
+    },
+    {
+      "column": "DOS_CON",
+      "row": 4,
+      "col": 65,
+      "width": 1,
+      "label": "Connected claims flag (unverified)",
+      "type": "checkbox",
+      "fg": "yellow",
+      "bg": "blue"
+    },
+    {
+      "column": "DOS_TYPEOL",
+      "row": 5,
+      "col": 10,
+      "width": 38,
+      "label": "Claim type code (unverified)",
+      "align": "center",
+      "fg": "yellow"
+    },
+    {
+      "column": "DOS_LIEU",
+      "row": 6,
+      "col": 10,
+      "width": 30,
+      "label": "Location"
+    },
+    {
+      "column": "DOS_IDENT",
+      "row": 7,
+      "col": 10,
+      "width": 25,
+      "label": "Identification (aircraft)"
+    },
+    {
+      "column": "DOS_APP",
+      "row": 8,
+      "col": 10,
+      "width": 38,
+      "label": "Title / aircraft (unverified)"
+    },
+    {
+      "column": "DOS_CAUSOL",
+      "row": 9,
+      "col": 10,
+      "width": 38,
+      "label": "Cause code (unverified)",
+      "align": "center",
+      "fg": "magenta"
+    },
+    {
+      "column": "DOS_REFCOU",
+      "row": 11,
+      "col": 36,
+      "width": 16,
+      "label": "Cedant / broker reference (unverified: could be DOS_CEDANT)"
+    },
+    {
+      "column": "DOS_EXP",
+      "row": 13,
+      "col": 1,
+      "width": 34,
+      "label": "Expert code",
+      "fg": "black",
+      "bg": "lightgray"
+    },
+    {
+      "column": "DOS_REFEXP",
+      "row": 13,
+      "col": 36,
+      "width": 16,
+      "label": "Expert reference"
+    },
+    {
+      "column": "DOS_AVO",
+      "row": 15,
+      "col": 1,
+      "width": 34,
+      "label": "Lawyer code",
+      "fg": "black",
+      "bg": "lightgray"
+    },
+    {
+      "column": "DOS_REFAVO",
+      "row": 15,
+      "col": 36,
+      "width": 16,
+      "label": "Lawyer reference"
+    },
+    {
+      "column": "DOS_DEREVA",
+      "row": 18,
+      "col": 1,
+      "width": 23,
+      "label": "Latest reserve evaluation (excludes fees, DOS_DERFRA)",
+      "align": "right",
+      "format": "number",
+      "precision": 2,
+      "thousandSeparator": " "
+    },
+    {
+      "column": "DOS_DEV",
+      "row": 18,
+      "col": 25,
+      "width": 3,
+      "label": "Reserve currency code"
+    },
+    {
+      "column": "DOS_DATEVA",
+      "row": 18,
+      "col": 29,
+      "width": 12,
+      "label": "Date of latest evaluation",
+      "align": "center",
+      "format": "date",
+      "dateFormat": "DD.MM.YYYY",
+      "fg": "black",
+      "bg": "lightgray"
+    },
+    {
+      "column": "DOS_XL",
+      "row": 20,
+      "col": 71,
+      "width": 4,
+      "label": "XL number",
+      "fg": "white",
+      "bg": "blue"
+    }
+  ],
+  "lists": [],
+  "links": [
+    {
+      "row": 2,
+      "col": 1,
+      "width": 8,
+      "label": "Level 1 split for this Clétot (REPALPC)",
+      "targetView": "dbo_repalpc",
+      "keys": [
+        {
+          "localColumn": "DOS_CLETOT",
+          "targetColumn": "CLETOT"
+        }
+      ]
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "width": 8,
+      "label": "Contract for this Clétot (CONTRLPC)",
+      "targetView": "dbo_contrlpc",
+      "keys": [
+        {
+          "localColumn": "DOS_CLETOT",
+          "targetColumn": "CLETOT"
+        }
+      ]
+    },
+    {
+      "row": 5,
+      "col": 58,
+      "width": 17,
+      "label": "Sub-claims (Tiers) - TIERS is not in the PROD views config yet",
+      "targetView": "dbo_tiers",
+      "keys": [
+        {
+          "localColumn": "DOS_NUM",
+          "targetColumn": "TIE_NUM"
+        }
+      ]
+    },
+    {
+      "row": 10,
+      "col": 1,
+      "width": 17,
+      "label": "Circumstances memo",
+      "targetTemplate": "claim-circonstances",
+      "keys": [
+        {
+          "localColumn": "DOS_NUM",
+          "targetColumn": "DOS_NUM"
+        }
+      ]
+    },
+    {
+      "row": 17,
+      "col": 11,
+      "width": 8,
+      "label": "Reserve movements (EVALUATI)",
+      "targetView": "dbo_evaluati",
+      "keys": [
+        {
+          "localColumn": "DOS_NUM",
+          "targetColumn": "EVA_NUMDOS"
+        }
+      ]
+    },
+    {
+      "row": 21,
+      "col": 2,
+      "width": 7,
+      "label": "Payments (REGLEMEN)",
+      "targetView": "dbo_reglemen",
+      "keys": [
+        {
+          "localColumn": "DOS_NUM",
+          "targetColumn": "REG_NUMDOS"
+        }
+      ]
+    }
+  ]
+}
