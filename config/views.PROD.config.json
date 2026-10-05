@@ -1,0 +1,3141 @@
+{
+  "views": {
+    "dbo_adr_tra": {
+      "title": "ADR TRA",
+      "table": "ADR_TRA",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "CODAVIA",
+          "label": "CODAVIA"
+        },
+        {
+          "name": "ENTITE",
+          "label": "ENTITE"
+        },
+        {
+          "name": "ADR_TYP1",
+          "label": "ADR TYP1"
+        },
+        {
+          "name": "ADR_TYP2",
+          "label": "ADR TYP2"
+        },
+        {
+          "name": "CODELPC",
+          "label": "CODELPC"
+        },
+        {
+          "name": "CODEGENE",
+          "label": "CODEGENE"
+        },
+        {
+          "name": "RENVLPC",
+          "label": "RENVLPC"
+        },
+        {
+          "name": "RENVOI",
+          "label": "RENVOI"
+        },
+        {
+          "name": "NOMINTER",
+          "label": "NOMINTER"
+        },
+        {
+          "name": "PREINTER",
+          "label": "PREINTER"
+        },
+        {
+          "name": "TEL",
+          "label": "TEL"
+        },
+        {
+          "name": "FAX",
+          "label": "FAX"
+        },
+        {
+          "name": "TELEX",
+          "label": "TELEX"
+        },
+        {
+          "name": "TITRE",
+          "label": "TITRE"
+        },
+        {
+          "name": "ADRESSE",
+          "label": "ADRESSE"
+        },
+        {
+          "name": "ADRESSE2",
+          "label": "ADRESSE2"
+        },
+        {
+          "name": "CODVILLE",
+          "label": "CODVILLE"
+        },
+        {
+          "name": "PAYS",
+          "label": "PAYS"
+        },
+        {
+          "name": "CODEPAYS",
+          "label": "CODEPAYS"
+        },
+        {
+          "name": "TYPE",
+          "label": "TYPE"
+        },
+        {
+          "name": "PROFESSION",
+          "label": "PROFESSION"
+        },
+        {
+          "name": "TYPAVIA",
+          "label": "TYPAVIA"
+        },
+        {
+          "name": "ATTENTION",
+          "label": "ATTENTION"
+        },
+        {
+          "name": "CODESUI",
+          "label": "CODESUI"
+        },
+        {
+          "name": "ADR_ENVOI",
+          "label": "ADR ENVOI",
+          "format": "date"
+        },
+        {
+          "name": "ADR_PART",
+          "label": "ADR PART"
+        },
+        {
+          "name": "ADR_COM",
+          "label": "ADR COM"
+        },
+        {
+          "name": "ADR_DED93",
+          "label": "ADR DED93"
+        },
+        {
+          "name": "ADR_DED94",
+          "label": "ADR DED94"
+        },
+        {
+          "name": "ADR_SURCOM",
+          "label": "ADR SURCOM"
+        },
+        {
+          "name": "ADR_TYP",
+          "label": "ADR TYP"
+        },
+        {
+          "name": "ADR_DEV",
+          "label": "ADR DEV"
+        },
+        {
+          "name": "ADR_TRANOM",
+          "label": "ADR TRANOM"
+        },
+        {
+          "name": "ADR_EXE",
+          "label": "ADR EXE"
+        },
+        {
+          "name": "CODEAFA",
+          "label": "CODEAFA"
+        },
+        {
+          "name": "UTILISE",
+          "label": "UTILISE"
+        },
+        {
+          "name": "ADR_PERSON",
+          "label": "ADR PERSON"
+        },
+        {
+          "name": "ADR_ACTS",
+          "label": "ADR ACTS"
+        },
+        {
+          "name": "ADR_BANK",
+          "label": "ADR BANK"
+        },
+        {
+          "name": "ADR_EMAIL",
+          "label": "ADR EMAIL"
+        },
+        {
+          "name": "ADR_CMAIL",
+          "label": "ADR CMAIL"
+        },
+        {
+          "name": "ADR_DATE",
+          "label": "ADR DATE",
+          "format": "date"
+        },
+        {
+          "name": "ADR_SMAIL",
+          "label": "ADR SMAIL"
+        },
+        {
+          "name": "ADR_INUTIL",
+          "label": "ADR INUTIL"
+        },
+        {
+          "name": "ADR_PTOTAL",
+          "label": "ADR PTOTAL"
+        },
+        {
+          "name": "ADR_CPT",
+          "label": "ADR CPT"
+        },
+        {
+          "name": "CODEGIEAF",
+          "label": "CODEGIEAF"
+        },
+        {
+          "name": "ADR_NBEN",
+          "label": "ADR NBEN"
+        },
+        {
+          "name": "ADR_COMCOU",
+          "label": "ADR COMCOU"
+        },
+        {
+          "name": "ADR_BROK",
+          "label": "ADR BROK"
+        },
+        {
+          "name": "CODCAM",
+          "label": "CODCAM"
+        },
+        {
+          "name": "ADR_EXEORI",
+          "label": "ADR EXEORI"
+        },
+        {
+          "name": "ADR_TAUX",
+          "label": "ADR TAUX"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "CODAVIA",
+          "label": "CODAVIA",
+          "operator": "contains",
+          "placeholder": "Search CODAVIA..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_adr_tra8": {
+      "title": "ADR TRA8",
+      "table": "ADR_TRA8",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "CODAVIA",
+          "label": "CODAVIA"
+        },
+        {
+          "name": "ENTITE",
+          "label": "ENTITE"
+        },
+        {
+          "name": "ADR_TYP1",
+          "label": "ADR TYP1"
+        },
+        {
+          "name": "ADR_TYP2",
+          "label": "ADR TYP2"
+        },
+        {
+          "name": "CODELPC",
+          "label": "CODELPC"
+        },
+        {
+          "name": "CODEGENE",
+          "label": "CODEGENE"
+        },
+        {
+          "name": "RENVLPC",
+          "label": "RENVLPC"
+        },
+        {
+          "name": "RENVOI",
+          "label": "RENVOI"
+        },
+        {
+          "name": "NOMINTER",
+          "label": "NOMINTER"
+        },
+        {
+          "name": "PREINTER",
+          "label": "PREINTER"
+        },
+        {
+          "name": "TEL",
+          "label": "TEL"
+        },
+        {
+          "name": "FAX",
+          "label": "FAX"
+        },
+        {
+          "name": "TELEX",
+          "label": "TELEX"
+        },
+        {
+          "name": "TITRE",
+          "label": "TITRE"
+        },
+        {
+          "name": "ADRESSE",
+          "label": "ADRESSE"
+        },
+        {
+          "name": "ADRESSE2",
+          "label": "ADRESSE2"
+        },
+        {
+          "name": "CODVILLE",
+          "label": "CODVILLE"
+        },
+        {
+          "name": "PAYS",
+          "label": "PAYS"
+        },
+        {
+          "name": "CODEPAYS",
+          "label": "CODEPAYS"
+        },
+        {
+          "name": "TYPE",
+          "label": "TYPE"
+        },
+        {
+          "name": "PROFESSION",
+          "label": "PROFESSION"
+        },
+        {
+          "name": "TYPAVIA",
+          "label": "TYPAVIA"
+        },
+        {
+          "name": "ATTENTION",
+          "label": "ATTENTION"
+        },
+        {
+          "name": "CODESUI",
+          "label": "CODESUI"
+        },
+        {
+          "name": "ADR_ENVOI",
+          "label": "ADR ENVOI",
+          "format": "date"
+        },
+        {
+          "name": "ADR_PART",
+          "label": "ADR PART"
+        },
+        {
+          "name": "ADR_COM",
+          "label": "ADR COM"
+        },
+        {
+          "name": "ADR_DED93",
+          "label": "ADR DED93"
+        },
+        {
+          "name": "ADR_DED94",
+          "label": "ADR DED94"
+        },
+        {
+          "name": "ADR_TYP",
+          "label": "ADR TYP"
+        },
+        {
+          "name": "ADR_DEV",
+          "label": "ADR DEV"
+        },
+        {
+          "name": "ADR_TRANOM",
+          "label": "ADR TRANOM"
+        },
+        {
+          "name": "ADR_EXE",
+          "label": "ADR EXE"
+        },
+        {
+          "name": "CODEAFA",
+          "label": "CODEAFA"
+        },
+        {
+          "name": "UTILISE",
+          "label": "UTILISE"
+        },
+        {
+          "name": "ADR_PERSON",
+          "label": "ADR PERSON"
+        },
+        {
+          "name": "ADR_BANK",
+          "label": "ADR BANK"
+        },
+        {
+          "name": "ADR_EMAIL",
+          "label": "ADR EMAIL"
+        },
+        {
+          "name": "ADR_DATE",
+          "label": "ADR DATE",
+          "format": "date"
+        },
+        {
+          "name": "ADR_SMAIL",
+          "label": "ADR SMAIL"
+        },
+        {
+          "name": "ADR_INUTIL",
+          "label": "ADR INUTIL"
+        },
+        {
+          "name": "ADR_PTOTAL",
+          "label": "ADR PTOTAL"
+        },
+        {
+          "name": "ADR_CPT",
+          "label": "ADR CPT"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "CODAVIA",
+          "label": "CODAVIA",
+          "operator": "contains",
+          "placeholder": "Search CODAVIA..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_adr_trac": {
+      "title": "ADR TRAC",
+      "table": "ADR_TRAC",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "CODAVIA",
+          "label": "CODAVIA"
+        },
+        {
+          "name": "ENTITE",
+          "label": "ENTITE"
+        },
+        {
+          "name": "ADR_PART",
+          "label": "ADR PART"
+        },
+        {
+          "name": "ADR_TAUX",
+          "label": "ADR TAUX"
+        },
+        {
+          "name": "ADR_TYP1",
+          "label": "ADR TYP1"
+        },
+        {
+          "name": "ADR_TYP2",
+          "label": "ADR TYP2"
+        },
+        {
+          "name": "CODELPC",
+          "label": "CODELPC"
+        },
+        {
+          "name": "CODEGENE",
+          "label": "CODEGENE"
+        },
+        {
+          "name": "RENVLPC",
+          "label": "RENVLPC"
+        },
+        {
+          "name": "RENVOI",
+          "label": "RENVOI"
+        },
+        {
+          "name": "NOMINTER",
+          "label": "NOMINTER"
+        },
+        {
+          "name": "PREINTER",
+          "label": "PREINTER"
+        },
+        {
+          "name": "TEL",
+          "label": "TEL"
+        },
+        {
+          "name": "FAX",
+          "label": "FAX"
+        },
+        {
+          "name": "TELEX",
+          "label": "TELEX"
+        },
+        {
+          "name": "TITRE",
+          "label": "TITRE"
+        },
+        {
+          "name": "ADRESSE",
+          "label": "ADRESSE"
+        },
+        {
+          "name": "ADRESSE2",
+          "label": "ADRESSE2"
+        },
+        {
+          "name": "CODVILLE",
+          "label": "CODVILLE"
+        },
+        {
+          "name": "PAYS",
+          "label": "PAYS"
+        },
+        {
+          "name": "CODEPAYS",
+          "label": "CODEPAYS"
+        },
+        {
+          "name": "TYPE",
+          "label": "TYPE"
+        },
+        {
+          "name": "PROFESSION",
+          "label": "PROFESSION"
+        },
+        {
+          "name": "TYPAVIA",
+          "label": "TYPAVIA"
+        },
+        {
+          "name": "ATTENTION",
+          "label": "ATTENTION"
+        },
+        {
+          "name": "CODESUI",
+          "label": "CODESUI"
+        },
+        {
+          "name": "ADR_ENVOI",
+          "label": "ADR ENVOI",
+          "format": "date"
+        },
+        {
+          "name": "ADR_COM",
+          "label": "ADR COM"
+        },
+        {
+          "name": "ADR_DED93",
+          "label": "ADR DED93"
+        },
+        {
+          "name": "ADR_DED94",
+          "label": "ADR DED94"
+        },
+        {
+          "name": "ADR_TYP",
+          "label": "ADR TYP"
+        },
+        {
+          "name": "ADR_DEV",
+          "label": "ADR DEV"
+        },
+        {
+          "name": "ADR_TRANOM",
+          "label": "ADR TRANOM"
+        },
+        {
+          "name": "ADR_EXE",
+          "label": "ADR EXE"
+        },
+        {
+          "name": "CODEAFA",
+          "label": "CODEAFA"
+        },
+        {
+          "name": "UTILISE",
+          "label": "UTILISE"
+        },
+        {
+          "name": "ADR_PERSON",
+          "label": "ADR PERSON"
+        },
+        {
+          "name": "ADR_BANK",
+          "label": "ADR BANK"
+        },
+        {
+          "name": "ADR_EMAIL",
+          "label": "ADR EMAIL"
+        },
+        {
+          "name": "ADR_CMAIL",
+          "label": "ADR CMAIL"
+        },
+        {
+          "name": "ADR_DATE",
+          "label": "ADR DATE",
+          "format": "date"
+        },
+        {
+          "name": "ADR_INUTIL",
+          "label": "ADR INUTIL"
+        },
+        {
+          "name": "ADR_PTOTAL",
+          "label": "ADR PTOTAL"
+        },
+        {
+          "name": "ADR_SMAIL",
+          "label": "ADR SMAIL"
+        },
+        {
+          "name": "ADR_CPT",
+          "label": "ADR CPT"
+        },
+        {
+          "name": "CODEGIEAF",
+          "label": "CODEGIEAF"
+        },
+        {
+          "name": "ADR_SURCOM",
+          "label": "ADR SURCOM"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "CODAVIA",
+          "label": "CODAVIA",
+          "operator": "contains",
+          "placeholder": "Search CODAVIA..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_adr_trao": {
+      "title": "ADR TRAO",
+      "table": "ADR_TRAO",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "CODAVIA",
+          "label": "CODAVIA"
+        },
+        {
+          "name": "ENTITE",
+          "label": "ENTITE"
+        },
+        {
+          "name": "ADR_TYP1",
+          "label": "ADR TYP1"
+        },
+        {
+          "name": "ADR_TYP2",
+          "label": "ADR TYP2"
+        },
+        {
+          "name": "CODELPC",
+          "label": "CODELPC"
+        },
+        {
+          "name": "CODEGENE",
+          "label": "CODEGENE"
+        },
+        {
+          "name": "RENVLPC",
+          "label": "RENVLPC"
+        },
+        {
+          "name": "RENVOI",
+          "label": "RENVOI"
+        },
+        {
+          "name": "NOMINTER",
+          "label": "NOMINTER"
+        },
+        {
+          "name": "PREINTER",
+          "label": "PREINTER"
+        },
+        {
+          "name": "TEL",
+          "label": "TEL"
+        },
+        {
+          "name": "FAX",
+          "label": "FAX"
+        },
+        {
+          "name": "TELEX",
+          "label": "TELEX"
+        },
+        {
+          "name": "TITRE",
+          "label": "TITRE"
+        },
+        {
+          "name": "ADRESSE",
+          "label": "ADRESSE"
+        },
+        {
+          "name": "ADRESSE2",
+          "label": "ADRESSE2"
+        },
+        {
+          "name": "CODVILLE",
+          "label": "CODVILLE"
+        },
+        {
+          "name": "PAYS",
+          "label": "PAYS"
+        },
+        {
+          "name": "CODEPAYS",
+          "label": "CODEPAYS"
+        },
+        {
+          "name": "TYPE",
+          "label": "TYPE"
+        },
+        {
+          "name": "PROFESSION",
+          "label": "PROFESSION"
+        },
+        {
+          "name": "TYPAVIA",
+          "label": "TYPAVIA"
+        },
+        {
+          "name": "ATTENTION",
+          "label": "ATTENTION"
+        },
+        {
+          "name": "CODESUI",
+          "label": "CODESUI"
+        },
+        {
+          "name": "ADR_ENVOI",
+          "label": "ADR ENVOI",
+          "format": "date"
+        },
+        {
+          "name": "ADR_PART",
+          "label": "ADR PART"
+        },
+        {
+          "name": "ADR_COM",
+          "label": "ADR COM"
+        },
+        {
+          "name": "ADR_DED93",
+          "label": "ADR DED93"
+        },
+        {
+          "name": "ADR_DED94",
+          "label": "ADR DED94"
+        },
+        {
+          "name": "ADR_SURCOM",
+          "label": "ADR SURCOM"
+        },
+        {
+          "name": "ADR_TYP",
+          "label": "ADR TYP"
+        },
+        {
+          "name": "ADR_DEV",
+          "label": "ADR DEV"
+        },
+        {
+          "name": "ADR_TRANOM",
+          "label": "ADR TRANOM"
+        },
+        {
+          "name": "ADR_EXE",
+          "label": "ADR EXE"
+        },
+        {
+          "name": "CODEAFA",
+          "label": "CODEAFA"
+        },
+        {
+          "name": "UTILISE",
+          "label": "UTILISE"
+        },
+        {
+          "name": "ADR_PERSON",
+          "label": "ADR PERSON"
+        },
+        {
+          "name": "ADR_BANK",
+          "label": "ADR BANK"
+        },
+        {
+          "name": "ADR_EMAIL",
+          "label": "ADR EMAIL"
+        },
+        {
+          "name": "ADR_DATE",
+          "label": "ADR DATE",
+          "format": "date"
+        },
+        {
+          "name": "ADR_SMAIL",
+          "label": "ADR SMAIL"
+        },
+        {
+          "name": "ADR_INUTIL",
+          "label": "ADR INUTIL"
+        },
+        {
+          "name": "ADR_PTOTAL",
+          "label": "ADR PTOTAL"
+        },
+        {
+          "name": "ADR_CPT",
+          "label": "ADR CPT"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "CODAVIA",
+          "label": "CODAVIA",
+          "operator": "contains",
+          "placeholder": "Search CODAVIA..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_adr_tras": {
+      "title": "ADR TRAS",
+      "table": "ADR_TRAS",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "CODAVIA",
+          "label": "CODAVIA"
+        },
+        {
+          "name": "ENTITE",
+          "label": "ENTITE"
+        },
+        {
+          "name": "ADR_TYP1",
+          "label": "ADR TYP1"
+        },
+        {
+          "name": "ADR_TYP2",
+          "label": "ADR TYP2"
+        },
+        {
+          "name": "CODELPC",
+          "label": "CODELPC"
+        },
+        {
+          "name": "CODEGENE",
+          "label": "CODEGENE"
+        },
+        {
+          "name": "RENVLPC",
+          "label": "RENVLPC"
+        },
+        {
+          "name": "RENVOI",
+          "label": "RENVOI"
+        },
+        {
+          "name": "NOMINTER",
+          "label": "NOMINTER"
+        },
+        {
+          "name": "PREINTER",
+          "label": "PREINTER"
+        },
+        {
+          "name": "TEL",
+          "label": "TEL"
+        },
+        {
+          "name": "FAX",
+          "label": "FAX"
+        },
+        {
+          "name": "TELEX",
+          "label": "TELEX"
+        },
+        {
+          "name": "TITRE",
+          "label": "TITRE"
+        },
+        {
+          "name": "ADRESSE",
+          "label": "ADRESSE"
+        },
+        {
+          "name": "ADRESSE2",
+          "label": "ADRESSE2"
+        },
+        {
+          "name": "CODVILLE",
+          "label": "CODVILLE"
+        },
+        {
+          "name": "PAYS",
+          "label": "PAYS"
+        },
+        {
+          "name": "CODEPAYS",
+          "label": "CODEPAYS"
+        },
+        {
+          "name": "TYPE",
+          "label": "TYPE"
+        },
+        {
+          "name": "PROFESSION",
+          "label": "PROFESSION"
+        },
+        {
+          "name": "TYPAVIA",
+          "label": "TYPAVIA"
+        },
+        {
+          "name": "ATTENTION",
+          "label": "ATTENTION"
+        },
+        {
+          "name": "CODESUI",
+          "label": "CODESUI"
+        },
+        {
+          "name": "ADR_ENVOI",
+          "label": "ADR ENVOI",
+          "format": "date"
+        },
+        {
+          "name": "ADR_PART",
+          "label": "ADR PART"
+        },
+        {
+          "name": "ADR_COM",
+          "label": "ADR COM"
+        },
+        {
+          "name": "ADR_DED93",
+          "label": "ADR DED93"
+        },
+        {
+          "name": "ADR_DED94",
+          "label": "ADR DED94"
+        },
+        {
+          "name": "ADR_SURCOM",
+          "label": "ADR SURCOM"
+        },
+        {
+          "name": "ADR_TYP",
+          "label": "ADR TYP"
+        },
+        {
+          "name": "ADR_DEV",
+          "label": "ADR DEV"
+        },
+        {
+          "name": "ADR_TRANOM",
+          "label": "ADR TRANOM"
+        },
+        {
+          "name": "ADR_EXE",
+          "label": "ADR EXE"
+        },
+        {
+          "name": "CODEAFA",
+          "label": "CODEAFA"
+        },
+        {
+          "name": "UTILISE",
+          "label": "UTILISE"
+        },
+        {
+          "name": "ADR_PERSON",
+          "label": "ADR PERSON"
+        },
+        {
+          "name": "ADR_BANK",
+          "label": "ADR BANK"
+        },
+        {
+          "name": "ADR_EMAIL",
+          "label": "ADR EMAIL"
+        },
+        {
+          "name": "ADR_DATE",
+          "label": "ADR DATE",
+          "format": "date"
+        },
+        {
+          "name": "ADR_SMAIL",
+          "label": "ADR SMAIL"
+        },
+        {
+          "name": "ADR_INUTIL",
+          "label": "ADR INUTIL"
+        },
+        {
+          "name": "ADR_PTOTAL",
+          "label": "ADR PTOTAL"
+        },
+        {
+          "name": "ADR_CPT",
+          "label": "ADR CPT"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "CODAVIA",
+          "label": "CODAVIA",
+          "operator": "contains",
+          "placeholder": "Search CODAVIA..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_adr_xl": {
+      "title": "ADR XL",
+      "table": "ADR_XL",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "CODAVIA",
+          "label": "CODAVIA"
+        },
+        {
+          "name": "ENTITE",
+          "label": "ENTITE"
+        },
+        {
+          "name": "ADR_TYP1",
+          "label": "ADR TYP1"
+        },
+        {
+          "name": "ADR_TYP2",
+          "label": "ADR TYP2"
+        },
+        {
+          "name": "ADR_TR1",
+          "label": "ADR TR1"
+        },
+        {
+          "name": "ADR_COMM",
+          "label": "ADR COMM"
+        },
+        {
+          "name": "ADR_RISQUE",
+          "label": "ADR RISQUE"
+        },
+        {
+          "name": "CODELPC",
+          "label": "CODELPC"
+        },
+        {
+          "name": "CODEGENE",
+          "label": "CODEGENE"
+        },
+        {
+          "name": "CODEPANE",
+          "label": "CODEPANE"
+        },
+        {
+          "name": "RENVGIE",
+          "label": "RENVGIE"
+        },
+        {
+          "name": "CODEGIE",
+          "label": "CODEGIE"
+        },
+        {
+          "name": "RENVLPC",
+          "label": "RENVLPC"
+        },
+        {
+          "name": "RENVOI",
+          "label": "RENVOI"
+        },
+        {
+          "name": "NOMINTER",
+          "label": "NOMINTER"
+        },
+        {
+          "name": "PREINTER",
+          "label": "PREINTER"
+        },
+        {
+          "name": "TEL",
+          "label": "TEL"
+        },
+        {
+          "name": "FAX",
+          "label": "FAX"
+        },
+        {
+          "name": "TELEX",
+          "label": "TELEX"
+        },
+        {
+          "name": "TITRE",
+          "label": "TITRE"
+        },
+        {
+          "name": "ADRESSE",
+          "label": "ADRESSE"
+        },
+        {
+          "name": "ADRESSE2",
+          "label": "ADRESSE2"
+        },
+        {
+          "name": "CODVILLE",
+          "label": "CODVILLE"
+        },
+        {
+          "name": "PAYS",
+          "label": "PAYS"
+        },
+        {
+          "name": "CODEPAYS",
+          "label": "CODEPAYS"
+        },
+        {
+          "name": "TYPE",
+          "label": "TYPE"
+        },
+        {
+          "name": "PROFESSION",
+          "label": "PROFESSION"
+        },
+        {
+          "name": "TYPAVIA",
+          "label": "TYPAVIA"
+        },
+        {
+          "name": "VU",
+          "label": "VU",
+          "format": "date"
+        },
+        {
+          "name": "VU_INI",
+          "label": "VU INI"
+        },
+        {
+          "name": "UTILISE",
+          "label": "UTILISE"
+        },
+        {
+          "name": "CONTROLE",
+          "label": "CONTROLE"
+        },
+        {
+          "name": "ATTENTION",
+          "label": "ATTENTION"
+        },
+        {
+          "name": "SELE",
+          "label": "SELE"
+        },
+        {
+          "name": "DATCRE",
+          "label": "DATCRE",
+          "format": "date"
+        },
+        {
+          "name": "ADR_TAXE",
+          "label": "ADR TAXE"
+        },
+        {
+          "name": "CODESUI",
+          "label": "CODESUI"
+        },
+        {
+          "name": "ADR_COM",
+          "label": "ADR COM"
+        },
+        {
+          "name": "ADR_ENVOI",
+          "label": "ADR ENVOI",
+          "format": "date"
+        },
+        {
+          "name": "ADR_ENVOA",
+          "label": "ADR ENVOA",
+          "format": "date"
+        },
+        {
+          "name": "ADR_FET",
+          "label": "ADR FET"
+        },
+        {
+          "name": "ADR_CLO",
+          "label": "ADR CLO"
+        },
+        {
+          "name": "ADR_CLOA",
+          "label": "ADR CLOA"
+        },
+        {
+          "name": "ADR_CPT",
+          "label": "ADR CPT"
+        },
+        {
+          "name": "ADR_CPTA",
+          "label": "ADR CPTA"
+        },
+        {
+          "name": "CODEAFA",
+          "label": "CODEAFA"
+        },
+        {
+          "name": "CODEUNI",
+          "label": "CODEUNI"
+        },
+        {
+          "name": "ADR_PERSON",
+          "label": "ADR PERSON"
+        },
+        {
+          "name": "ADR_BANK",
+          "label": "ADR BANK"
+        },
+        {
+          "name": "ADR_TRIPRI",
+          "label": "ADR TRIPRI"
+        },
+        {
+          "name": "ADR_EXPLIG",
+          "label": "ADR EXPLIG"
+        },
+        {
+          "name": "ADR_TOF",
+          "label": "ADR TOF"
+        },
+        {
+          "name": "ADR_AMA",
+          "label": "ADR AMA"
+        },
+        {
+          "name": "ADR_ACTS",
+          "label": "ADR ACTS"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "CODAVIA",
+          "label": "CODAVIA",
+          "operator": "contains",
+          "placeholder": "Search CODAVIA..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_contrlpc": {
+      "title": "CONTRLPC",
+      "table": "CONTRLPC",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "CLETOT",
+          "label": "CLETOT"
+        },
+        {
+          "name": "MMCLE",
+          "label": "MMCLE"
+        },
+        {
+          "name": "POLANN",
+          "label": "POLANN"
+        },
+        {
+          "name": "POLICE",
+          "label": "POLICE"
+        },
+        {
+          "name": "CLIENT",
+          "label": "CLIENT"
+        },
+        {
+          "name": "PAYS",
+          "label": "PAYS"
+        },
+        {
+          "name": "ETAT",
+          "label": "ETAT"
+        },
+        {
+          "name": "CON_TAXE",
+          "label": "CON TAXE"
+        },
+        {
+          "name": "CEDANTE",
+          "label": "CEDANTE"
+        },
+        {
+          "name": "CON_NUMCLI",
+          "label": "CON NUMCLI"
+        },
+        {
+          "name": "CON_FRONT",
+          "label": "CON FRONT"
+        },
+        {
+          "name": "APERPOL",
+          "label": "APERPOL"
+        },
+        {
+          "name": "AVENANT",
+          "label": "AVENANT"
+        },
+        {
+          "name": "EXERCICE",
+          "label": "EXERCICE"
+        },
+        {
+          "name": "EXELONG",
+          "label": "EXELONG"
+        },
+        {
+          "name": "CODESTAT",
+          "label": "CODESTAT"
+        },
+        {
+          "name": "RISQUE",
+          "label": "RISQUE"
+        },
+        {
+          "name": "TXPART",
+          "label": "TXPART"
+        },
+        {
+          "name": "CON_BUR",
+          "label": "CON BUR"
+        },
+        {
+          "name": "DIRACC",
+          "label": "DIRACC"
+        },
+        {
+          "name": "SAISDATE",
+          "label": "SAISDATE"
+        },
+        {
+          "name": "CON_UTIL",
+          "label": "CON UTIL"
+        },
+        {
+          "name": "CON_EFT",
+          "label": "CON EFT",
+          "format": "date"
+        },
+        {
+          "name": "CON_DECEFT",
+          "label": "CON DECEFT",
+          "format": "date"
+        },
+        {
+          "name": "CON_EXP",
+          "label": "CON EXP",
+          "format": "date"
+        },
+        {
+          "name": "CON_MON",
+          "label": "CON MON"
+        },
+        {
+          "name": "CON_DEV",
+          "label": "CON DEV"
+        },
+        {
+          "name": "CON_MEM",
+          "label": "CON MEM"
+        },
+        {
+          "name": "CON_RESP1",
+          "label": "CON RESP1"
+        },
+        {
+          "name": "CON_RESP2",
+          "label": "CON RESP2"
+        },
+        {
+          "name": "CON_COU",
+          "label": "CON COU"
+        },
+        {
+          "name": "CON_REFCED",
+          "label": "CON REFCED"
+        },
+        {
+          "name": "CON_COUTYP",
+          "label": "CON COUTYP"
+        },
+        {
+          "name": "CON_SOUSC",
+          "label": "CON SOUSC"
+        },
+        {
+          "name": "CON_COMCED",
+          "label": "CON COMCED"
+        },
+        {
+          "name": "CON_COMREC",
+          "label": "CON COMREC"
+        },
+        {
+          "name": "CON_APE",
+          "label": "CON APE"
+        },
+        {
+          "name": "CON_AJU",
+          "label": "CON AJU"
+        },
+        {
+          "name": "CON_SIN",
+          "label": "CON SIN"
+        },
+        {
+          "name": "CON_TAX",
+          "label": "CON TAX"
+        },
+        {
+          "name": "CON_CON",
+          "label": "CON CON"
+        },
+        {
+          "name": "CON_100",
+          "label": "CON 100"
+        },
+        {
+          "name": "CON_SLIP",
+          "label": "CON SLIP"
+        },
+        {
+          "name": "CON_POLGIE",
+          "label": "CON POLGIE"
+        },
+        {
+          "name": "CON_PBARR",
+          "label": "CON PBARR"
+        },
+        {
+          "name": "CON_ASSTYP",
+          "label": "CON ASSTYP"
+        },
+        {
+          "name": "CON_PROJET",
+          "label": "CON PROJET"
+        },
+        {
+          "name": "CON_TYPE",
+          "label": "CON TYPE"
+        },
+        {
+          "name": "CON_CLEPRI",
+          "label": "CON CLEPRI"
+        },
+        {
+          "name": "POLREN",
+          "label": "POLREN"
+        },
+        {
+          "name": "CON_FP",
+          "label": "CON FP"
+        },
+        {
+          "name": "CON_FOND",
+          "label": "CON FOND"
+        },
+        {
+          "name": "CON_U2002",
+          "label": "CON U2002"
+        },
+        {
+          "name": "CON_2002",
+          "label": "CON 2002"
+        },
+        {
+          "name": "CON_COM",
+          "label": "CON COM"
+        },
+        {
+          "name": "CON_CLECOM",
+          "label": "CON CLECOM"
+        },
+        {
+          "name": "CON_FAC",
+          "label": "CON FAC"
+        },
+        {
+          "name": "CON_TRA",
+          "label": "CON TRA"
+        },
+        {
+          "name": "CON_RET",
+          "label": "CON RET"
+        },
+        {
+          "name": "CON_COMFAC",
+          "label": "CON COMFAC"
+        },
+        {
+          "name": "CON_COMTRA",
+          "label": "CON COMTRA"
+        },
+        {
+          "name": "CON_OKPART",
+          "label": "CON OKPART"
+        },
+        {
+          "name": "CON_P_2999",
+          "label": "CON P 2999"
+        },
+        {
+          "name": "CON_P_TMC",
+          "label": "CON P TMC"
+        },
+        {
+          "name": "CON_P_DRET",
+          "label": "CON P DRET"
+        },
+        {
+          "name": "CON_GENRE",
+          "label": "CON GENRE"
+        },
+        {
+          "name": "CON_OKAGCS",
+          "label": "CON OKAGCS"
+        },
+        {
+          "name": "CON_BAGCS",
+          "label": "CON BAGCS"
+        },
+        {
+          "name": "CON_RAGCS",
+          "label": "CON RAGCS"
+        },
+        {
+          "name": "CON_CAGCS",
+          "label": "CON CAGCS"
+        },
+        {
+          "name": "CON_CTAGCS",
+          "label": "CON CTAGCS"
+        },
+        {
+          "name": "CON_SAI",
+          "label": "CON SAI",
+          "format": "date"
+        },
+        {
+          "name": "OLDCLE",
+          "label": "OLDCLE"
+        },
+        {
+          "name": "CON_COMOK",
+          "label": "CON COMOK"
+        },
+        {
+          "name": "UTIL",
+          "label": "UTIL"
+        },
+        {
+          "name": "CON_COUCAM",
+          "label": "CON COUCAM"
+        },
+        {
+          "name": "CON_CAM",
+          "label": "CON CAM"
+        },
+        {
+          "name": "RISCAM",
+          "label": "RISCAM"
+        },
+        {
+          "name": "ORISQUE",
+          "label": "ORISQUE"
+        },
+        {
+          "name": "CON_CLETOT",
+          "label": "CON CLETOT"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "CLETOT",
+          "label": "CLETOT",
+          "operator": "contains",
+          "placeholder": "Search CLETOT..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_dossier": {
+      "title": "DOSSIER",
+      "table": "DOSSIER",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "DOS_INI",
+          "label": "DOS INI"
+        },
+        {
+          "name": "DOS_QUI",
+          "label": "DOS QUI"
+        },
+        {
+          "name": "DOS_IMP",
+          "label": "DOS IMP"
+        },
+        {
+          "name": "DOS_RISQ",
+          "label": "DOS RISQ"
+        },
+        {
+          "name": "DOS_PAYS",
+          "label": "DOS PAYS"
+        },
+        {
+          "name": "DOS_EXER",
+          "label": "DOS EXER"
+        },
+        {
+          "name": "DOS_DA",
+          "label": "DOS DA"
+        },
+        {
+          "name": "DOS_FIN",
+          "label": "DOS FIN"
+        },
+        {
+          "name": "DOS_NUM",
+          "label": "DOS NUM"
+        },
+        {
+          "name": "DOS_DUP",
+          "label": "DOS DUP"
+        },
+        {
+          "name": "DOS_NUMDUP",
+          "label": "DOS NUMDUP"
+        },
+        {
+          "name": "DOS_NUMAFA",
+          "label": "DOS NUMAFA"
+        },
+        {
+          "name": "DOS_NUMPOL",
+          "label": "DOS NUMPOL"
+        },
+        {
+          "name": "DOS_CLETOT",
+          "label": "DOS CLETOT"
+        },
+        {
+          "name": "DOS_CLEAFA",
+          "label": "DOS CLEAFA"
+        },
+        {
+          "name": "DOS_TXAFA",
+          "label": "DOS TXAFA"
+        },
+        {
+          "name": "DOS_MMCLE",
+          "label": "DOS MMCLE"
+        },
+        {
+          "name": "DOS_LIEU",
+          "label": "DOS LIEU"
+        },
+        {
+          "name": "DOS_APP",
+          "label": "DOS APP"
+        },
+        {
+          "name": "DOS_CIRCON",
+          "label": "DOS CIRCON"
+        },
+        {
+          "name": "DOS_NBDEM",
+          "label": "DOS NBDEM"
+        },
+        {
+          "name": "DOS_ANAL",
+          "label": "DOS ANAL"
+        },
+        {
+          "name": "DOS_DATCRE",
+          "label": "DOS DATCRE",
+          "format": "date"
+        },
+        {
+          "name": "DOS_NUMCLI",
+          "label": "DOS NUMCLI"
+        },
+        {
+          "name": "DOS_ASSURE",
+          "label": "DOS ASSURE"
+        },
+        {
+          "name": "DOS_IDENT",
+          "label": "DOS IDENT"
+        },
+        {
+          "name": "DOS_CEDANT",
+          "label": "DOS CEDANT"
+        },
+        {
+          "name": "DOS_EXP",
+          "label": "DOS EXP"
+        },
+        {
+          "name": "DOS_AVO",
+          "label": "DOS AVO"
+        },
+        {
+          "name": "DOS_REFCOU",
+          "label": "DOS REFCOU"
+        },
+        {
+          "name": "DOS_REFAVO",
+          "label": "DOS REFAVO"
+        },
+        {
+          "name": "DOS_REFEXP",
+          "label": "DOS REFEXP"
+        },
+        {
+          "name": "DOS_DEREVA",
+          "label": "DOS DEREVA"
+        },
+        {
+          "name": "DOS_DERFRA",
+          "label": "DOS DERFRA"
+        },
+        {
+          "name": "DOS_NUMEVA",
+          "label": "DOS NUMEVA"
+        },
+        {
+          "name": "DOS_DATEVA",
+          "label": "DOS DATEVA",
+          "format": "date"
+        },
+        {
+          "name": "DOS_XL",
+          "label": "DOS XL"
+        },
+        {
+          "name": "DOS_DEV",
+          "label": "DOS DEV"
+        },
+        {
+          "name": "DOS_RAPEXP",
+          "label": "DOS RAPEXP"
+        },
+        {
+          "name": "DOS_RAPAVO",
+          "label": "DOS RAPAVO"
+        },
+        {
+          "name": "DOS_RAPCOU",
+          "label": "DOS RAPCOU"
+        },
+        {
+          "name": "DOS_TXPRIM",
+          "label": "DOS TXPRIM"
+        },
+        {
+          "name": "DOS_REG",
+          "label": "DOS REG"
+        },
+        {
+          "name": "DOS_CON",
+          "label": "DOS CON"
+        },
+        {
+          "name": "DOS_VER",
+          "label": "DOS VER"
+        },
+        {
+          "name": "DOS_RESDUP",
+          "label": "DOS RESDUP"
+        },
+        {
+          "name": "DOS_CAR",
+          "label": "DOS CAR"
+        },
+        {
+          "name": "DOS_STAT",
+          "label": "DOS STAT"
+        },
+        {
+          "name": "DOS_ASBEST",
+          "label": "DOS ASBEST"
+        },
+        {
+          "name": "DOS_POLLU",
+          "label": "DOS POLLU"
+        },
+        {
+          "name": "DOS_INFOUV",
+          "label": "DOS INFOUV"
+        },
+        {
+          "name": "DOS_VALEST",
+          "label": "DOS VALEST"
+        },
+        {
+          "name": "DOS_FRANCH",
+          "label": "DOS FRANCH"
+        },
+        {
+          "name": "DOS_NBJFRA",
+          "label": "DOS NBJFRA"
+        },
+        {
+          "name": "DOS_LETTRE",
+          "label": "DOS LETTRE"
+        },
+        {
+          "name": "DOS_FRADEV",
+          "label": "DOS FRADEV"
+        },
+        {
+          "name": "DOS_PERTOT",
+          "label": "DOS PERTOT"
+        },
+        {
+          "name": "DOS_PAHH",
+          "label": "DOS PAHH"
+        },
+        {
+          "name": "DOS_DATOUV",
+          "label": "DOS DATOUV",
+          "format": "date"
+        },
+        {
+          "name": "DOS_DATCLO",
+          "label": "DOS DATCLO",
+          "format": "date"
+        },
+        {
+          "name": "DOS_2002",
+          "label": "DOS 2002"
+        },
+        {
+          "name": "DOS_CLEALT",
+          "label": "DOS CLEALT"
+        },
+        {
+          "name": "UTIL",
+          "label": "UTIL"
+        },
+        {
+          "name": "DOS_4EP",
+          "label": "DOS 4 EP"
+        },
+        {
+          "name": "DOS_SUBRO",
+          "label": "DOS SUBRO"
+        },
+        {
+          "name": "DOS_ARCHET",
+          "label": "DOS ARCHET"
+        },
+        {
+          "name": "DOS_VORACE",
+          "label": "DOS VORACE"
+        },
+        {
+          "name": "DOS_CAUSOL",
+          "label": "DOS CAUSOL"
+        },
+        {
+          "name": "DOS_TYPEOL",
+          "label": "DOS TYPEOL"
+        },
+        {
+          "name": "DOS_REFCIR",
+          "label": "DOS REFCIR"
+        },
+        {
+          "name": "DOS_AVENAN",
+          "label": "DOS AVENAN"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "DOS_INI",
+          "label": "DOS INI",
+          "operator": "contains",
+          "placeholder": "Search DOS INI..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_evaluati": {
+      "title": "EVALUATI",
+      "table": "EVALUATI",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "EVA_NUMDOS",
+          "label": "EVA NUMDOS"
+        },
+        {
+          "name": "EVA_NUM",
+          "label": "EVA NUM"
+        },
+        {
+          "name": "EVA_DAT",
+          "label": "EVA DAT",
+          "format": "date"
+        },
+        {
+          "name": "EVA_FRA",
+          "label": "EVA FRA"
+        },
+        {
+          "name": "EVA_MON",
+          "label": "EVA MON"
+        },
+        {
+          "name": "EVA_DEV",
+          "label": "EVA DEV"
+        },
+        {
+          "name": "EVA_ATTMON",
+          "label": "EVA ATTMON"
+        },
+        {
+          "name": "EVA_FRAMON",
+          "label": "EVA FRAMON"
+        },
+        {
+          "name": "EVA_REGMON",
+          "label": "EVA REGMON"
+        },
+        {
+          "name": "EVA_REF",
+          "label": "EVA REF"
+        },
+        {
+          "name": "EVA_FRAN",
+          "label": "EVA FRAN"
+        },
+        {
+          "name": "EVA_2002",
+          "label": "EVA 2002"
+        },
+        {
+          "name": "EVA_CLE",
+          "label": "EVA CLE"
+        },
+        {
+          "name": "EVA_FINID",
+          "label": "EVA FINID"
+        },
+        {
+          "name": "EVA_AJU",
+          "label": "EVA AJU"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "EVA_NUMDOS",
+          "label": "EVA NUMDOS",
+          "operator": "exact",
+          "placeholder": "Search EVA NUMDOS..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_primes": {
+      "title": "PRIMES",
+      "table": "PRIMES",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "PRI_CLEINT",
+          "label": "PRI CLEINT"
+        },
+        {
+          "name": "PRI_NUMECH",
+          "label": "PRI NUMECH"
+        },
+        {
+          "name": "PRI_NUMCLO",
+          "label": "PRI NUMCLO"
+        },
+        {
+          "name": "PRI_DAT",
+          "label": "PRI DAT",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DEMI",
+          "label": "PRI DEMI",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DVAL",
+          "label": "PRI DVAL",
+          "format": "date"
+        },
+        {
+          "name": "PRI_PRCENT",
+          "label": "PRI PRCENT"
+        },
+        {
+          "name": "PRI_COUT",
+          "label": "PRI COUT"
+        },
+        {
+          "name": "PRI_FRONT",
+          "label": "PRI FRONT"
+        },
+        {
+          "name": "PRI_PRBRUT",
+          "label": "PRI PRBRUT"
+        },
+        {
+          "name": "PRI_REA",
+          "label": "PRI REA"
+        },
+        {
+          "name": "PRI_TAXES",
+          "label": "PRI TAXES"
+        },
+        {
+          "name": "PRI_TERRO",
+          "label": "PRI TERRO"
+        },
+        {
+          "name": "PRI_TOTAL",
+          "label": "PRI TOTAL"
+        },
+        {
+          "name": "PRI_COM",
+          "label": "PRI COM"
+        },
+        {
+          "name": "PRI_DEV",
+          "label": "PRI DEV"
+        },
+        {
+          "name": "PRI_ST_E",
+          "label": "PRI ST E"
+        },
+        {
+          "name": "PRI_ST_P",
+          "label": "PRI ST P"
+        },
+        {
+          "name": "PRI_ST_C",
+          "label": "PRI ST C"
+        },
+        {
+          "name": "PRI_ST_OD",
+          "label": "PRI ST OD"
+        },
+        {
+          "name": "PRI_REF",
+          "label": "PRI REF"
+        },
+        {
+          "name": "PRI_COU",
+          "label": "PRI COU"
+        },
+        {
+          "name": "PRI_COD",
+          "label": "PRI COD"
+        },
+        {
+          "name": "PRI_REC",
+          "label": "PRI REC"
+        },
+        {
+          "name": "PRI_RECDEV",
+          "label": "PRI RECDEV"
+        },
+        {
+          "name": "PRI_RES",
+          "label": "PRI RES"
+        },
+        {
+          "name": "PRI_POI",
+          "label": "PRI POI"
+        },
+        {
+          "name": "PRI_INI",
+          "label": "PRI INI"
+        },
+        {
+          "name": "PRI_SAI",
+          "label": "PRI SAI",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DDUE",
+          "label": "PRI DDUE",
+          "format": "date"
+        },
+        {
+          "name": "PRI_IMPDUE",
+          "label": "PRI IMPDUE"
+        },
+        {
+          "name": "PRI_MONIN",
+          "label": "PRI MONIN"
+        },
+        {
+          "name": "PRI_DEVIN",
+          "label": "PRI DEVIN"
+        },
+        {
+          "name": "PRI_2002",
+          "label": "PRI 2002"
+        },
+        {
+          "name": "PRI_DECCOM",
+          "label": "PRI DECCOM"
+        },
+        {
+          "name": "UTIL",
+          "label": "UTIL"
+        },
+        {
+          "name": "PRI_CIR",
+          "label": "PRI CIR"
+        },
+        {
+          "name": "PRI_INST",
+          "label": "PRI INST"
+        },
+        {
+          "name": "PRI_ID",
+          "label": "PRI ID"
+        },
+        {
+          "name": "PRI_FER",
+          "label": "PRI FER"
+        },
+        {
+          "name": "PRI_OUV",
+          "label": "PRI OUV"
+        },
+        {
+          "name": "PRI_GRP",
+          "label": "PRI GRP"
+        },
+        {
+          "name": "PRI_COUGRP",
+          "label": "PRI COUGRP"
+        },
+        {
+          "name": "PRI_QUIT",
+          "label": "PRI QUIT"
+        },
+        {
+          "name": "PRI_FINID",
+          "label": "PRI FINID"
+        },
+        {
+          "name": "COM_CASH",
+          "label": "COM CASH"
+        },
+        {
+          "name": "PRI_NIF",
+          "label": "PRI NIF"
+        },
+        {
+          "name": "PRI_EIF",
+          "label": "PRI EIF"
+        },
+        {
+          "name": "PRI_EMI",
+          "label": "PRI EMI"
+        },
+        {
+          "name": "PRI_REL",
+          "label": "PRI REL"
+        },
+        {
+          "name": "PRI_DR1",
+          "label": "PRI DR1",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DR2",
+          "label": "PRI DR2",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DR3",
+          "label": "PRI DR3",
+          "format": "date"
+        },
+        {
+          "name": "PRI_TOTORI",
+          "label": "PRI TOTORI"
+        },
+        {
+          "name": "PRI_ST_P98",
+          "label": "PRI ST P98"
+        },
+        {
+          "name": "PRI_REFCAM",
+          "label": "PRI REFCAM"
+        },
+        {
+          "name": "PRI_REMI",
+          "label": "PRI REMI"
+        },
+        {
+          "name": "PRI_COUCAM",
+          "label": "PRI COUCAM"
+        },
+        {
+          "name": "PRI_REFCON",
+          "label": "PRI REFCON"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "PRI_CLEINT",
+          "label": "PRI CLEINT",
+          "operator": "contains",
+          "placeholder": "Search PRI CLEINT..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_primesgg": {
+      "title": "PRIMESGG",
+      "table": "PRIMESGG",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "PRI_CLEINT",
+          "label": "PRI CLEINT"
+        },
+        {
+          "name": "PRI_NUMECH",
+          "label": "PRI NUMECH"
+        },
+        {
+          "name": "PRI_NUMCLO",
+          "label": "PRI NUMCLO"
+        },
+        {
+          "name": "PRI_DAT",
+          "label": "PRI DAT",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DEMI",
+          "label": "PRI DEMI",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DVAL",
+          "label": "PRI DVAL",
+          "format": "date"
+        },
+        {
+          "name": "PRI_PRCENT",
+          "label": "PRI PRCENT"
+        },
+        {
+          "name": "PRI_COUT",
+          "label": "PRI COUT"
+        },
+        {
+          "name": "PRI_FRONT",
+          "label": "PRI FRONT"
+        },
+        {
+          "name": "PRI_PRBRUT",
+          "label": "PRI PRBRUT"
+        },
+        {
+          "name": "PRI_REA",
+          "label": "PRI REA"
+        },
+        {
+          "name": "PRI_TAXES",
+          "label": "PRI TAXES"
+        },
+        {
+          "name": "PRI_TERRO",
+          "label": "PRI TERRO"
+        },
+        {
+          "name": "PRI_TOTAL",
+          "label": "PRI TOTAL"
+        },
+        {
+          "name": "PRI_COM",
+          "label": "PRI COM"
+        },
+        {
+          "name": "PRI_DEV",
+          "label": "PRI DEV"
+        },
+        {
+          "name": "PRI_ST_E",
+          "label": "PRI ST E"
+        },
+        {
+          "name": "PRI_ST_P",
+          "label": "PRI ST P"
+        },
+        {
+          "name": "PRI_ST_C",
+          "label": "PRI ST C"
+        },
+        {
+          "name": "PRI_ST_OD",
+          "label": "PRI ST OD"
+        },
+        {
+          "name": "PRI_REF",
+          "label": "PRI REF"
+        },
+        {
+          "name": "PRI_COU",
+          "label": "PRI COU"
+        },
+        {
+          "name": "PRI_COD",
+          "label": "PRI COD"
+        },
+        {
+          "name": "PRI_REC",
+          "label": "PRI REC"
+        },
+        {
+          "name": "PRI_RECDEV",
+          "label": "PRI RECDEV"
+        },
+        {
+          "name": "PRI_RES",
+          "label": "PRI RES"
+        },
+        {
+          "name": "PRI_POI",
+          "label": "PRI POI"
+        },
+        {
+          "name": "PRI_INI",
+          "label": "PRI INI"
+        },
+        {
+          "name": "PRI_SAI",
+          "label": "PRI SAI",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DDUE",
+          "label": "PRI DDUE",
+          "format": "date"
+        },
+        {
+          "name": "PRI_IMPDUE",
+          "label": "PRI IMPDUE"
+        },
+        {
+          "name": "PRI_MONIN",
+          "label": "PRI MONIN"
+        },
+        {
+          "name": "PRI_DEVIN",
+          "label": "PRI DEVIN"
+        },
+        {
+          "name": "PRI_CIR",
+          "label": "PRI CIR"
+        },
+        {
+          "name": "PRI_DECCOM",
+          "label": "PRI DECCOM"
+        },
+        {
+          "name": "UTIL",
+          "label": "UTIL"
+        },
+        {
+          "name": "PRI_INST",
+          "label": "PRI INST"
+        },
+        {
+          "name": "PRI_ID",
+          "label": "PRI ID"
+        },
+        {
+          "name": "PRI_FER",
+          "label": "PRI FER"
+        },
+        {
+          "name": "PRI_FINID",
+          "label": "PRI FINID"
+        },
+        {
+          "name": "COM_CASH",
+          "label": "COM CASH"
+        },
+        {
+          "name": "PRI_OUV",
+          "label": "PRI OUV"
+        },
+        {
+          "name": "PRI_GRP",
+          "label": "PRI GRP"
+        },
+        {
+          "name": "PRI_NIF",
+          "label": "PRI NIF"
+        },
+        {
+          "name": "PRI_EIF",
+          "label": "PRI EIF"
+        },
+        {
+          "name": "PRI_EMI",
+          "label": "PRI EMI"
+        },
+        {
+          "name": "PRI_REL",
+          "label": "PRI REL"
+        },
+        {
+          "name": "PRI_DR1",
+          "label": "PRI DR1",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DR2",
+          "label": "PRI DR2",
+          "format": "date"
+        },
+        {
+          "name": "PRI_DR3",
+          "label": "PRI DR3",
+          "format": "date"
+        },
+        {
+          "name": "PRI_TOTORI",
+          "label": "PRI TOTORI"
+        },
+        {
+          "name": "PRI_COUGRP",
+          "label": "PRI COUGRP"
+        },
+        {
+          "name": "PRI_QUIT",
+          "label": "PRI QUIT"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "PRI_CLEINT",
+          "label": "PRI CLEINT",
+          "operator": "contains",
+          "placeholder": "Search PRI CLEINT..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_reglemen": {
+      "title": "REGLEMEN",
+      "table": "REGLEMEN",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "REG_QUITYP",
+          "label": "REG QUITYP"
+        },
+        {
+          "name": "REG_NUMREG",
+          "label": "REG NUMREG"
+        },
+        {
+          "name": "REG_MMCLE",
+          "label": "REG MMCLE"
+        },
+        {
+          "name": "REG_CLETOT",
+          "label": "REG CLETOT"
+        },
+        {
+          "name": "REG_NUMDOS",
+          "label": "REG NUMDOS"
+        },
+        {
+          "name": "REG_NUMDEM",
+          "label": "REG NUMDEM"
+        },
+        {
+          "name": "REG_MON",
+          "label": "REG MON"
+        },
+        {
+          "name": "REG_TVA",
+          "label": "REG TVA"
+        },
+        {
+          "name": "REG_DEV",
+          "label": "REG DEV"
+        },
+        {
+          "name": "REG_TYP",
+          "label": "REG TYP"
+        },
+        {
+          "name": "REG_MOD",
+          "label": "REG MOD"
+        },
+        {
+          "name": "REG_QUI",
+          "label": "REG QUI"
+        },
+        {
+          "name": "REG_QUICOD",
+          "label": "REG QUICOD"
+        },
+        {
+          "name": "REG_ORD",
+          "label": "REG ORD"
+        },
+        {
+          "name": "REG_DATORD",
+          "label": "REG DATORD",
+          "format": "date"
+        },
+        {
+          "name": "REF_GES",
+          "label": "REF GES"
+        },
+        {
+          "name": "REG_ETA",
+          "label": "REG ETA"
+        },
+        {
+          "name": "REG_CPT",
+          "label": "REG CPT"
+        },
+        {
+          "name": "REG_DES",
+          "label": "REG DES"
+        },
+        {
+          "name": "REG_DATPAI",
+          "label": "REG DATPAI",
+          "format": "date"
+        },
+        {
+          "name": "REG_MONDEV",
+          "label": "REG MONDEV"
+        },
+        {
+          "name": "REG_DOSDEV",
+          "label": "REG DOSDEV"
+        },
+        {
+          "name": "REG_MODRES",
+          "label": "REG MODRES"
+        },
+        {
+          "name": "REG_MODFRA",
+          "label": "REG MODFRA"
+        },
+        {
+          "name": "REG_MODTIE",
+          "label": "REG MODTIE"
+        },
+        {
+          "name": "REG_NUMCLO",
+          "label": "REG NUMCLO"
+        },
+        {
+          "name": "REG_REFCOU",
+          "label": "REG REFCOU"
+        },
+        {
+          "name": "REG_CLAIM",
+          "label": "REG CLAIM"
+        },
+        {
+          "name": "REG_POI",
+          "label": "REG POI"
+        },
+        {
+          "name": "REG_REC",
+          "label": "REG REC"
+        },
+        {
+          "name": "REG_RECDEV",
+          "label": "REG RECDEV"
+        },
+        {
+          "name": "REG_LETTRE",
+          "label": "REG LETTRE"
+        },
+        {
+          "name": "REG_INFOUV",
+          "label": "REG INFOUV"
+        },
+        {
+          "name": "REG_OD",
+          "label": "REG OD"
+        },
+        {
+          "name": "REG_RAP",
+          "label": "REG RAP"
+        },
+        {
+          "name": "REG_RESSUP",
+          "label": "REG RESSUP"
+        },
+        {
+          "name": "REG_INI",
+          "label": "REG INI"
+        },
+        {
+          "name": "REG_TXPRIM",
+          "label": "REG TXPRIM"
+        },
+        {
+          "name": "REG_TRI",
+          "label": "REG TRI"
+        },
+        {
+          "name": "REG_MONIN",
+          "label": "REG MONIN"
+        },
+        {
+          "name": "REG_DEVIN",
+          "label": "REG DEVIN"
+        },
+        {
+          "name": "REG_2002",
+          "label": "REG 2002"
+        },
+        {
+          "name": "REG_PAICOD",
+          "label": "REG PAICOD"
+        },
+        {
+          "name": "REG_BPR",
+          "label": "REG BPR"
+        },
+        {
+          "name": "REG_VAL",
+          "label": "REG VAL"
+        },
+        {
+          "name": "REG_IDV",
+          "label": "REG IDV"
+        },
+        {
+          "name": "REG_V4E",
+          "label": "REG V4 E"
+        },
+        {
+          "name": "REG_I4E",
+          "label": "REG I4 E"
+        },
+        {
+          "name": "REG_FINID",
+          "label": "REG FINID"
+        },
+        {
+          "name": "REG_PIECE",
+          "label": "REG PIECE"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "REG_QUITYP",
+          "label": "REG QUITYP",
+          "operator": "exact",
+          "placeholder": "Search REG QUITYP..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    },
+    "dbo_repalpc": {
+      "title": "REPALPC",
+      "table": "REPALPC",
+      "keyColumn": "LineOfBusiness",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LineOfBusiness",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LineOfBusiness",
+          "label": "Line Of Business"
+        },
+        {
+          "name": "_RecNo",
+          "label": "Rec No"
+        },
+        {
+          "name": "REP_TYP1",
+          "label": "REP TYP1"
+        },
+        {
+          "name": "REP_TYP2",
+          "label": "REP TYP2"
+        },
+        {
+          "name": "TIERS",
+          "label": "TIERS"
+        },
+        {
+          "name": "NOUTIERS",
+          "label": "NOUTIERS"
+        },
+        {
+          "name": "OLDSECU",
+          "label": "OLDSECU"
+        },
+        {
+          "name": "TXPRIM",
+          "label": "TXPRIM"
+        },
+        {
+          "name": "TXCOM",
+          "label": "TXCOM"
+        },
+        {
+          "name": "TXCOMREA",
+          "label": "TXCOMREA"
+        },
+        {
+          "name": "CLETOT",
+          "label": "CLETOT"
+        },
+        {
+          "name": "REP_TAXE",
+          "label": "REP TAXE"
+        },
+        {
+          "name": "REP_REFCOU",
+          "label": "REP REFCOU"
+        },
+        {
+          "name": "REP_FET",
+          "label": "REP FET"
+        },
+        {
+          "name": "REP_EXELON",
+          "label": "REP EXELON"
+        },
+        {
+          "name": "REP_DCOM",
+          "label": "REP DCOM",
+          "format": "date"
+        },
+        {
+          "name": "REP_TOF",
+          "label": "REP TOF"
+        },
+        {
+          "name": "OLDTRAIT",
+          "label": "OLDTRAIT"
+        },
+        {
+          "name": "REP_OREFCO",
+          "label": "REP OREFCO"
+        },
+        {
+          "name": "INACTIF",
+          "label": "INACTIF"
+        },
+        {
+          "name": "TYPE",
+          "label": "TYPE"
+        },
+        {
+          "name": "ANCTXCOM",
+          "label": "ANCTXCOM"
+        },
+        {
+          "name": "CARAC",
+          "label": "CARAC"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LineOfBusiness",
+          "label": "Line Of Business",
+          "operator": "contains",
+          "placeholder": "Search Line Of Business..."
+        },
+        {
+          "column": "_RecNo",
+          "label": "Rec No",
+          "operator": "exact",
+          "placeholder": "Search Rec No..."
+        },
+        {
+          "column": "REP_TYP1",
+          "label": "REP TYP1",
+          "operator": "exact",
+          "placeholder": "Search REP TYP1..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "PROD"
+    }
+  }
+}
