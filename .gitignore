@@ -8,3 +8,6 @@ daemon/
 *.pdb
 *.ipdb
 *.iobj
+
+# Local test deployment build (large .exe, local config)
+TestDeploy/

@@ -1361,9 +1361,13 @@ function collectSearchFilters(view, query) {
       const value = firstQueryValue(query[valueParam]);
       const toValue = firstQueryValue(query[toValueParam]);
       const legacyFromValue = firstQueryValue(query[legacyFromParam]);
-      const legacyToValue = firstQueryValue(query[toValueParam]);
+      const legacyToValue = toValue;
 
-      if ((legacyFromValue !== undefined && legacyFromValue !== null && String(legacyFromValue).trim() !== "") || (legacyToValue !== undefined && legacyToValue !== null && String(legacyToValue).trim() !== "")) {
+      // Old-style links use s_<col>_from / s_<col>_to with no operator. The "between" form also
+      // sends s_<col>_to (with an operator), so only use the legacy path when no operator is given.
+      const hasLegacyFrom = legacyFromValue !== undefined && legacyFromValue !== null && String(legacyFromValue).trim() !== "";
+      const hasLegacyTo = legacyToValue !== undefined && legacyToValue !== null && String(legacyToValue).trim() !== "";
+      if (!requestedOperator && (hasLegacyFrom || hasLegacyTo)) {
         if (legacyFromValue !== undefined && legacyFromValue !== null && String(legacyFromValue).trim() !== "") {
           addedColumns.add(column);
           filters.push({

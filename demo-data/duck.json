@@ -1,0 +1,1064 @@
+{
+  "views": {
+    "main_bank_failures": {
+      "title": "bank failures",
+      "table": "bank_failures",
+      "keyColumn": "c1",
+      "limit": 200,
+      "defaultSort": {
+        "column": "c1",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "c1",
+          "label": "c1"
+        },
+        {
+          "name": "Bank",
+          "label": "Bank"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "State",
+          "label": "State"
+        },
+        {
+          "name": "Date",
+          "label": "Date",
+          "format": "date"
+        },
+        {
+          "name": "Acquired by",
+          "label": "Acquired by"
+        },
+        {
+          "name": "Assets ($mil.)",
+          "label": "Assets ($mil.)"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "c1",
+          "label": "c1",
+          "operator": "exact",
+          "placeholder": "Search c1..."
+        },
+        {
+          "column": "Bank",
+          "label": "Bank",
+          "operator": "contains",
+          "placeholder": "Search Bank..."
+        },
+        {
+          "column": "City",
+          "label": "City",
+          "operator": "contains",
+          "placeholder": "Search City..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_boxplot": {
+      "title": "boxplot",
+      "table": "boxplot",
+      "keyColumn": "gold",
+      "limit": 200,
+      "defaultSort": {
+        "column": "gold",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "gold",
+          "label": "gold"
+        },
+        {
+          "name": "silver",
+          "label": "silver"
+        },
+        {
+          "name": "crude",
+          "label": "crude"
+        },
+        {
+          "name": "slick",
+          "label": "slick"
+        },
+        {
+          "name": "copper",
+          "label": "copper"
+        },
+        {
+          "name": "iron",
+          "label": "iron"
+        },
+        {
+          "name": "diamond",
+          "label": "diamond"
+        },
+        {
+          "name": "rubber",
+          "label": "rubber"
+        },
+        {
+          "name": "lead",
+          "label": "lead"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "gold",
+          "label": "gold",
+          "operator": "exact",
+          "placeholder": "Search gold..."
+        },
+        {
+          "column": "silver",
+          "label": "silver",
+          "operator": "exact",
+          "placeholder": "Search silver..."
+        },
+        {
+          "column": "crude",
+          "label": "crude",
+          "operator": "exact",
+          "placeholder": "Search crude..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_calendar": {
+      "title": "calendar",
+      "table": "calendar",
+      "keyColumn": "dt",
+      "limit": 200,
+      "defaultSort": {
+        "column": "dt",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "dt",
+          "label": "dt",
+          "format": "date"
+        },
+        {
+          "name": "v",
+          "label": "v"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "dt",
+          "label": "dt",
+          "operator": "exact",
+          "placeholder": "Search dt..."
+        },
+        {
+          "column": "v",
+          "label": "v",
+          "operator": "exact",
+          "placeholder": "Search v..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_candle": {
+      "title": "candle",
+      "table": "candle",
+      "keyColumn": "time",
+      "limit": 200,
+      "defaultSort": {
+        "column": "time",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "time",
+          "label": "time",
+          "format": "time"
+        },
+        {
+          "name": "open",
+          "label": "open"
+        },
+        {
+          "name": "close",
+          "label": "close"
+        },
+        {
+          "name": "low",
+          "label": "low"
+        },
+        {
+          "name": "high",
+          "label": "high"
+        },
+        {
+          "name": "volume",
+          "label": "volume"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "time",
+          "label": "time",
+          "operator": "exact",
+          "placeholder": "Search time..."
+        },
+        {
+          "column": "open",
+          "label": "open",
+          "operator": "exact",
+          "placeholder": "Search open..."
+        },
+        {
+          "column": "close",
+          "label": "close",
+          "operator": "exact",
+          "placeholder": "Search close..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_christmas_cost": {
+      "title": "christmas cost",
+      "table": "christmas_cost",
+      "keyColumn": "Country",
+      "limit": 200,
+      "defaultSort": {
+        "column": "Country",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "Country",
+          "label": "Country"
+        },
+        {
+          "name": "CostOfChristmas",
+          "label": "Cost Of Christmas"
+        },
+        {
+          "name": "AvgSalary",
+          "label": "Avg Salary"
+        },
+        {
+          "name": "Trunk",
+          "label": "Trunk"
+        },
+        {
+          "name": "Star",
+          "label": "Star"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "Country",
+          "label": "Country",
+          "operator": "contains",
+          "placeholder": "Search Country..."
+        },
+        {
+          "column": "CostOfChristmas",
+          "label": "Cost Of Christmas",
+          "operator": "exact",
+          "placeholder": "Search Cost Of Christmas..."
+        },
+        {
+          "column": "AvgSalary",
+          "label": "Avg Salary",
+          "operator": "exact",
+          "placeholder": "Search Avg Salary..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_companies": {
+      "title": "companies",
+      "table": "companies",
+      "keyColumn": "Company",
+      "limit": 200,
+      "defaultSort": {
+        "column": "Company",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "Company",
+          "label": "Company"
+        },
+        {
+          "name": "PnL",
+          "label": "Pn L"
+        },
+        {
+          "name": "Revenue",
+          "label": "Revenue"
+        },
+        {
+          "name": "Negatives",
+          "label": "Negatives"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "Company",
+          "label": "Company",
+          "operator": "contains",
+          "placeholder": "Search Company..."
+        },
+        {
+          "column": "PnL",
+          "label": "Pn L",
+          "operator": "exact",
+          "placeholder": "Search Pn L..."
+        },
+        {
+          "column": "Revenue",
+          "label": "Revenue",
+          "operator": "exact",
+          "placeholder": "Search Revenue..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_country_stats_scatter": {
+      "title": "country stats scatter",
+      "table": "country_stats_scatter",
+      "keyColumn": "Country",
+      "limit": 200,
+      "defaultSort": {
+        "column": "Country",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "Country",
+          "label": "Country"
+        },
+        {
+          "name": "Population",
+          "label": "Population"
+        },
+        {
+          "name": "GDP",
+          "label": "GDP"
+        },
+        {
+          "name": "GDPperCapita",
+          "label": "GDPper Capita"
+        },
+        {
+          "name": "exports",
+          "label": "exports"
+        },
+        {
+          "name": "exportsPerCapita",
+          "label": "exports Per Capita"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "Country",
+          "label": "Country",
+          "operator": "contains",
+          "placeholder": "Search Country..."
+        },
+        {
+          "column": "Population",
+          "label": "Population",
+          "operator": "exact",
+          "placeholder": "Search Population..."
+        },
+        {
+          "column": "GDP",
+          "label": "GDP",
+          "operator": "exact",
+          "placeholder": "Search GDP..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_gold_vs_bitcoin": {
+      "title": "gold vs bitcoin",
+      "table": "gold_vs_bitcoin",
+      "keyColumn": "time",
+      "limit": 200,
+      "defaultSort": {
+        "column": "time",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "time",
+          "label": "time",
+          "format": "datetime"
+        },
+        {
+          "name": "gold",
+          "label": "gold"
+        },
+        {
+          "name": "bitcoin",
+          "label": "bitcoin"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "time",
+          "label": "time",
+          "operator": "exact",
+          "placeholder": "Search time..."
+        },
+        {
+          "column": "gold",
+          "label": "gold",
+          "operator": "exact",
+          "placeholder": "Search gold..."
+        },
+        {
+          "column": "bitcoin",
+          "label": "bitcoin",
+          "operator": "exact",
+          "placeholder": "Search bitcoin..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_japan_births_deaths": {
+      "title": "japan births deaths",
+      "table": "japan_births_deaths",
+      "keyColumn": "Year",
+      "limit": 200,
+      "defaultSort": {
+        "column": "Year",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "Year",
+          "label": "Year",
+          "format": "date"
+        },
+        {
+          "name": "Births",
+          "label": "Births"
+        },
+        {
+          "name": "Deaths",
+          "label": "Deaths"
+        },
+        {
+          "name": "Births_SD_MARKLINE",
+          "label": "Births SD MARKLINE"
+        },
+        {
+          "name": "Births_SD_MARKAREA",
+          "label": "Births SD MARKAREA"
+        },
+        {
+          "name": "Births_SD_MARKPOINT",
+          "label": "Births SD MARKPOINT"
+        },
+        {
+          "name": "Delta",
+          "label": "Delta"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "Year",
+          "label": "Year",
+          "operator": "exact",
+          "placeholder": "Search Year..."
+        },
+        {
+          "column": "Births",
+          "label": "Births",
+          "operator": "exact",
+          "placeholder": "Search Births..."
+        },
+        {
+          "column": "Deaths",
+          "label": "Deaths",
+          "operator": "exact",
+          "placeholder": "Search Deaths..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_japan_population": {
+      "title": "japan population",
+      "table": "japan_population",
+      "keyColumn": "Age",
+      "limit": 200,
+      "defaultSort": {
+        "column": "Age",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "Age",
+          "label": "Age"
+        },
+        {
+          "name": "Males",
+          "label": "Males"
+        },
+        {
+          "name": "Females",
+          "label": "Females"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "Age",
+          "label": "Age",
+          "operator": "contains",
+          "placeholder": "Search Age..."
+        },
+        {
+          "column": "Males",
+          "label": "Males",
+          "operator": "exact",
+          "placeholder": "Search Males..."
+        },
+        {
+          "column": "Females",
+          "label": "Females",
+          "operator": "exact",
+          "placeholder": "Search Females..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_metrics": {
+      "title": "metrics",
+      "table": "metrics",
+      "keyColumn": "gold",
+      "limit": 200,
+      "defaultSort": {
+        "column": "gold",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "gold",
+          "label": "gold"
+        },
+        {
+          "name": "silver",
+          "label": "silver"
+        },
+        {
+          "name": "crude",
+          "label": "crude"
+        },
+        {
+          "name": "slick",
+          "label": "slick"
+        },
+        {
+          "name": "copper",
+          "label": "copper"
+        },
+        {
+          "name": "iron",
+          "label": "iron"
+        },
+        {
+          "name": "diamond",
+          "label": "diamond"
+        },
+        {
+          "name": "rubber",
+          "label": "rubber"
+        },
+        {
+          "name": "lead",
+          "label": "lead"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "gold",
+          "label": "gold",
+          "operator": "exact",
+          "placeholder": "Search gold..."
+        },
+        {
+          "column": "silver",
+          "label": "silver",
+          "operator": "exact",
+          "placeholder": "Search silver..."
+        },
+        {
+          "column": "crude",
+          "label": "crude",
+          "operator": "exact",
+          "placeholder": "Search crude..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_niger_population": {
+      "title": "niger population",
+      "table": "niger_population",
+      "keyColumn": "Age",
+      "limit": 200,
+      "defaultSort": {
+        "column": "Age",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "Age",
+          "label": "Age"
+        },
+        {
+          "name": "Males",
+          "label": "Males"
+        },
+        {
+          "name": "Females",
+          "label": "Females"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "Age",
+          "label": "Age",
+          "operator": "contains",
+          "placeholder": "Search Age..."
+        },
+        {
+          "column": "Males",
+          "label": "Males",
+          "operator": "exact",
+          "placeholder": "Search Males..."
+        },
+        {
+          "column": "Females",
+          "label": "Females",
+          "operator": "exact",
+          "placeholder": "Search Females..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_quotes": {
+      "title": "quotes",
+      "table": "quotes",
+      "keyColumn": "bid",
+      "limit": 200,
+      "defaultSort": {
+        "column": "bid",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "time",
+          "label": "time",
+          "format": "time"
+        },
+        {
+          "name": "status",
+          "label": "status"
+        },
+        {
+          "name": "instrument",
+          "label": "instrument"
+        },
+        {
+          "name": "symbol_SD_TAG",
+          "label": "symbol SD TAG"
+        },
+        {
+          "name": "price_SD_CURUSD",
+          "label": "price SD CURUSD"
+        },
+        {
+          "name": "bid",
+          "label": "bid"
+        },
+        {
+          "name": "bid_SD_BG",
+          "label": "bid SD BG"
+        },
+        {
+          "name": "bid_SD_CODE",
+          "label": "bid SD CODE"
+        },
+        {
+          "name": "percent_SD_PERCENT0",
+          "label": "percent SD PERCENT0"
+        },
+        {
+          "name": "percbar_SD_DATABAR",
+          "label": "percbar SD DATABAR"
+        },
+        {
+          "name": "bid_SD_FG",
+          "label": "bid SD FG"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "time",
+          "label": "time",
+          "operator": "exact",
+          "placeholder": "Search time..."
+        },
+        {
+          "column": "status",
+          "label": "status",
+          "operator": "contains",
+          "placeholder": "Search status..."
+        },
+        {
+          "column": "instrument",
+          "label": "instrument",
+          "operator": "contains",
+          "placeholder": "Search instrument..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_radar": {
+      "title": "radar",
+      "table": "radar",
+      "keyColumn": "portfolio",
+      "limit": 200,
+      "defaultSort": {
+        "column": "portfolio",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "portfolio",
+          "label": "portfolio"
+        },
+        {
+          "name": "agri",
+          "label": "agri"
+        },
+        {
+          "name": "realEstate",
+          "label": "real Estate"
+        },
+        {
+          "name": "tech",
+          "label": "tech"
+        },
+        {
+          "name": "growthPotential",
+          "label": "growth Potential"
+        },
+        {
+          "name": "finance",
+          "label": "finance"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "portfolio",
+          "label": "portfolio",
+          "operator": "contains",
+          "placeholder": "Search portfolio..."
+        },
+        {
+          "column": "agri",
+          "label": "agri",
+          "operator": "exact",
+          "placeholder": "Search agri..."
+        },
+        {
+          "column": "realEstate",
+          "label": "real Estate",
+          "operator": "exact",
+          "placeholder": "Search real Estate..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_sankey": {
+      "title": "sankey",
+      "table": "sankey",
+      "keyColumn": "OrderOrigin",
+      "limit": 200,
+      "defaultSort": {
+        "column": "OrderOrigin",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "OrderOrigin",
+          "label": "Order Origin"
+        },
+        {
+          "name": "Exchange",
+          "label": "Exchange"
+        },
+        {
+          "name": "State",
+          "label": "State"
+        },
+        {
+          "name": "v",
+          "label": "v"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "OrderOrigin",
+          "label": "Order Origin",
+          "operator": "contains",
+          "placeholder": "Search Order Origin..."
+        },
+        {
+          "column": "Exchange",
+          "label": "Exchange",
+          "operator": "contains",
+          "placeholder": "Search Exchange..."
+        },
+        {
+          "column": "State",
+          "label": "State",
+          "operator": "contains",
+          "placeholder": "Search State..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_search_trends": {
+      "title": "search trends",
+      "table": "search_trends",
+      "keyColumn": "Week",
+      "limit": 200,
+      "defaultSort": {
+        "column": "Week",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "Week",
+          "label": "Week",
+          "format": "date"
+        },
+        {
+          "name": "Matthew Perry",
+          "label": "Matthew Perry"
+        },
+        {
+          "name": "chandrayaan-3",
+          "label": "chandrayaan-3"
+        },
+        {
+          "name": "titanic submarine",
+          "label": "titanic submarine"
+        },
+        {
+          "name": "hurricane lee",
+          "label": "hurricane lee"
+        },
+        {
+          "name": "maine shooting",
+          "label": "maine shooting"
+        },
+        {
+          "name": "nashville shooting",
+          "label": "nashville shooting"
+        },
+        {
+          "name": "Tina Turner",
+          "label": "Tina Turner"
+        },
+        {
+          "name": "Ken Block",
+          "label": "Ken Block"
+        },
+        {
+          "name": "Lil Tay",
+          "label": "Lil Tay"
+        },
+        {
+          "name": "Jerry Springer",
+          "label": "Jerry Springer"
+        },
+        {
+          "name": "Angus Cloud",
+          "label": "Angus Cloud"
+        },
+        {
+          "name": "Nicola Bulley",
+          "label": "Nicola Bulley"
+        },
+        {
+          "name": "Jason Aldean",
+          "label": "Jason Aldean"
+        },
+        {
+          "name": "Joe Jonas",
+          "label": "Joe Jonas"
+        },
+        {
+          "name": "Smash Mouth",
+          "label": "Smash Mouth"
+        },
+        {
+          "name": "Matthew Perry_SD_MARKPOINT",
+          "label": "Matthew Perry SD MARKPOINT"
+        },
+        {
+          "name": "chandrayaan-3_SD_MARKPOINT",
+          "label": "chandrayaan-3 SD MARKPOINT"
+        },
+        {
+          "name": "titanic submarine_SD_MARKPOINT",
+          "label": "titanic submarine SD MARKPOINT"
+        },
+        {
+          "name": "hurricane lee_SD_MARKPOINT",
+          "label": "hurricane lee SD MARKPOINT"
+        },
+        {
+          "name": "maine shooting_SD_MARKPOINT",
+          "label": "maine shooting SD MARKPOINT"
+        },
+        {
+          "name": "nashville shooting_SD_MARKPOINT",
+          "label": "nashville shooting SD MARKPOINT"
+        },
+        {
+          "name": "Tina Turner_SD_MARKPOINT",
+          "label": "Tina Turner SD MARKPOINT"
+        },
+        {
+          "name": "Ken Block_SD_MARKPOINT",
+          "label": "Ken Block SD MARKPOINT"
+        },
+        {
+          "name": "Lil Tay_SD_MARKPOINT",
+          "label": "Lil Tay SD MARKPOINT"
+        },
+        {
+          "name": "Jerry Springer_SD_MARKPOINT",
+          "label": "Jerry Springer SD MARKPOINT"
+        },
+        {
+          "name": "Angus Cloud_SD_MARKPOINT",
+          "label": "Angus Cloud SD MARKPOINT"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "Week",
+          "label": "Week",
+          "operator": "exact",
+          "placeholder": "Search Week..."
+        },
+        {
+          "column": "Matthew Perry",
+          "label": "Matthew Perry",
+          "operator": "exact",
+          "placeholder": "Search Matthew Perry..."
+        },
+        {
+          "column": "chandrayaan-3",
+          "label": "chandrayaan-3",
+          "operator": "exact",
+          "placeholder": "Search chandrayaan-3..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    },
+    "main_tree": {
+      "title": "tree",
+      "table": "tree",
+      "keyColumn": "Continent",
+      "limit": 200,
+      "defaultSort": {
+        "column": "Continent",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "Continent",
+          "label": "Continent"
+        },
+        {
+          "name": "TradingBloc",
+          "label": "Trading Bloc"
+        },
+        {
+          "name": "Country",
+          "label": "Country"
+        },
+        {
+          "name": "GDP",
+          "label": "GDP"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "Continent",
+          "label": "Continent",
+          "operator": "contains",
+          "placeholder": "Search Continent..."
+        },
+        {
+          "column": "TradingBloc",
+          "label": "Trading Bloc",
+          "operator": "contains",
+          "placeholder": "Search Trading Bloc..."
+        },
+        {
+          "column": "Country",
+          "label": "Country",
+          "operator": "contains",
+          "placeholder": "Search Country..."
+        }
+      ],
+      "links": [],
+      "schema": "main",
+      "database": "MyDuck"
+    }
+  }
+}

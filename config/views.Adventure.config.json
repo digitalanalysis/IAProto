@@ -1,0 +1,6290 @@
+{
+  "views": {
+    "dbo_awbuildversion": {
+      "title": "AWBuild Version",
+      "table": "AWBuildVersion",
+      "keyColumn": "SystemInformationID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SystemInformationID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SystemInformationID",
+          "label": "System Information ID"
+        },
+        {
+          "name": "Database Version",
+          "label": "Database Version"
+        },
+        {
+          "name": "VersionDate",
+          "label": "Version Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SystemInformationID",
+          "label": "System Information ID",
+          "operator": "exact",
+          "placeholder": "Search System Information ID..."
+        },
+        {
+          "column": "Database Version",
+          "label": "Database Version",
+          "operator": "contains",
+          "placeholder": "Search Database Version..."
+        },
+        {
+          "column": "VersionDate",
+          "label": "Version Date",
+          "operator": "exact",
+          "placeholder": "Search Version Date..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "Adventure"
+    },
+    "dbo_databaselog": {
+      "title": "Database Log",
+      "table": "DatabaseLog",
+      "keyColumn": "DatabaseLogID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "DatabaseLogID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "DatabaseLogID",
+          "label": "Database Log ID"
+        },
+        {
+          "name": "PostTime",
+          "label": "Post Time",
+          "format": "datetime"
+        },
+        {
+          "name": "DatabaseUser",
+          "label": "Database User"
+        },
+        {
+          "name": "Event",
+          "label": "Event"
+        },
+        {
+          "name": "Schema",
+          "label": "Schema"
+        },
+        {
+          "name": "Object",
+          "label": "Object"
+        },
+        {
+          "name": "TSQL",
+          "label": "TSQL"
+        },
+        {
+          "name": "XmlEvent",
+          "label": "Xml Event"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "DatabaseLogID",
+          "label": "Database Log ID",
+          "operator": "exact",
+          "placeholder": "Search Database Log ID..."
+        },
+        {
+          "column": "PostTime",
+          "label": "Post Time",
+          "operator": "exact",
+          "placeholder": "Search Post Time..."
+        },
+        {
+          "column": "DatabaseUser",
+          "label": "Database User",
+          "operator": "contains",
+          "placeholder": "Search Database User..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "Adventure"
+    },
+    "dbo_errorlog": {
+      "title": "Error Log",
+      "table": "ErrorLog",
+      "keyColumn": "ErrorLogID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ErrorLogID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ErrorLogID",
+          "label": "Error Log ID"
+        },
+        {
+          "name": "ErrorTime",
+          "label": "Error Time",
+          "format": "datetime"
+        },
+        {
+          "name": "UserName",
+          "label": "User Name"
+        },
+        {
+          "name": "ErrorNumber",
+          "label": "Error Number"
+        },
+        {
+          "name": "ErrorSeverity",
+          "label": "Error Severity"
+        },
+        {
+          "name": "ErrorState",
+          "label": "Error State"
+        },
+        {
+          "name": "ErrorProcedure",
+          "label": "Error Procedure"
+        },
+        {
+          "name": "ErrorLine",
+          "label": "Error Line"
+        },
+        {
+          "name": "ErrorMessage",
+          "label": "Error Message"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ErrorLogID",
+          "label": "Error Log ID",
+          "operator": "exact",
+          "placeholder": "Search Error Log ID..."
+        },
+        {
+          "column": "ErrorTime",
+          "label": "Error Time",
+          "operator": "exact",
+          "placeholder": "Search Error Time..."
+        },
+        {
+          "column": "UserName",
+          "label": "User Name",
+          "operator": "contains",
+          "placeholder": "Search User Name..."
+        }
+      ],
+      "links": [],
+      "schema": "dbo",
+      "database": "Adventure"
+    },
+    "humanresources_department": {
+      "title": "Department",
+      "table": "Department",
+      "keyColumn": "DepartmentID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "DepartmentID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "DepartmentID",
+          "label": "Department ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "GroupName",
+          "label": "Group Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "DepartmentID",
+          "label": "Department ID",
+          "operator": "exact",
+          "placeholder": "Search Department ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "GroupName",
+          "label": "Group Name",
+          "operator": "contains",
+          "placeholder": "Search Group Name..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_employee": {
+      "title": "Employee",
+      "table": "Employee",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "NationalIDNumber",
+          "label": "National IDNumber"
+        },
+        {
+          "name": "LoginID",
+          "label": "Login ID"
+        },
+        {
+          "name": "OrganizationNode",
+          "label": "Organization Node"
+        },
+        {
+          "name": "OrganizationLevel",
+          "label": "Organization Level"
+        },
+        {
+          "name": "JobTitle",
+          "label": "Job Title"
+        },
+        {
+          "name": "BirthDate",
+          "label": "Birth Date",
+          "format": "date"
+        },
+        {
+          "name": "MaritalStatus",
+          "label": "Marital Status"
+        },
+        {
+          "name": "Gender",
+          "label": "Gender"
+        },
+        {
+          "name": "HireDate",
+          "label": "Hire Date",
+          "format": "date"
+        },
+        {
+          "name": "SalariedFlag",
+          "label": "Salaried Flag"
+        },
+        {
+          "name": "VacationHours",
+          "label": "Vacation Hours"
+        },
+        {
+          "name": "SickLeaveHours",
+          "label": "Sick Leave Hours"
+        },
+        {
+          "name": "CurrentFlag",
+          "label": "Current Flag"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "NationalIDNumber",
+          "label": "National IDNumber",
+          "operator": "contains",
+          "placeholder": "Search National IDNumber..."
+        },
+        {
+          "column": "LoginID",
+          "label": "Login ID",
+          "operator": "exact",
+          "placeholder": "Search Login ID..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_employeedepartmenthistory": {
+      "title": "Employee Department History",
+      "table": "EmployeeDepartmentHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "DepartmentID",
+          "label": "Department ID"
+        },
+        {
+          "name": "ShiftID",
+          "label": "Shift ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date",
+          "format": "date"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "DepartmentID",
+          "label": "Department ID",
+          "operator": "exact",
+          "placeholder": "Search Department ID..."
+        },
+        {
+          "column": "ShiftID",
+          "label": "Shift ID",
+          "operator": "exact",
+          "placeholder": "Search Shift ID..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_employeepayhistory": {
+      "title": "Employee Pay History",
+      "table": "EmployeePayHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "RateChangeDate",
+          "label": "Rate Change Date",
+          "format": "datetime"
+        },
+        {
+          "name": "Rate",
+          "label": "Rate"
+        },
+        {
+          "name": "PayFrequency",
+          "label": "Pay Frequency"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "RateChangeDate",
+          "label": "Rate Change Date",
+          "operator": "exact",
+          "placeholder": "Search Rate Change Date..."
+        },
+        {
+          "column": "Rate",
+          "label": "Rate",
+          "operator": "exact",
+          "placeholder": "Search Rate..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_jobcandidate": {
+      "title": "Job Candidate",
+      "table": "JobCandidate",
+      "keyColumn": "JobCandidateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "JobCandidateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "JobCandidateID",
+          "label": "Job Candidate ID"
+        },
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Resume",
+          "label": "Resume"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "JobCandidateID",
+          "label": "Job Candidate ID",
+          "operator": "exact",
+          "placeholder": "Search Job Candidate ID..."
+        },
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Resume",
+          "label": "Resume",
+          "operator": "exact",
+          "placeholder": "Search Resume..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_shift": {
+      "title": "Shift",
+      "table": "Shift",
+      "keyColumn": "ShiftID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ShiftID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ShiftID",
+          "label": "Shift ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "StartTime",
+          "label": "Start Time",
+          "format": "time"
+        },
+        {
+          "name": "EndTime",
+          "label": "End Time",
+          "format": "time"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ShiftID",
+          "label": "Shift ID",
+          "operator": "exact",
+          "placeholder": "Search Shift ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "StartTime",
+          "label": "Start Time",
+          "operator": "exact",
+          "placeholder": "Search Start Time..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_vemployee": {
+      "title": "v Employee",
+      "table": "vEmployee",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "JobTitle",
+          "label": "Job Title"
+        },
+        {
+          "name": "PhoneNumber",
+          "label": "Phone Number"
+        },
+        {
+          "name": "PhoneNumberType",
+          "label": "Phone Number Type"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "EmailPromotion",
+          "label": "Email Promotion"
+        },
+        {
+          "name": "AddressLine1",
+          "label": "Address Line1"
+        },
+        {
+          "name": "AddressLine2",
+          "label": "Address Line2"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "StateProvinceName",
+          "label": "State Province Name"
+        },
+        {
+          "name": "PostalCode",
+          "label": "Postal Code"
+        },
+        {
+          "name": "CountryRegionName",
+          "label": "Country Region Name"
+        },
+        {
+          "name": "AdditionalContactInfo",
+          "label": "Additional Contact Info"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Title",
+          "label": "Title",
+          "operator": "contains",
+          "placeholder": "Search Title..."
+        },
+        {
+          "column": "FirstName",
+          "label": "First Name",
+          "operator": "contains",
+          "placeholder": "Search First Name..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_vemployeedepartment": {
+      "title": "v Employee Department",
+      "table": "vEmployeeDepartment",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "JobTitle",
+          "label": "Job Title"
+        },
+        {
+          "name": "Department",
+          "label": "Department"
+        },
+        {
+          "name": "GroupName",
+          "label": "Group Name"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Title",
+          "label": "Title",
+          "operator": "contains",
+          "placeholder": "Search Title..."
+        },
+        {
+          "column": "FirstName",
+          "label": "First Name",
+          "operator": "contains",
+          "placeholder": "Search First Name..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_vemployeedepartmenthistory": {
+      "title": "v Employee Department History",
+      "table": "vEmployeeDepartmentHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "Shift",
+          "label": "Shift"
+        },
+        {
+          "name": "Department",
+          "label": "Department"
+        },
+        {
+          "name": "GroupName",
+          "label": "Group Name"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "date"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date",
+          "format": "date"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Title",
+          "label": "Title",
+          "operator": "contains",
+          "placeholder": "Search Title..."
+        },
+        {
+          "column": "FirstName",
+          "label": "First Name",
+          "operator": "contains",
+          "placeholder": "Search First Name..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_vjobcandidate": {
+      "title": "v Job Candidate",
+      "table": "vJobCandidate",
+      "keyColumn": "JobCandidateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "JobCandidateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "JobCandidateID",
+          "label": "Job Candidate ID"
+        },
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Name.Prefix",
+          "label": "Name.Prefix"
+        },
+        {
+          "name": "Name.First",
+          "label": "Name.First"
+        },
+        {
+          "name": "Name.Middle",
+          "label": "Name.Middle"
+        },
+        {
+          "name": "Name.Last",
+          "label": "Name.Last"
+        },
+        {
+          "name": "Name.Suffix",
+          "label": "Name.Suffix"
+        },
+        {
+          "name": "Skills",
+          "label": "Skills"
+        },
+        {
+          "name": "Addr.Type",
+          "label": "Addr.Type"
+        },
+        {
+          "name": "Addr.Loc.CountryRegion",
+          "label": "Addr.Loc.Country Region"
+        },
+        {
+          "name": "Addr.Loc.State",
+          "label": "Addr.Loc.State"
+        },
+        {
+          "name": "Addr.Loc.City",
+          "label": "Addr.Loc.City"
+        },
+        {
+          "name": "Addr.PostalCode",
+          "label": "Addr.Postal Code"
+        },
+        {
+          "name": "EMail",
+          "label": "EMail"
+        },
+        {
+          "name": "WebSite",
+          "label": "Web Site"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "JobCandidateID",
+          "label": "Job Candidate ID",
+          "operator": "exact",
+          "placeholder": "Search Job Candidate ID..."
+        },
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Name.Prefix",
+          "label": "Name.Prefix",
+          "operator": "contains",
+          "placeholder": "Search Name.Prefix..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_vjobcandidateeducation": {
+      "title": "v Job Candidate Education",
+      "table": "vJobCandidateEducation",
+      "keyColumn": "JobCandidateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "JobCandidateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "JobCandidateID",
+          "label": "Job Candidate ID"
+        },
+        {
+          "name": "Edu.Level",
+          "label": "Edu.Level"
+        },
+        {
+          "name": "Edu.StartDate",
+          "label": "Edu.Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "Edu.EndDate",
+          "label": "Edu.End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "Edu.Degree",
+          "label": "Edu.Degree"
+        },
+        {
+          "name": "Edu.Major",
+          "label": "Edu.Major"
+        },
+        {
+          "name": "Edu.Minor",
+          "label": "Edu.Minor"
+        },
+        {
+          "name": "Edu.GPA",
+          "label": "Edu.GPA"
+        },
+        {
+          "name": "Edu.GPAScale",
+          "label": "Edu.GPAScale"
+        },
+        {
+          "name": "Edu.School",
+          "label": "Edu.School"
+        },
+        {
+          "name": "Edu.Loc.CountryRegion",
+          "label": "Edu.Loc.Country Region"
+        },
+        {
+          "name": "Edu.Loc.State",
+          "label": "Edu.Loc.State"
+        },
+        {
+          "name": "Edu.Loc.City",
+          "label": "Edu.Loc.City"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "JobCandidateID",
+          "label": "Job Candidate ID",
+          "operator": "exact",
+          "placeholder": "Search Job Candidate ID..."
+        },
+        {
+          "column": "Edu.Level",
+          "label": "Edu.Level",
+          "operator": "contains",
+          "placeholder": "Search Edu.Level..."
+        },
+        {
+          "column": "Edu.StartDate",
+          "label": "Edu.Start Date",
+          "operator": "exact",
+          "placeholder": "Search Edu.Start Date..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "humanresources_vjobcandidateemployment": {
+      "title": "v Job Candidate Employment",
+      "table": "vJobCandidateEmployment",
+      "keyColumn": "JobCandidateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "JobCandidateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "JobCandidateID",
+          "label": "Job Candidate ID"
+        },
+        {
+          "name": "Emp.StartDate",
+          "label": "Emp.Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "Emp.EndDate",
+          "label": "Emp.End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "Emp.OrgName",
+          "label": "Emp.Org Name"
+        },
+        {
+          "name": "Emp.JobTitle",
+          "label": "Emp.Job Title"
+        },
+        {
+          "name": "Emp.Responsibility",
+          "label": "Emp.Responsibility"
+        },
+        {
+          "name": "Emp.FunctionCategory",
+          "label": "Emp.Function Category"
+        },
+        {
+          "name": "Emp.IndustryCategory",
+          "label": "Emp.Industry Category"
+        },
+        {
+          "name": "Emp.Loc.CountryRegion",
+          "label": "Emp.Loc.Country Region"
+        },
+        {
+          "name": "Emp.Loc.State",
+          "label": "Emp.Loc.State"
+        },
+        {
+          "name": "Emp.Loc.City",
+          "label": "Emp.Loc.City"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "JobCandidateID",
+          "label": "Job Candidate ID",
+          "operator": "exact",
+          "placeholder": "Search Job Candidate ID..."
+        },
+        {
+          "column": "Emp.StartDate",
+          "label": "Emp.Start Date",
+          "operator": "exact",
+          "placeholder": "Search Emp.Start Date..."
+        },
+        {
+          "column": "Emp.EndDate",
+          "label": "Emp.End Date",
+          "operator": "exact",
+          "placeholder": "Search Emp.End Date..."
+        }
+      ],
+      "links": [],
+      "schema": "HumanResources",
+      "database": "Adventure"
+    },
+    "person_address": {
+      "title": "Address",
+      "table": "Address",
+      "keyColumn": "AddressID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "AddressID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "AddressID",
+          "label": "Address ID"
+        },
+        {
+          "name": "AddressLine1",
+          "label": "Address Line1"
+        },
+        {
+          "name": "AddressLine2",
+          "label": "Address Line2"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "StateProvinceID",
+          "label": "State Province ID"
+        },
+        {
+          "name": "PostalCode",
+          "label": "Postal Code"
+        },
+        {
+          "name": "SpatialLocation",
+          "label": "Spatial Location"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "AddressID",
+          "label": "Address ID",
+          "operator": "exact",
+          "placeholder": "Search Address ID..."
+        },
+        {
+          "column": "AddressLine1",
+          "label": "Address Line1",
+          "operator": "contains",
+          "placeholder": "Search Address Line1..."
+        },
+        {
+          "column": "AddressLine2",
+          "label": "Address Line2",
+          "operator": "contains",
+          "placeholder": "Search Address Line2..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_addresstype": {
+      "title": "Address Type",
+      "table": "AddressType",
+      "keyColumn": "AddressTypeID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "AddressTypeID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "AddressTypeID",
+          "label": "Address Type ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "AddressTypeID",
+          "label": "Address Type ID",
+          "operator": "exact",
+          "placeholder": "Search Address Type ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_businessentity": {
+      "title": "Business Entity",
+      "table": "BusinessEntity",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_businessentityaddress": {
+      "title": "Business Entity Address",
+      "table": "BusinessEntityAddress",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "AddressID",
+          "label": "Address ID"
+        },
+        {
+          "name": "AddressTypeID",
+          "label": "Address Type ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "AddressID",
+          "label": "Address ID",
+          "operator": "exact",
+          "placeholder": "Search Address ID..."
+        },
+        {
+          "column": "AddressTypeID",
+          "label": "Address Type ID",
+          "operator": "exact",
+          "placeholder": "Search Address Type ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_businessentitycontact": {
+      "title": "Business Entity Contact",
+      "table": "BusinessEntityContact",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "PersonID",
+          "label": "Person ID"
+        },
+        {
+          "name": "ContactTypeID",
+          "label": "Contact Type ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "PersonID",
+          "label": "Person ID",
+          "operator": "exact",
+          "placeholder": "Search Person ID..."
+        },
+        {
+          "column": "ContactTypeID",
+          "label": "Contact Type ID",
+          "operator": "exact",
+          "placeholder": "Search Contact Type ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_contacttype": {
+      "title": "Contact Type",
+      "table": "ContactType",
+      "keyColumn": "ContactTypeID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ContactTypeID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ContactTypeID",
+          "label": "Contact Type ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ContactTypeID",
+          "label": "Contact Type ID",
+          "operator": "exact",
+          "placeholder": "Search Contact Type ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_countryregion": {
+      "title": "Country Region",
+      "table": "CountryRegion",
+      "keyColumn": "CountryRegionCode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CountryRegionCode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CountryRegionCode",
+          "label": "Country Region Code",
+          "operator": "contains",
+          "placeholder": "Search Country Region Code..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_emailaddress": {
+      "title": "Email Address",
+      "table": "EmailAddress",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "EmailAddressID",
+          "label": "Email Address ID"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "EmailAddressID",
+          "label": "Email Address ID",
+          "operator": "exact",
+          "placeholder": "Search Email Address ID..."
+        },
+        {
+          "column": "EmailAddress",
+          "label": "Email Address",
+          "operator": "contains",
+          "placeholder": "Search Email Address..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_password": {
+      "title": "Password",
+      "table": "Password",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "PasswordHash",
+          "label": "Password Hash"
+        },
+        {
+          "name": "PasswordSalt",
+          "label": "Password Salt"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "PasswordHash",
+          "label": "Password Hash",
+          "operator": "contains",
+          "placeholder": "Search Password Hash..."
+        },
+        {
+          "column": "PasswordSalt",
+          "label": "Password Salt",
+          "operator": "contains",
+          "placeholder": "Search Password Salt..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_person": {
+      "title": "Person",
+      "table": "Person",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "PersonType",
+          "label": "Person Type"
+        },
+        {
+          "name": "NameStyle",
+          "label": "Name Style"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "EmailPromotion",
+          "label": "Email Promotion"
+        },
+        {
+          "name": "AdditionalContactInfo",
+          "label": "Additional Contact Info"
+        },
+        {
+          "name": "Demographics",
+          "label": "Demographics"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "PersonType",
+          "label": "Person Type",
+          "operator": "contains",
+          "placeholder": "Search Person Type..."
+        },
+        {
+          "column": "NameStyle",
+          "label": "Name Style",
+          "operator": "exact",
+          "placeholder": "Search Name Style..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_personphone": {
+      "title": "Person Phone",
+      "table": "PersonPhone",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "PhoneNumber",
+          "label": "Phone Number"
+        },
+        {
+          "name": "PhoneNumberTypeID",
+          "label": "Phone Number Type ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "PhoneNumber",
+          "label": "Phone Number",
+          "operator": "contains",
+          "placeholder": "Search Phone Number..."
+        },
+        {
+          "column": "PhoneNumberTypeID",
+          "label": "Phone Number Type ID",
+          "operator": "exact",
+          "placeholder": "Search Phone Number Type ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_phonenumbertype": {
+      "title": "Phone Number Type",
+      "table": "PhoneNumberType",
+      "keyColumn": "PhoneNumberTypeID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "PhoneNumberTypeID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "PhoneNumberTypeID",
+          "label": "Phone Number Type ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "PhoneNumberTypeID",
+          "label": "Phone Number Type ID",
+          "operator": "exact",
+          "placeholder": "Search Phone Number Type ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_stateprovince": {
+      "title": "State Province",
+      "table": "StateProvince",
+      "keyColumn": "StateProvinceID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "StateProvinceID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "StateProvinceID",
+          "label": "State Province ID"
+        },
+        {
+          "name": "StateProvinceCode",
+          "label": "State Province Code"
+        },
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "IsOnlyStateProvinceFlag",
+          "label": "Is Only State Province Flag"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "StateProvinceID",
+          "label": "State Province ID",
+          "operator": "exact",
+          "placeholder": "Search State Province ID..."
+        },
+        {
+          "column": "StateProvinceCode",
+          "label": "State Province Code",
+          "operator": "contains",
+          "placeholder": "Search State Province Code..."
+        },
+        {
+          "column": "CountryRegionCode",
+          "label": "Country Region Code",
+          "operator": "contains",
+          "placeholder": "Search Country Region Code..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_vadditionalcontactinfo": {
+      "title": "v Additional Contact Info",
+      "table": "vAdditionalContactInfo",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "TelephoneNumber",
+          "label": "Telephone Number"
+        },
+        {
+          "name": "TelephoneSpecialInstructions",
+          "label": "Telephone Special Instructions"
+        },
+        {
+          "name": "Street",
+          "label": "Street"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "StateProvince",
+          "label": "State Province"
+        },
+        {
+          "name": "PostalCode",
+          "label": "Postal Code"
+        },
+        {
+          "name": "CountryRegion",
+          "label": "Country Region"
+        },
+        {
+          "name": "HomeAddressSpecialInstructions",
+          "label": "Home Address Special Instructions"
+        },
+        {
+          "name": "EMailAddress",
+          "label": "EMail Address"
+        },
+        {
+          "name": "EMailSpecialInstructions",
+          "label": "EMail Special Instructions"
+        },
+        {
+          "name": "EMailTelephoneNumber",
+          "label": "EMail Telephone Number"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "FirstName",
+          "label": "First Name",
+          "operator": "contains",
+          "placeholder": "Search First Name..."
+        },
+        {
+          "column": "MiddleName",
+          "label": "Middle Name",
+          "operator": "contains",
+          "placeholder": "Search Middle Name..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "person_vstateprovincecountryregion": {
+      "title": "v State Province Country Region",
+      "table": "vStateProvinceCountryRegion",
+      "keyColumn": "StateProvinceID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "StateProvinceID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "StateProvinceID",
+          "label": "State Province ID"
+        },
+        {
+          "name": "StateProvinceCode",
+          "label": "State Province Code"
+        },
+        {
+          "name": "IsOnlyStateProvinceFlag",
+          "label": "Is Only State Province Flag"
+        },
+        {
+          "name": "StateProvinceName",
+          "label": "State Province Name"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "CountryRegionName",
+          "label": "Country Region Name"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "StateProvinceID",
+          "label": "State Province ID",
+          "operator": "exact",
+          "placeholder": "Search State Province ID..."
+        },
+        {
+          "column": "StateProvinceCode",
+          "label": "State Province Code",
+          "operator": "contains",
+          "placeholder": "Search State Province Code..."
+        },
+        {
+          "column": "IsOnlyStateProvinceFlag",
+          "label": "Is Only State Province Flag",
+          "operator": "exact",
+          "placeholder": "Search Is Only State Province Flag..."
+        }
+      ],
+      "links": [],
+      "schema": "Person",
+      "database": "Adventure"
+    },
+    "production_billofmaterials": {
+      "title": "Bill Of Materials",
+      "table": "BillOfMaterials",
+      "keyColumn": "BillOfMaterialsID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BillOfMaterialsID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BillOfMaterialsID",
+          "label": "Bill Of Materials ID"
+        },
+        {
+          "name": "ProductAssemblyID",
+          "label": "Product Assembly ID"
+        },
+        {
+          "name": "ComponentID",
+          "label": "Component ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "UnitMeasureCode",
+          "label": "Unit Measure Code"
+        },
+        {
+          "name": "BOMLevel",
+          "label": "BOMLevel"
+        },
+        {
+          "name": "PerAssemblyQty",
+          "label": "Per Assembly Qty"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BillOfMaterialsID",
+          "label": "Bill Of Materials ID",
+          "operator": "exact",
+          "placeholder": "Search Bill Of Materials ID..."
+        },
+        {
+          "column": "ProductAssemblyID",
+          "label": "Product Assembly ID",
+          "operator": "exact",
+          "placeholder": "Search Product Assembly ID..."
+        },
+        {
+          "column": "ComponentID",
+          "label": "Component ID",
+          "operator": "exact",
+          "placeholder": "Search Component ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_culture": {
+      "title": "Culture",
+      "table": "Culture",
+      "keyColumn": "CultureID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CultureID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CultureID",
+          "label": "Culture ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CultureID",
+          "label": "Culture ID",
+          "operator": "exact",
+          "placeholder": "Search Culture ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_document": {
+      "title": "Document",
+      "table": "Document",
+      "keyColumn": "DocumentNode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "DocumentNode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "DocumentNode",
+          "label": "Document Node"
+        },
+        {
+          "name": "DocumentLevel",
+          "label": "Document Level"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "Owner",
+          "label": "Owner"
+        },
+        {
+          "name": "FolderFlag",
+          "label": "Folder Flag"
+        },
+        {
+          "name": "FileName",
+          "label": "File Name"
+        },
+        {
+          "name": "FileExtension",
+          "label": "File Extension"
+        },
+        {
+          "name": "Revision",
+          "label": "Revision"
+        },
+        {
+          "name": "ChangeNumber",
+          "label": "Change Number"
+        },
+        {
+          "name": "Status",
+          "label": "Status"
+        },
+        {
+          "name": "DocumentSummary",
+          "label": "Document Summary"
+        },
+        {
+          "name": "Document",
+          "label": "Document"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "DocumentNode",
+          "label": "Document Node",
+          "operator": "exact",
+          "placeholder": "Search Document Node..."
+        },
+        {
+          "column": "DocumentLevel",
+          "label": "Document Level",
+          "operator": "exact",
+          "placeholder": "Search Document Level..."
+        },
+        {
+          "column": "Title",
+          "label": "Title",
+          "operator": "contains",
+          "placeholder": "Search Title..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_illustration": {
+      "title": "Illustration",
+      "table": "Illustration",
+      "keyColumn": "IllustrationID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "IllustrationID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "IllustrationID",
+          "label": "Illustration ID"
+        },
+        {
+          "name": "Diagram",
+          "label": "Diagram"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "IllustrationID",
+          "label": "Illustration ID",
+          "operator": "exact",
+          "placeholder": "Search Illustration ID..."
+        },
+        {
+          "column": "Diagram",
+          "label": "Diagram",
+          "operator": "exact",
+          "placeholder": "Search Diagram..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_location": {
+      "title": "Location",
+      "table": "Location",
+      "keyColumn": "LocationID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "LocationID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "LocationID",
+          "label": "Location ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "CostRate",
+          "label": "Cost Rate"
+        },
+        {
+          "name": "Availability",
+          "label": "Availability"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "LocationID",
+          "label": "Location ID",
+          "operator": "exact",
+          "placeholder": "Search Location ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "CostRate",
+          "label": "Cost Rate",
+          "operator": "exact",
+          "placeholder": "Search Cost Rate..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_product": {
+      "title": "Product",
+      "table": "Product",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ProductNumber",
+          "label": "Product Number"
+        },
+        {
+          "name": "MakeFlag",
+          "label": "Make Flag"
+        },
+        {
+          "name": "FinishedGoodsFlag",
+          "label": "Finished Goods Flag"
+        },
+        {
+          "name": "Color",
+          "label": "Color"
+        },
+        {
+          "name": "SafetyStockLevel",
+          "label": "Safety Stock Level"
+        },
+        {
+          "name": "ReorderPoint",
+          "label": "Reorder Point"
+        },
+        {
+          "name": "StandardCost",
+          "label": "Standard Cost"
+        },
+        {
+          "name": "ListPrice",
+          "label": "List Price"
+        },
+        {
+          "name": "Size",
+          "label": "Size"
+        },
+        {
+          "name": "SizeUnitMeasureCode",
+          "label": "Size Unit Measure Code"
+        },
+        {
+          "name": "WeightUnitMeasureCode",
+          "label": "Weight Unit Measure Code"
+        },
+        {
+          "name": "Weight",
+          "label": "Weight"
+        },
+        {
+          "name": "DaysToManufacture",
+          "label": "Days To Manufacture"
+        },
+        {
+          "name": "ProductLine",
+          "label": "Product Line"
+        },
+        {
+          "name": "Class",
+          "label": "Class"
+        },
+        {
+          "name": "Style",
+          "label": "Style"
+        },
+        {
+          "name": "ProductSubcategoryID",
+          "label": "Product Subcategory ID"
+        },
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "SellStartDate",
+          "label": "Sell Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "SellEndDate",
+          "label": "Sell End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "DiscontinuedDate",
+          "label": "Discontinued Date",
+          "format": "datetime"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ProductNumber",
+          "label": "Product Number",
+          "operator": "contains",
+          "placeholder": "Search Product Number..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productcategory": {
+      "title": "Product Category",
+      "table": "ProductCategory",
+      "keyColumn": "ProductCategoryID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductCategoryID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductCategoryID",
+          "label": "Product Category ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductCategoryID",
+          "label": "Product Category ID",
+          "operator": "exact",
+          "placeholder": "Search Product Category ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productcosthistory": {
+      "title": "Product Cost History",
+      "table": "ProductCostHistory",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "StandardCost",
+          "label": "Standard Cost"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "StartDate",
+          "label": "Start Date",
+          "operator": "exact",
+          "placeholder": "Search Start Date..."
+        },
+        {
+          "column": "EndDate",
+          "label": "End Date",
+          "operator": "exact",
+          "placeholder": "Search End Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productdescription": {
+      "title": "Product Description",
+      "table": "ProductDescription",
+      "keyColumn": "ProductDescriptionID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductDescriptionID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductDescriptionID",
+          "label": "Product Description ID"
+        },
+        {
+          "name": "Description",
+          "label": "Description"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductDescriptionID",
+          "label": "Product Description ID",
+          "operator": "exact",
+          "placeholder": "Search Product Description ID..."
+        },
+        {
+          "column": "Description",
+          "label": "Description",
+          "operator": "contains",
+          "placeholder": "Search Description..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productdocument": {
+      "title": "Product Document",
+      "table": "ProductDocument",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "DocumentNode",
+          "label": "Document Node"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "DocumentNode",
+          "label": "Document Node",
+          "operator": "exact",
+          "placeholder": "Search Document Node..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productinventory": {
+      "title": "Product Inventory",
+      "table": "ProductInventory",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "LocationID",
+          "label": "Location ID"
+        },
+        {
+          "name": "Shelf",
+          "label": "Shelf"
+        },
+        {
+          "name": "Bin",
+          "label": "Bin"
+        },
+        {
+          "name": "Quantity",
+          "label": "Quantity"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "LocationID",
+          "label": "Location ID",
+          "operator": "exact",
+          "placeholder": "Search Location ID..."
+        },
+        {
+          "column": "Shelf",
+          "label": "Shelf",
+          "operator": "contains",
+          "placeholder": "Search Shelf..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productlistpricehistory": {
+      "title": "Product List Price History",
+      "table": "ProductListPriceHistory",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ListPrice",
+          "label": "List Price"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "StartDate",
+          "label": "Start Date",
+          "operator": "exact",
+          "placeholder": "Search Start Date..."
+        },
+        {
+          "column": "EndDate",
+          "label": "End Date",
+          "operator": "exact",
+          "placeholder": "Search End Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productmodel": {
+      "title": "Product Model",
+      "table": "ProductModel",
+      "keyColumn": "ProductModelID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductModelID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "CatalogDescription",
+          "label": "Catalog Description"
+        },
+        {
+          "name": "Instructions",
+          "label": "Instructions"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductModelID",
+          "label": "Product Model ID",
+          "operator": "exact",
+          "placeholder": "Search Product Model ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "CatalogDescription",
+          "label": "Catalog Description",
+          "operator": "exact",
+          "placeholder": "Search Catalog Description..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productmodelillustration": {
+      "title": "Product Model Illustration",
+      "table": "ProductModelIllustration",
+      "keyColumn": "ProductModelID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductModelID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "IllustrationID",
+          "label": "Illustration ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductModelID",
+          "label": "Product Model ID",
+          "operator": "exact",
+          "placeholder": "Search Product Model ID..."
+        },
+        {
+          "column": "IllustrationID",
+          "label": "Illustration ID",
+          "operator": "exact",
+          "placeholder": "Search Illustration ID..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productmodelproductdescriptionculture": {
+      "title": "Product Model Product Description Culture",
+      "table": "ProductModelProductDescriptionCulture",
+      "keyColumn": "ProductModelID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductModelID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "ProductDescriptionID",
+          "label": "Product Description ID"
+        },
+        {
+          "name": "CultureID",
+          "label": "Culture ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductModelID",
+          "label": "Product Model ID",
+          "operator": "exact",
+          "placeholder": "Search Product Model ID..."
+        },
+        {
+          "column": "ProductDescriptionID",
+          "label": "Product Description ID",
+          "operator": "exact",
+          "placeholder": "Search Product Description ID..."
+        },
+        {
+          "column": "CultureID",
+          "label": "Culture ID",
+          "operator": "exact",
+          "placeholder": "Search Culture ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productphoto": {
+      "title": "Product Photo",
+      "table": "ProductPhoto",
+      "keyColumn": "ProductPhotoID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductPhotoID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductPhotoID",
+          "label": "Product Photo ID"
+        },
+        {
+          "name": "ThumbNailPhoto",
+          "label": "Thumb Nail Photo"
+        },
+        {
+          "name": "ThumbnailPhotoFileName",
+          "label": "Thumbnail Photo File Name"
+        },
+        {
+          "name": "LargePhoto",
+          "label": "Large Photo"
+        },
+        {
+          "name": "LargePhotoFileName",
+          "label": "Large Photo File Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductPhotoID",
+          "label": "Product Photo ID",
+          "operator": "exact",
+          "placeholder": "Search Product Photo ID..."
+        },
+        {
+          "column": "ThumbNailPhoto",
+          "label": "Thumb Nail Photo",
+          "operator": "exact",
+          "placeholder": "Search Thumb Nail Photo..."
+        },
+        {
+          "column": "ThumbnailPhotoFileName",
+          "label": "Thumbnail Photo File Name",
+          "operator": "contains",
+          "placeholder": "Search Thumbnail Photo File Name..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productproductphoto": {
+      "title": "Product Product Photo",
+      "table": "ProductProductPhoto",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "ProductPhotoID",
+          "label": "Product Photo ID"
+        },
+        {
+          "name": "Primary",
+          "label": "Primary"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "ProductPhotoID",
+          "label": "Product Photo ID",
+          "operator": "exact",
+          "placeholder": "Search Product Photo ID..."
+        },
+        {
+          "column": "Primary",
+          "label": "Primary",
+          "operator": "exact",
+          "placeholder": "Search Primary..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productreview": {
+      "title": "Product Review",
+      "table": "ProductReview",
+      "keyColumn": "ProductReviewID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductReviewID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductReviewID",
+          "label": "Product Review ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "ReviewerName",
+          "label": "Reviewer Name"
+        },
+        {
+          "name": "ReviewDate",
+          "label": "Review Date",
+          "format": "datetime"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "Rating",
+          "label": "Rating"
+        },
+        {
+          "name": "Comments",
+          "label": "Comments"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductReviewID",
+          "label": "Product Review ID",
+          "operator": "exact",
+          "placeholder": "Search Product Review ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "ReviewerName",
+          "label": "Reviewer Name",
+          "operator": "contains",
+          "placeholder": "Search Reviewer Name..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_productsubcategory": {
+      "title": "Product Subcategory",
+      "table": "ProductSubcategory",
+      "keyColumn": "ProductSubcategoryID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductSubcategoryID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductSubcategoryID",
+          "label": "Product Subcategory ID"
+        },
+        {
+          "name": "ProductCategoryID",
+          "label": "Product Category ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductSubcategoryID",
+          "label": "Product Subcategory ID",
+          "operator": "exact",
+          "placeholder": "Search Product Subcategory ID..."
+        },
+        {
+          "column": "ProductCategoryID",
+          "label": "Product Category ID",
+          "operator": "exact",
+          "placeholder": "Search Product Category ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_scrapreason": {
+      "title": "Scrap Reason",
+      "table": "ScrapReason",
+      "keyColumn": "ScrapReasonID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ScrapReasonID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ScrapReasonID",
+          "label": "Scrap Reason ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ScrapReasonID",
+          "label": "Scrap Reason ID",
+          "operator": "exact",
+          "placeholder": "Search Scrap Reason ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_transactionhistory": {
+      "title": "Transaction History",
+      "table": "TransactionHistory",
+      "keyColumn": "TransactionID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "TransactionID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "TransactionID",
+          "label": "Transaction ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "ReferenceOrderID",
+          "label": "Reference Order ID"
+        },
+        {
+          "name": "ReferenceOrderLineID",
+          "label": "Reference Order Line ID"
+        },
+        {
+          "name": "TransactionDate",
+          "label": "Transaction Date",
+          "format": "datetime"
+        },
+        {
+          "name": "TransactionType",
+          "label": "Transaction Type"
+        },
+        {
+          "name": "Quantity",
+          "label": "Quantity"
+        },
+        {
+          "name": "ActualCost",
+          "label": "Actual Cost"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "TransactionID",
+          "label": "Transaction ID",
+          "operator": "exact",
+          "placeholder": "Search Transaction ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "ReferenceOrderID",
+          "label": "Reference Order ID",
+          "operator": "exact",
+          "placeholder": "Search Reference Order ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_transactionhistoryarchive": {
+      "title": "Transaction History Archive",
+      "table": "TransactionHistoryArchive",
+      "keyColumn": "TransactionID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "TransactionID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "TransactionID",
+          "label": "Transaction ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "ReferenceOrderID",
+          "label": "Reference Order ID"
+        },
+        {
+          "name": "ReferenceOrderLineID",
+          "label": "Reference Order Line ID"
+        },
+        {
+          "name": "TransactionDate",
+          "label": "Transaction Date",
+          "format": "datetime"
+        },
+        {
+          "name": "TransactionType",
+          "label": "Transaction Type"
+        },
+        {
+          "name": "Quantity",
+          "label": "Quantity"
+        },
+        {
+          "name": "ActualCost",
+          "label": "Actual Cost"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "TransactionID",
+          "label": "Transaction ID",
+          "operator": "exact",
+          "placeholder": "Search Transaction ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "ReferenceOrderID",
+          "label": "Reference Order ID",
+          "operator": "exact",
+          "placeholder": "Search Reference Order ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_unitmeasure": {
+      "title": "Unit Measure",
+      "table": "UnitMeasure",
+      "keyColumn": "UnitMeasureCode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "UnitMeasureCode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "UnitMeasureCode",
+          "label": "Unit Measure Code"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "UnitMeasureCode",
+          "label": "Unit Measure Code",
+          "operator": "contains",
+          "placeholder": "Search Unit Measure Code..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_vproductanddescription": {
+      "title": "v Product And Description",
+      "table": "vProductAndDescription",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ProductModel",
+          "label": "Product Model"
+        },
+        {
+          "name": "CultureID",
+          "label": "Culture ID"
+        },
+        {
+          "name": "Description",
+          "label": "Description"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ProductModel",
+          "label": "Product Model",
+          "operator": "contains",
+          "placeholder": "Search Product Model..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_vproductmodelcatalogdescription": {
+      "title": "v Product Model Catalog Description",
+      "table": "vProductModelCatalogDescription",
+      "keyColumn": "ProductModelID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductModelID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "Summary",
+          "label": "Summary"
+        },
+        {
+          "name": "Manufacturer",
+          "label": "Manufacturer"
+        },
+        {
+          "name": "Copyright",
+          "label": "Copyright"
+        },
+        {
+          "name": "ProductURL",
+          "label": "Product URL"
+        },
+        {
+          "name": "WarrantyPeriod",
+          "label": "Warranty Period"
+        },
+        {
+          "name": "WarrantyDescription",
+          "label": "Warranty Description"
+        },
+        {
+          "name": "NoOfYears",
+          "label": "No Of Years"
+        },
+        {
+          "name": "MaintenanceDescription",
+          "label": "Maintenance Description"
+        },
+        {
+          "name": "Wheel",
+          "label": "Wheel"
+        },
+        {
+          "name": "Saddle",
+          "label": "Saddle"
+        },
+        {
+          "name": "Pedal",
+          "label": "Pedal"
+        },
+        {
+          "name": "BikeFrame",
+          "label": "Bike Frame"
+        },
+        {
+          "name": "Crankset",
+          "label": "Crankset"
+        },
+        {
+          "name": "PictureAngle",
+          "label": "Picture Angle"
+        },
+        {
+          "name": "PictureSize",
+          "label": "Picture Size"
+        },
+        {
+          "name": "ProductPhotoID",
+          "label": "Product Photo ID"
+        },
+        {
+          "name": "Material",
+          "label": "Material"
+        },
+        {
+          "name": "Color",
+          "label": "Color"
+        },
+        {
+          "name": "ProductLine",
+          "label": "Product Line"
+        },
+        {
+          "name": "Style",
+          "label": "Style"
+        },
+        {
+          "name": "RiderExperience",
+          "label": "Rider Experience"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductModelID",
+          "label": "Product Model ID",
+          "operator": "exact",
+          "placeholder": "Search Product Model ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "Summary",
+          "label": "Summary",
+          "operator": "contains",
+          "placeholder": "Search Summary..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_vproductmodelinstructions": {
+      "title": "v Product Model Instructions",
+      "table": "vProductModelInstructions",
+      "keyColumn": "ProductModelID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductModelID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductModelID",
+          "label": "Product Model ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "Instructions",
+          "label": "Instructions"
+        },
+        {
+          "name": "LocationID",
+          "label": "Location ID"
+        },
+        {
+          "name": "SetupHours",
+          "label": "Setup Hours"
+        },
+        {
+          "name": "MachineHours",
+          "label": "Machine Hours"
+        },
+        {
+          "name": "LaborHours",
+          "label": "Labor Hours"
+        },
+        {
+          "name": "LotSize",
+          "label": "Lot Size"
+        },
+        {
+          "name": "Step",
+          "label": "Step"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductModelID",
+          "label": "Product Model ID",
+          "operator": "exact",
+          "placeholder": "Search Product Model ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "Instructions",
+          "label": "Instructions",
+          "operator": "contains",
+          "placeholder": "Search Instructions..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_workorder": {
+      "title": "Work Order",
+      "table": "WorkOrder",
+      "keyColumn": "WorkOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "WorkOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "WorkOrderID",
+          "label": "Work Order ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "OrderQty",
+          "label": "Order Qty"
+        },
+        {
+          "name": "StockedQty",
+          "label": "Stocked Qty"
+        },
+        {
+          "name": "ScrappedQty",
+          "label": "Scrapped Qty"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "DueDate",
+          "label": "Due Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ScrapReasonID",
+          "label": "Scrap Reason ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "WorkOrderID",
+          "label": "Work Order ID",
+          "operator": "exact",
+          "placeholder": "Search Work Order ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "OrderQty",
+          "label": "Order Qty",
+          "operator": "exact",
+          "placeholder": "Search Order Qty..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "production_workorderrouting": {
+      "title": "Work Order Routing",
+      "table": "WorkOrderRouting",
+      "keyColumn": "WorkOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "WorkOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "WorkOrderID",
+          "label": "Work Order ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "OperationSequence",
+          "label": "Operation Sequence"
+        },
+        {
+          "name": "LocationID",
+          "label": "Location ID"
+        },
+        {
+          "name": "ScheduledStartDate",
+          "label": "Scheduled Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ScheduledEndDate",
+          "label": "Scheduled End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ActualStartDate",
+          "label": "Actual Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ActualEndDate",
+          "label": "Actual End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ActualResourceHrs",
+          "label": "Actual Resource Hrs"
+        },
+        {
+          "name": "PlannedCost",
+          "label": "Planned Cost"
+        },
+        {
+          "name": "ActualCost",
+          "label": "Actual Cost"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "WorkOrderID",
+          "label": "Work Order ID",
+          "operator": "exact",
+          "placeholder": "Search Work Order ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "OperationSequence",
+          "label": "Operation Sequence",
+          "operator": "exact",
+          "placeholder": "Search Operation Sequence..."
+        }
+      ],
+      "links": [],
+      "schema": "Production",
+      "database": "Adventure"
+    },
+    "purchasing_productvendor": {
+      "title": "Product Vendor",
+      "table": "ProductVendor",
+      "keyColumn": "ProductID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ProductID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "AverageLeadTime",
+          "label": "Average Lead Time"
+        },
+        {
+          "name": "StandardPrice",
+          "label": "Standard Price"
+        },
+        {
+          "name": "LastReceiptCost",
+          "label": "Last Receipt Cost"
+        },
+        {
+          "name": "LastReceiptDate",
+          "label": "Last Receipt Date",
+          "format": "datetime"
+        },
+        {
+          "name": "MinOrderQty",
+          "label": "Min Order Qty"
+        },
+        {
+          "name": "MaxOrderQty",
+          "label": "Max Order Qty"
+        },
+        {
+          "name": "OnOrderQty",
+          "label": "On Order Qty"
+        },
+        {
+          "name": "UnitMeasureCode",
+          "label": "Unit Measure Code"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "AverageLeadTime",
+          "label": "Average Lead Time",
+          "operator": "exact",
+          "placeholder": "Search Average Lead Time..."
+        }
+      ],
+      "links": [],
+      "schema": "Purchasing",
+      "database": "Adventure"
+    },
+    "purchasing_purchaseorderdetail": {
+      "title": "Purchase Order Detail",
+      "table": "PurchaseOrderDetail",
+      "keyColumn": "PurchaseOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "PurchaseOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "PurchaseOrderID",
+          "label": "Purchase Order ID"
+        },
+        {
+          "name": "PurchaseOrderDetailID",
+          "label": "Purchase Order Detail ID"
+        },
+        {
+          "name": "DueDate",
+          "label": "Due Date",
+          "format": "datetime"
+        },
+        {
+          "name": "OrderQty",
+          "label": "Order Qty"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "UnitPrice",
+          "label": "Unit Price"
+        },
+        {
+          "name": "LineTotal",
+          "label": "Line Total"
+        },
+        {
+          "name": "ReceivedQty",
+          "label": "Received Qty"
+        },
+        {
+          "name": "RejectedQty",
+          "label": "Rejected Qty"
+        },
+        {
+          "name": "StockedQty",
+          "label": "Stocked Qty"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "PurchaseOrderID",
+          "label": "Purchase Order ID",
+          "operator": "exact",
+          "placeholder": "Search Purchase Order ID..."
+        },
+        {
+          "column": "PurchaseOrderDetailID",
+          "label": "Purchase Order Detail ID",
+          "operator": "exact",
+          "placeholder": "Search Purchase Order Detail ID..."
+        },
+        {
+          "column": "DueDate",
+          "label": "Due Date",
+          "operator": "exact",
+          "placeholder": "Search Due Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Purchasing",
+      "database": "Adventure"
+    },
+    "purchasing_purchaseorderheader": {
+      "title": "Purchase Order Header",
+      "table": "PurchaseOrderHeader",
+      "keyColumn": "PurchaseOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "PurchaseOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "PurchaseOrderID",
+          "label": "Purchase Order ID"
+        },
+        {
+          "name": "RevisionNumber",
+          "label": "Revision Number"
+        },
+        {
+          "name": "Status",
+          "label": "Status"
+        },
+        {
+          "name": "EmployeeID",
+          "label": "Employee ID"
+        },
+        {
+          "name": "VendorID",
+          "label": "Vendor ID"
+        },
+        {
+          "name": "ShipMethodID",
+          "label": "Ship Method ID"
+        },
+        {
+          "name": "OrderDate",
+          "label": "Order Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ShipDate",
+          "label": "Ship Date",
+          "format": "datetime"
+        },
+        {
+          "name": "SubTotal",
+          "label": "Sub Total"
+        },
+        {
+          "name": "TaxAmt",
+          "label": "Tax Amt"
+        },
+        {
+          "name": "Freight",
+          "label": "Freight"
+        },
+        {
+          "name": "TotalDue",
+          "label": "Total Due"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "PurchaseOrderID",
+          "label": "Purchase Order ID",
+          "operator": "exact",
+          "placeholder": "Search Purchase Order ID..."
+        },
+        {
+          "column": "RevisionNumber",
+          "label": "Revision Number",
+          "operator": "exact",
+          "placeholder": "Search Revision Number..."
+        },
+        {
+          "column": "Status",
+          "label": "Status",
+          "operator": "exact",
+          "placeholder": "Search Status..."
+        }
+      ],
+      "links": [],
+      "schema": "Purchasing",
+      "database": "Adventure"
+    },
+    "purchasing_shipmethod": {
+      "title": "Ship Method",
+      "table": "ShipMethod",
+      "keyColumn": "ShipMethodID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ShipMethodID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ShipMethodID",
+          "label": "Ship Method ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ShipBase",
+          "label": "Ship Base"
+        },
+        {
+          "name": "ShipRate",
+          "label": "Ship Rate"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ShipMethodID",
+          "label": "Ship Method ID",
+          "operator": "exact",
+          "placeholder": "Search Ship Method ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ShipBase",
+          "label": "Ship Base",
+          "operator": "exact",
+          "placeholder": "Search Ship Base..."
+        }
+      ],
+      "links": [],
+      "schema": "Purchasing",
+      "database": "Adventure"
+    },
+    "purchasing_vendor": {
+      "title": "Vendor",
+      "table": "Vendor",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "AccountNumber",
+          "label": "Account Number"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "CreditRating",
+          "label": "Credit Rating"
+        },
+        {
+          "name": "PreferredVendorStatus",
+          "label": "Preferred Vendor Status"
+        },
+        {
+          "name": "ActiveFlag",
+          "label": "Active Flag"
+        },
+        {
+          "name": "PurchasingWebServiceURL",
+          "label": "Purchasing Web Service URL"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "AccountNumber",
+          "label": "Account Number",
+          "operator": "contains",
+          "placeholder": "Search Account Number..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        }
+      ],
+      "links": [],
+      "schema": "Purchasing",
+      "database": "Adventure"
+    },
+    "purchasing_vvendorwithaddresses": {
+      "title": "v Vendor With Addresses",
+      "table": "vVendorWithAddresses",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "AddressType",
+          "label": "Address Type"
+        },
+        {
+          "name": "AddressLine1",
+          "label": "Address Line1"
+        },
+        {
+          "name": "AddressLine2",
+          "label": "Address Line2"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "StateProvinceName",
+          "label": "State Province Name"
+        },
+        {
+          "name": "PostalCode",
+          "label": "Postal Code"
+        },
+        {
+          "name": "CountryRegionName",
+          "label": "Country Region Name"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "AddressType",
+          "label": "Address Type",
+          "operator": "contains",
+          "placeholder": "Search Address Type..."
+        }
+      ],
+      "links": [],
+      "schema": "Purchasing",
+      "database": "Adventure"
+    },
+    "purchasing_vvendorwithcontacts": {
+      "title": "v Vendor With Contacts",
+      "table": "vVendorWithContacts",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ContactType",
+          "label": "Contact Type"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "PhoneNumber",
+          "label": "Phone Number"
+        },
+        {
+          "name": "PhoneNumberType",
+          "label": "Phone Number Type"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "EmailPromotion",
+          "label": "Email Promotion"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ContactType",
+          "label": "Contact Type",
+          "operator": "contains",
+          "placeholder": "Search Contact Type..."
+        }
+      ],
+      "links": [],
+      "schema": "Purchasing",
+      "database": "Adventure"
+    },
+    "sales_countryregioncurrency": {
+      "title": "Country Region Currency",
+      "table": "CountryRegionCurrency",
+      "keyColumn": "CountryRegionCode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CountryRegionCode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "CurrencyCode",
+          "label": "Currency Code"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CountryRegionCode",
+          "label": "Country Region Code",
+          "operator": "contains",
+          "placeholder": "Search Country Region Code..."
+        },
+        {
+          "column": "CurrencyCode",
+          "label": "Currency Code",
+          "operator": "contains",
+          "placeholder": "Search Currency Code..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_creditcard": {
+      "title": "Credit Card",
+      "table": "CreditCard",
+      "keyColumn": "CreditCardID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CreditCardID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CreditCardID",
+          "label": "Credit Card ID"
+        },
+        {
+          "name": "CardType",
+          "label": "Card Type"
+        },
+        {
+          "name": "CardNumber",
+          "label": "Card Number"
+        },
+        {
+          "name": "ExpMonth",
+          "label": "Exp Month"
+        },
+        {
+          "name": "ExpYear",
+          "label": "Exp Year"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CreditCardID",
+          "label": "Credit Card ID",
+          "operator": "exact",
+          "placeholder": "Search Credit Card ID..."
+        },
+        {
+          "column": "CardType",
+          "label": "Card Type",
+          "operator": "contains",
+          "placeholder": "Search Card Type..."
+        },
+        {
+          "column": "CardNumber",
+          "label": "Card Number",
+          "operator": "contains",
+          "placeholder": "Search Card Number..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_currency": {
+      "title": "Currency",
+      "table": "Currency",
+      "keyColumn": "CurrencyCode",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CurrencyCode",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CurrencyCode",
+          "label": "Currency Code"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CurrencyCode",
+          "label": "Currency Code",
+          "operator": "contains",
+          "placeholder": "Search Currency Code..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_currencyrate": {
+      "title": "Currency Rate",
+      "table": "CurrencyRate",
+      "keyColumn": "CurrencyRateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CurrencyRateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CurrencyRateID",
+          "label": "Currency Rate ID"
+        },
+        {
+          "name": "CurrencyRateDate",
+          "label": "Currency Rate Date",
+          "format": "datetime"
+        },
+        {
+          "name": "FromCurrencyCode",
+          "label": "From Currency Code"
+        },
+        {
+          "name": "ToCurrencyCode",
+          "label": "To Currency Code"
+        },
+        {
+          "name": "AverageRate",
+          "label": "Average Rate"
+        },
+        {
+          "name": "EndOfDayRate",
+          "label": "End Of Day Rate"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CurrencyRateID",
+          "label": "Currency Rate ID",
+          "operator": "exact",
+          "placeholder": "Search Currency Rate ID..."
+        },
+        {
+          "column": "CurrencyRateDate",
+          "label": "Currency Rate Date",
+          "operator": "exact",
+          "placeholder": "Search Currency Rate Date..."
+        },
+        {
+          "column": "FromCurrencyCode",
+          "label": "From Currency Code",
+          "operator": "contains",
+          "placeholder": "Search From Currency Code..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_customer": {
+      "title": "Customer",
+      "table": "Customer",
+      "keyColumn": "CustomerID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "CustomerID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "CustomerID",
+          "label": "Customer ID"
+        },
+        {
+          "name": "PersonID",
+          "label": "Person ID"
+        },
+        {
+          "name": "StoreID",
+          "label": "Store ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "AccountNumber",
+          "label": "Account Number"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "CustomerID",
+          "label": "Customer ID",
+          "operator": "exact",
+          "placeholder": "Search Customer ID..."
+        },
+        {
+          "column": "PersonID",
+          "label": "Person ID",
+          "operator": "exact",
+          "placeholder": "Search Person ID..."
+        },
+        {
+          "column": "StoreID",
+          "label": "Store ID",
+          "operator": "exact",
+          "placeholder": "Search Store ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_personcreditcard": {
+      "title": "Person Credit Card",
+      "table": "PersonCreditCard",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "CreditCardID",
+          "label": "Credit Card ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "CreditCardID",
+          "label": "Credit Card ID",
+          "operator": "exact",
+          "placeholder": "Search Credit Card ID..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salesorderdetail": {
+      "title": "Sales Order Detail",
+      "table": "SalesOrderDetail",
+      "keyColumn": "SalesOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "label": "Sales Order ID"
+        },
+        {
+          "name": "SalesOrderDetailID",
+          "label": "Sales Order Detail ID"
+        },
+        {
+          "name": "CarrierTrackingNumber",
+          "label": "Carrier Tracking Number"
+        },
+        {
+          "name": "OrderQty",
+          "label": "Order Qty"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "SpecialOfferID",
+          "label": "Special Offer ID"
+        },
+        {
+          "name": "UnitPrice",
+          "label": "Unit Price"
+        },
+        {
+          "name": "UnitPriceDiscount",
+          "label": "Unit Price Discount"
+        },
+        {
+          "name": "LineTotal",
+          "label": "Line Total"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesOrderID",
+          "label": "Sales Order ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order ID..."
+        },
+        {
+          "column": "SalesOrderDetailID",
+          "label": "Sales Order Detail ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order Detail ID..."
+        },
+        {
+          "column": "CarrierTrackingNumber",
+          "label": "Carrier Tracking Number",
+          "operator": "contains",
+          "placeholder": "Search Carrier Tracking Number..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salesorderheader": {
+      "title": "Sales Order Header",
+      "table": "SalesOrderHeader",
+      "keyColumn": "SalesOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "label": "Sales Order ID"
+        },
+        {
+          "name": "RevisionNumber",
+          "label": "Revision Number"
+        },
+        {
+          "name": "OrderDate",
+          "label": "Order Date",
+          "format": "datetime"
+        },
+        {
+          "name": "DueDate",
+          "label": "Due Date",
+          "format": "datetime"
+        },
+        {
+          "name": "ShipDate",
+          "label": "Ship Date",
+          "format": "datetime"
+        },
+        {
+          "name": "Status",
+          "label": "Status"
+        },
+        {
+          "name": "OnlineOrderFlag",
+          "label": "Online Order Flag"
+        },
+        {
+          "name": "SalesOrderNumber",
+          "label": "Sales Order Number"
+        },
+        {
+          "name": "PurchaseOrderNumber",
+          "label": "Purchase Order Number"
+        },
+        {
+          "name": "AccountNumber",
+          "label": "Account Number"
+        },
+        {
+          "name": "CustomerID",
+          "label": "Customer ID"
+        },
+        {
+          "name": "SalesPersonID",
+          "label": "Sales Person ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "BillToAddressID",
+          "label": "Bill To Address ID"
+        },
+        {
+          "name": "ShipToAddressID",
+          "label": "Ship To Address ID"
+        },
+        {
+          "name": "ShipMethodID",
+          "label": "Ship Method ID"
+        },
+        {
+          "name": "CreditCardID",
+          "label": "Credit Card ID"
+        },
+        {
+          "name": "CreditCardApprovalCode",
+          "label": "Credit Card Approval Code"
+        },
+        {
+          "name": "CurrencyRateID",
+          "label": "Currency Rate ID"
+        },
+        {
+          "name": "SubTotal",
+          "label": "Sub Total"
+        },
+        {
+          "name": "TaxAmt",
+          "label": "Tax Amt"
+        },
+        {
+          "name": "Freight",
+          "label": "Freight"
+        },
+        {
+          "name": "TotalDue",
+          "label": "Total Due"
+        },
+        {
+          "name": "Comment",
+          "label": "Comment"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesOrderID",
+          "label": "Sales Order ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order ID..."
+        },
+        {
+          "column": "RevisionNumber",
+          "label": "Revision Number",
+          "operator": "exact",
+          "placeholder": "Search Revision Number..."
+        },
+        {
+          "column": "OrderDate",
+          "label": "Order Date",
+          "operator": "exact",
+          "placeholder": "Search Order Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salesorderheadersalesreason": {
+      "title": "Sales Order Header Sales Reason",
+      "table": "SalesOrderHeaderSalesReason",
+      "keyColumn": "SalesOrderID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesOrderID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesOrderID",
+          "label": "Sales Order ID"
+        },
+        {
+          "name": "SalesReasonID",
+          "label": "Sales Reason ID"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesOrderID",
+          "label": "Sales Order ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Order ID..."
+        },
+        {
+          "column": "SalesReasonID",
+          "label": "Sales Reason ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Reason ID..."
+        },
+        {
+          "column": "ModifiedDate",
+          "label": "Modified Date",
+          "operator": "exact",
+          "placeholder": "Search Modified Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salesperson": {
+      "title": "Sales Person",
+      "table": "SalesPerson",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "SalesQuota",
+          "label": "Sales Quota"
+        },
+        {
+          "name": "Bonus",
+          "label": "Bonus"
+        },
+        {
+          "name": "CommissionPct",
+          "label": "Commission Pct"
+        },
+        {
+          "name": "SalesYTD",
+          "label": "Sales YTD"
+        },
+        {
+          "name": "SalesLastYear",
+          "label": "Sales Last Year"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "TerritoryID",
+          "label": "Territory ID",
+          "operator": "exact",
+          "placeholder": "Search Territory ID..."
+        },
+        {
+          "column": "SalesQuota",
+          "label": "Sales Quota",
+          "operator": "exact",
+          "placeholder": "Search Sales Quota..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salespersonquotahistory": {
+      "title": "Sales Person Quota History",
+      "table": "SalesPersonQuotaHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "QuotaDate",
+          "label": "Quota Date",
+          "format": "datetime"
+        },
+        {
+          "name": "SalesQuota",
+          "label": "Sales Quota"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "QuotaDate",
+          "label": "Quota Date",
+          "operator": "exact",
+          "placeholder": "Search Quota Date..."
+        },
+        {
+          "column": "SalesQuota",
+          "label": "Sales Quota",
+          "operator": "exact",
+          "placeholder": "Search Sales Quota..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salesreason": {
+      "title": "Sales Reason",
+      "table": "SalesReason",
+      "keyColumn": "SalesReasonID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesReasonID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesReasonID",
+          "label": "Sales Reason ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ReasonType",
+          "label": "Reason Type"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesReasonID",
+          "label": "Sales Reason ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Reason ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ReasonType",
+          "label": "Reason Type",
+          "operator": "contains",
+          "placeholder": "Search Reason Type..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salestaxrate": {
+      "title": "Sales Tax Rate",
+      "table": "SalesTaxRate",
+      "keyColumn": "SalesTaxRateID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesTaxRateID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesTaxRateID",
+          "label": "Sales Tax Rate ID"
+        },
+        {
+          "name": "StateProvinceID",
+          "label": "State Province ID"
+        },
+        {
+          "name": "TaxType",
+          "label": "Tax Type"
+        },
+        {
+          "name": "TaxRate",
+          "label": "Tax Rate"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesTaxRateID",
+          "label": "Sales Tax Rate ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Tax Rate ID..."
+        },
+        {
+          "column": "StateProvinceID",
+          "label": "State Province ID",
+          "operator": "exact",
+          "placeholder": "Search State Province ID..."
+        },
+        {
+          "column": "TaxType",
+          "label": "Tax Type",
+          "operator": "exact",
+          "placeholder": "Search Tax Type..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salesterritory": {
+      "title": "Sales Territory",
+      "table": "SalesTerritory",
+      "keyColumn": "TerritoryID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "TerritoryID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "CountryRegionCode",
+          "label": "Country Region Code"
+        },
+        {
+          "name": "Group",
+          "label": "Group"
+        },
+        {
+          "name": "SalesYTD",
+          "label": "Sales YTD"
+        },
+        {
+          "name": "SalesLastYear",
+          "label": "Sales Last Year"
+        },
+        {
+          "name": "CostYTD",
+          "label": "Cost YTD"
+        },
+        {
+          "name": "CostLastYear",
+          "label": "Cost Last Year"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "TerritoryID",
+          "label": "Territory ID",
+          "operator": "exact",
+          "placeholder": "Search Territory ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "CountryRegionCode",
+          "label": "Country Region Code",
+          "operator": "contains",
+          "placeholder": "Search Country Region Code..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_salesterritoryhistory": {
+      "title": "Sales Territory History",
+      "table": "SalesTerritoryHistory",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "TerritoryID",
+          "label": "Territory ID"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "TerritoryID",
+          "label": "Territory ID",
+          "operator": "exact",
+          "placeholder": "Search Territory ID..."
+        },
+        {
+          "column": "StartDate",
+          "label": "Start Date",
+          "operator": "exact",
+          "placeholder": "Search Start Date..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_shoppingcartitem": {
+      "title": "Shopping Cart Item",
+      "table": "ShoppingCartItem",
+      "keyColumn": "ShoppingCartItemID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "ShoppingCartItemID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "ShoppingCartItemID",
+          "label": "Shopping Cart Item ID"
+        },
+        {
+          "name": "ShoppingCartID",
+          "label": "Shopping Cart ID"
+        },
+        {
+          "name": "Quantity",
+          "label": "Quantity"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "DateCreated",
+          "label": "Date Created",
+          "format": "datetime"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "ShoppingCartItemID",
+          "label": "Shopping Cart Item ID",
+          "operator": "exact",
+          "placeholder": "Search Shopping Cart Item ID..."
+        },
+        {
+          "column": "ShoppingCartID",
+          "label": "Shopping Cart ID",
+          "operator": "exact",
+          "placeholder": "Search Shopping Cart ID..."
+        },
+        {
+          "column": "Quantity",
+          "label": "Quantity",
+          "operator": "exact",
+          "placeholder": "Search Quantity..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_specialoffer": {
+      "title": "Special Offer",
+      "table": "SpecialOffer",
+      "keyColumn": "SpecialOfferID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SpecialOfferID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SpecialOfferID",
+          "label": "Special Offer ID"
+        },
+        {
+          "name": "Description",
+          "label": "Description"
+        },
+        {
+          "name": "DiscountPct",
+          "label": "Discount Pct"
+        },
+        {
+          "name": "Type",
+          "label": "Type"
+        },
+        {
+          "name": "Category",
+          "label": "Category"
+        },
+        {
+          "name": "StartDate",
+          "label": "Start Date",
+          "format": "datetime"
+        },
+        {
+          "name": "EndDate",
+          "label": "End Date",
+          "format": "datetime"
+        },
+        {
+          "name": "MinQty",
+          "label": "Min Qty"
+        },
+        {
+          "name": "MaxQty",
+          "label": "Max Qty"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SpecialOfferID",
+          "label": "Special Offer ID",
+          "operator": "exact",
+          "placeholder": "Search Special Offer ID..."
+        },
+        {
+          "column": "Description",
+          "label": "Description",
+          "operator": "contains",
+          "placeholder": "Search Description..."
+        },
+        {
+          "column": "DiscountPct",
+          "label": "Discount Pct",
+          "operator": "exact",
+          "placeholder": "Search Discount Pct..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_specialofferproduct": {
+      "title": "Special Offer Product",
+      "table": "SpecialOfferProduct",
+      "keyColumn": "SpecialOfferID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SpecialOfferID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SpecialOfferID",
+          "label": "Special Offer ID"
+        },
+        {
+          "name": "ProductID",
+          "label": "Product ID"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SpecialOfferID",
+          "label": "Special Offer ID",
+          "operator": "exact",
+          "placeholder": "Search Special Offer ID..."
+        },
+        {
+          "column": "ProductID",
+          "label": "Product ID",
+          "operator": "exact",
+          "placeholder": "Search Product ID..."
+        },
+        {
+          "column": "rowguid",
+          "label": "rowguid",
+          "operator": "exact",
+          "placeholder": "Search rowguid..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_store": {
+      "title": "Store",
+      "table": "Store",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "SalesPersonID",
+          "label": "Sales Person ID"
+        },
+        {
+          "name": "Demographics",
+          "label": "Demographics"
+        },
+        {
+          "name": "rowguid",
+          "label": "rowguid"
+        },
+        {
+          "name": "ModifiedDate",
+          "label": "Modified Date",
+          "format": "datetime"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "SalesPersonID",
+          "label": "Sales Person ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Person ID..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_vindividualcustomer": {
+      "title": "v Individual Customer",
+      "table": "vIndividualCustomer",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "PhoneNumber",
+          "label": "Phone Number"
+        },
+        {
+          "name": "PhoneNumberType",
+          "label": "Phone Number Type"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "EmailPromotion",
+          "label": "Email Promotion"
+        },
+        {
+          "name": "AddressType",
+          "label": "Address Type"
+        },
+        {
+          "name": "AddressLine1",
+          "label": "Address Line1"
+        },
+        {
+          "name": "AddressLine2",
+          "label": "Address Line2"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "StateProvinceName",
+          "label": "State Province Name"
+        },
+        {
+          "name": "PostalCode",
+          "label": "Postal Code"
+        },
+        {
+          "name": "CountryRegionName",
+          "label": "Country Region Name"
+        },
+        {
+          "name": "Demographics",
+          "label": "Demographics"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Title",
+          "label": "Title",
+          "operator": "contains",
+          "placeholder": "Search Title..."
+        },
+        {
+          "column": "FirstName",
+          "label": "First Name",
+          "operator": "contains",
+          "placeholder": "Search First Name..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_vpersondemographics": {
+      "title": "v Person Demographics",
+      "table": "vPersonDemographics",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "TotalPurchaseYTD",
+          "label": "Total Purchase YTD"
+        },
+        {
+          "name": "DateFirstPurchase",
+          "label": "Date First Purchase",
+          "format": "datetime"
+        },
+        {
+          "name": "BirthDate",
+          "label": "Birth Date",
+          "format": "datetime"
+        },
+        {
+          "name": "MaritalStatus",
+          "label": "Marital Status"
+        },
+        {
+          "name": "YearlyIncome",
+          "label": "Yearly Income"
+        },
+        {
+          "name": "Gender",
+          "label": "Gender"
+        },
+        {
+          "name": "TotalChildren",
+          "label": "Total Children"
+        },
+        {
+          "name": "NumberChildrenAtHome",
+          "label": "Number Children At Home"
+        },
+        {
+          "name": "Education",
+          "label": "Education"
+        },
+        {
+          "name": "Occupation",
+          "label": "Occupation"
+        },
+        {
+          "name": "HomeOwnerFlag",
+          "label": "Home Owner Flag"
+        },
+        {
+          "name": "NumberCarsOwned",
+          "label": "Number Cars Owned"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "TotalPurchaseYTD",
+          "label": "Total Purchase YTD",
+          "operator": "exact",
+          "placeholder": "Search Total Purchase YTD..."
+        },
+        {
+          "column": "DateFirstPurchase",
+          "label": "Date First Purchase",
+          "operator": "exact",
+          "placeholder": "Search Date First Purchase..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_vsalesperson": {
+      "title": "v Sales Person",
+      "table": "vSalesPerson",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "JobTitle",
+          "label": "Job Title"
+        },
+        {
+          "name": "PhoneNumber",
+          "label": "Phone Number"
+        },
+        {
+          "name": "PhoneNumberType",
+          "label": "Phone Number Type"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "EmailPromotion",
+          "label": "Email Promotion"
+        },
+        {
+          "name": "AddressLine1",
+          "label": "Address Line1"
+        },
+        {
+          "name": "AddressLine2",
+          "label": "Address Line2"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "StateProvinceName",
+          "label": "State Province Name"
+        },
+        {
+          "name": "PostalCode",
+          "label": "Postal Code"
+        },
+        {
+          "name": "CountryRegionName",
+          "label": "Country Region Name"
+        },
+        {
+          "name": "TerritoryName",
+          "label": "Territory Name"
+        },
+        {
+          "name": "TerritoryGroup",
+          "label": "Territory Group"
+        },
+        {
+          "name": "SalesQuota",
+          "label": "Sales Quota"
+        },
+        {
+          "name": "SalesYTD",
+          "label": "Sales YTD"
+        },
+        {
+          "name": "SalesLastYear",
+          "label": "Sales Last Year"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Title",
+          "label": "Title",
+          "operator": "contains",
+          "placeholder": "Search Title..."
+        },
+        {
+          "column": "FirstName",
+          "label": "First Name",
+          "operator": "contains",
+          "placeholder": "Search First Name..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_vsalespersonsalesbyfiscalyears": {
+      "title": "v Sales Person Sales By Fiscal Years",
+      "table": "vSalesPersonSalesByFiscalYears",
+      "keyColumn": "SalesPersonID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "SalesPersonID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "SalesPersonID",
+          "label": "Sales Person ID"
+        },
+        {
+          "name": "FullName",
+          "label": "Full Name"
+        },
+        {
+          "name": "JobTitle",
+          "label": "Job Title"
+        },
+        {
+          "name": "SalesTerritory",
+          "label": "Sales Territory"
+        },
+        {
+          "name": "2002",
+          "label": "2002"
+        },
+        {
+          "name": "2003",
+          "label": "2003"
+        },
+        {
+          "name": "2004",
+          "label": "2004"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "SalesPersonID",
+          "label": "Sales Person ID",
+          "operator": "exact",
+          "placeholder": "Search Sales Person ID..."
+        },
+        {
+          "column": "FullName",
+          "label": "Full Name",
+          "operator": "contains",
+          "placeholder": "Search Full Name..."
+        },
+        {
+          "column": "JobTitle",
+          "label": "Job Title",
+          "operator": "contains",
+          "placeholder": "Search Job Title..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_vstorewithaddresses": {
+      "title": "v Store With Addresses",
+      "table": "vStoreWithAddresses",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "AddressType",
+          "label": "Address Type"
+        },
+        {
+          "name": "AddressLine1",
+          "label": "Address Line1"
+        },
+        {
+          "name": "AddressLine2",
+          "label": "Address Line2"
+        },
+        {
+          "name": "City",
+          "label": "City"
+        },
+        {
+          "name": "StateProvinceName",
+          "label": "State Province Name"
+        },
+        {
+          "name": "PostalCode",
+          "label": "Postal Code"
+        },
+        {
+          "name": "CountryRegionName",
+          "label": "Country Region Name"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "AddressType",
+          "label": "Address Type",
+          "operator": "contains",
+          "placeholder": "Search Address Type..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_vstorewithcontacts": {
+      "title": "v Store With Contacts",
+      "table": "vStoreWithContacts",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "ContactType",
+          "label": "Contact Type"
+        },
+        {
+          "name": "Title",
+          "label": "Title"
+        },
+        {
+          "name": "FirstName",
+          "label": "First Name"
+        },
+        {
+          "name": "MiddleName",
+          "label": "Middle Name"
+        },
+        {
+          "name": "LastName",
+          "label": "Last Name"
+        },
+        {
+          "name": "Suffix",
+          "label": "Suffix"
+        },
+        {
+          "name": "PhoneNumber",
+          "label": "Phone Number"
+        },
+        {
+          "name": "PhoneNumberType",
+          "label": "Phone Number Type"
+        },
+        {
+          "name": "EmailAddress",
+          "label": "Email Address"
+        },
+        {
+          "name": "EmailPromotion",
+          "label": "Email Promotion"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "ContactType",
+          "label": "Contact Type",
+          "operator": "contains",
+          "placeholder": "Search Contact Type..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    },
+    "sales_vstorewithdemographics": {
+      "title": "v Store With Demographics",
+      "table": "vStoreWithDemographics",
+      "keyColumn": "BusinessEntityID",
+      "limit": 200,
+      "defaultSort": {
+        "column": "BusinessEntityID",
+        "direction": "ASC"
+      },
+      "columns": [
+        {
+          "name": "BusinessEntityID",
+          "label": "Business Entity ID"
+        },
+        {
+          "name": "Name",
+          "label": "Name"
+        },
+        {
+          "name": "AnnualSales",
+          "label": "Annual Sales"
+        },
+        {
+          "name": "AnnualRevenue",
+          "label": "Annual Revenue"
+        },
+        {
+          "name": "BankName",
+          "label": "Bank Name"
+        },
+        {
+          "name": "BusinessType",
+          "label": "Business Type"
+        },
+        {
+          "name": "YearOpened",
+          "label": "Year Opened"
+        },
+        {
+          "name": "Specialty",
+          "label": "Specialty"
+        },
+        {
+          "name": "SquareFeet",
+          "label": "Square Feet"
+        },
+        {
+          "name": "Brands",
+          "label": "Brands"
+        },
+        {
+          "name": "Internet",
+          "label": "Internet"
+        },
+        {
+          "name": "NumberEmployees",
+          "label": "Number Employees"
+        }
+      ],
+      "searchFields": [
+        {
+          "column": "BusinessEntityID",
+          "label": "Business Entity ID",
+          "operator": "exact",
+          "placeholder": "Search Business Entity ID..."
+        },
+        {
+          "column": "Name",
+          "label": "Name",
+          "operator": "contains",
+          "placeholder": "Search Name..."
+        },
+        {
+          "column": "AnnualSales",
+          "label": "Annual Sales",
+          "operator": "exact",
+          "placeholder": "Search Annual Sales..."
+        }
+      ],
+      "links": [],
+      "schema": "Sales",
+      "database": "Adventure"
+    }
+  }
+}
